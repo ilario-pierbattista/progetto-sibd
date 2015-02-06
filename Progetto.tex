@@ -1,4 +1,4 @@
-\documentclass[12pt,twoside]{article}
+\documentclass[a4paper,twoside]{article}
 
 %Packages
 \usepackage{amsmath}	% advanced math symbols pkg
@@ -6,15 +6,25 @@
 \usepackage{graphicx} % pictures support
 \usepackage{marginnote} % margin notes support
 \usepackage{longtable} % table on multiple pages support
+\usepackage[italian]{babel} % language support 
 
+\makeindex
 
 %Document begin
 \begin{document}
 
 \title{Progettazione di una Base di Dati per un'Offinica Meccanica}
-\author{Gruppo 809}
+\author{Gruppo 809\\
+	Ilario Pierbattista\\
+	Alessandro Staffolani\\
+	Luka Petrovic}
 \date{\today{}}
 \maketitle
+
+\tableofcontents
+
+% Introduzione
+\input{intro.tex}
 
 % Sezione sull'analisi dei requisiti
 \input{analisi_requisiti.tex}
