@@ -1,12 +1,19 @@
 \documentclass[a4paper,twoside]{article}
 
 %Packages
+\usepackage{lmodern}
 \usepackage{amsmath}	% advanced math symbols pkg
+\usepackage{amsthm, amsthm}
 \usepackage[utf8]{inputenc}	% utf8 encoding
 \usepackage{graphicx} % pictures support
 \usepackage{marginnote} % margin notes support
 \usepackage{longtable} % table on multiple pages support
-\usepackage[italian]{babel} % language support 
+\usepackage[italian]{babel} % language support
+\usepackage{enumitem} % custom enumeration support
+
+\theoremstyle{definition}
+\newtheorem{example}{Esempio}[section]
+
 
 \makeindex
 
@@ -20,17 +27,21 @@
 	Luka Petrovic}
 \date{\today{}}
 \maketitle
+\newpage
 
 \tableofcontents
 
 % Introduzione
 \input{intro.tex}
+\newpage
 
 % Sezione sull'analisi dei requisiti
 \input{analisi_requisiti.tex}
+\newpage
 
 % Sezione sulla progettazione concettuale
 \input{concettuale.tex}
+\newpage
 
 % Sezione sulla progettazione logica
 % Sezione con gli screenshot delle chiamate alla base di dati

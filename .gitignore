@@ -107,6 +107,3 @@ sympy-plots-for-*.tex/
 
 # xindy
 *.xdy
-
-# Compiled pdf
-*.pdf
