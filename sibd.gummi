@@ -1,0 +1,8 @@
+version=0.6.0
+typesetter=pdflatex
+steps=texpdf
+root=/home/ilario/Documents/Basi di Dati/Progetto/Progetto.tex
+
+file=/home/ilario/Documents/Basi di Dati/Progetto/intro.tex
+file=/home/ilario/Documents/Basi di Dati/Progetto/concettuale.tex
+file=/home/ilario/Documents/Basi di Dati/Progetto/analisi_requisiti.tex
