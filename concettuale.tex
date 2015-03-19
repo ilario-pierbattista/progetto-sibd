@@ -147,6 +147,8 @@
 				\label{fig:autovettura}
 			\end{figure}
 			
+			Si è scelto l'attrubuto \emph{Targa} come chiave primaria della relazione piuttosto che l'attributo \emph{Telaio} (numero di serie del telaio) nonostante anche quest'ultimo identifichi univocamente l'autovettura. Riteniamo che sia più agevole identificare un'autovettura attraverso la targa poichè tale informazione è più facilmente reperibile rispetto al seriale del telaio.
+			
 		\subsubsection{Preventivo}
 		
 			In figura \ref{fig:preventivo}, il diagramma espone gli attributi dell'entità \emph{Preventivo}.
@@ -157,7 +159,7 @@
 				\caption{Sviluppo dell'entità Preventivo}
 				\label{fig:preventivo}
 			\end{figure}
-		
+			
 		\subsubsection{Prestazione}
 			
 			Gli attributi dell'entità \emph{Prestazione} vengono esplicitati dal diagramma in figura \ref{fig:prestazione}.
@@ -168,6 +170,8 @@
 				\caption{Sviluppo dell'entità Prestazione}
 				\label{fig:prestazione}
 			\end{figure}
+			
+			Dovendo tener traccia del preventivo di riferimento a fronte di una prestazione fornita, abbiamo scelto l'attributo \emph{Preventivo} (il codice identificativo del preventivo) come chiave primaria, dal momento che non vi possono essere più prestazioni a fronte dello stesso preventivo.
 		
 		\subsubsection{Componente}
 			
@@ -186,28 +190,30 @@
 			
 			Esplicitati gli attributi delle principali entità, procediamo a legarle tra loro sviluppando le relationship ed alcune entità minori.
 			
-			Ripercorrendo i passi dello sviluppo dello scheletro del diagramma ER, partiamo dalle relationship che legano le entità \emph{Cliente}, \emph{Autovettura}, \emph{Preventivo} (diagramma in figura \ref{fig:cliente_autovettura_preventivo}).			
+			Ripercorrendo i passi dello sviluppo dello scheletro del diagramma ER, partiamo dalle relationship che legano le entità \emph{Cliente}, \emph{Autovettura}, \emph{Preventivo} (diagramma in figura \ref{fig:cliente_autovettura_preventivo}).		
 		
 			\begin{figure}[H]
 				\centering
 				\includegraphics[width=13cm]{images/finitures/cliente_autovettura_preventivo.png}
-				\caption{Sviluppo di Cliente, Autovettura, Preventivo}
+				\caption{Sviluppo delle relationship che legano Cliente, Autovettura e Preventivo}
 				\label{fig:cliente_autovettura_preventivo}
 			\end{figure}
 			
-			Chiaramente ad ogni cliente registrato, saranno associate una o più autovetture di sua propiertà. Ad ogni autovettura saranno associati uno o più preventivi di interventi riferiti all'autovettura stessa.
+			Chiaramente ad ogni cliente registrato, saranno associate una o più autovetture di sua propiertà. Ad ogni autovettura saranno associati uno o più preventivi di interventi riferiti all'autovettura stessa (Diagramma in figura \ref{fig:cliente_autovettura_preventivo}).
 			
-			Se l'intervento preventivato viene realizzato, al preventivo sarà associata una ed una sola prestazione. La stipulazione del preventivo non è vincolante nei confronti del cliente, quindi non è vero che ad ogni preventivo corrisponde una prestazione.
+			Se l'intervento preventivato viene realizzato, al preventivo sarà associata una ed una sola prestazione. La stipulazione del preventivo non è vincolante nei confronti del cliente, quindi non è vero che ad ogni preventivo corrisponde una prestazione (Diagramma in figura \ref{fig:preventivo_prestazione}).
 			
 			\begin{figure}[H]
 				\centering
 				\includegraphics[width=13cm]{images/finitures/preventivo_prestazione.png}
-				\caption{Sviluppo delle componenti di Preventivo e Prestazione}
+				\caption{Sviluppo della relationship che lega Preventivo e Prestazione}
 				\label{fig:preventivo_prestazione}
 			\end{figure}
+			
+			=====================
 		
-		\subsubsection{Preventivo e Componente}
-		
+			
+				
 			\begin{figure}[H]
 				\centering
 				\includegraphics[width=11.5cm]{images/finitures/preventivo_componente.png}
