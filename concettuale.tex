@@ -1,7 +1,8 @@
 \section{Progettazione Concettuale}
 	
 	\subsection{Strategia di Progetto}
-		\emph{Top-down} per la realizzazione dello schema ad un adeguato livello di raffinamento. 
+		\emph{Inside-Out} e \emph{Top-Down} per lo scheletro.
+		\emph{Inside-Out} per i raffinamenti successivi.
 						
 		{\color{red}{Questa sezione va ampliata e corretta}}
 		
@@ -105,7 +106,7 @@
 		
 		\begin{sidewaysfigure}
 			\centering
-			\includegraphics[width=20cm]{images/diagrams/schema.png}
+			\includegraphics[width=22cm]{images/diagrams/schema.png}
 			\caption{Scheletro del diagramma ER}
 			\label{fig:scheletro_er}
 		\end{sidewaysfigure}
@@ -184,7 +185,27 @@
 				\label{fig:componente}
 			\end{figure}
 		
-		\subsubsection{Altre entità di base}
+		\subsubsection{Fattura}
+		
+			Nel diagramma in figura \ref{fig:fattura}, l'entità \emph{Fattura} ed i suoi attributi.
+		
+			\begin{figure}[H]
+				\centering
+				\includegraphics[width=7cm]{images/finitures/fattura.png}
+				\caption{Sviluppo di Transazione}
+				\label{fig:fattura}
+			\end{figure}
+		
+		\subsubsection{Transazione}
+			
+			Il diagramma in figura \ref{fig:transazione} raffigura lo sviluppo degli attributi dell'entità \emph{Transazione}.
+						
+			\begin{figure}[H]
+				\centering
+				\includegraphics[width=4.5cm]{images/finitures/transazione.png}
+				\caption{Sviluppo di Transazione}
+				\label{fig:transazione}
+			\end{figure}
 		
 		\subsubsection{Raffinamenti Successivi}
 			
@@ -210,53 +231,116 @@
 				\label{fig:preventivo_prestazione}
 			\end{figure}
 			
-			=====================
-		
+			I componenti previsti nelle riparazioni vengono descritti tramite la relazione \emph{Previsione} che lega le entità \emph{Componente} e \emph{Preventivo}. In ogni preventivo si può prevedere di utilizzare nessuno, uno o più componenti. L'utilizzo di uno stesso componente può essere previsto - ovviamente - nella formulazione di più preventivi.
+			Si consulti il diagramma in figura \ref{fig:preventivo_componente}.
 			
-				
 			\begin{figure}[H]
 				\centering
-				\includegraphics[width=11.5cm]{images/finitures/preventivo_componente.png}
+				\includegraphics[width=13cm]{images/finitures/preventivo_componente.png}
 				\caption{Sviluppo di Preventivo e Componente}
 				\label{fig:preventivo_componente}
 			\end{figure}
-		
-		\subsubsection{Magazzino ed Ordine}
-		
+			
+			L'attributo "Ubicazione" della relazione \emph{Previsione} rappresenta l'ubicazione dei componenti utilizzati nelle installazioni di nuovi impianti (si consultino anche le specifiche riguardanti i preventivi alla sottosezione "Frasi relative ai Preventivi" \ref{sec:frasi_preventivi}).
+			
+			Per la registrazione degli articoli acquistati sono state introdotte in fase di sviluppo dello scheletro dello schema ER le entità \emph{Ordine} e \emph{Fornitura}. Tali entità, prese singolarmente, sono poco significative, essendo fortemente legate tra di loro (si faccia riferimento al diagramma in figura \ref{fig:fornitore_ordine_fornitura_componente}).
+			
+			I contratti di acquisto con i fornitori vengono modellati dall'entità \emph{Ordine}. Naturalmente presso lo stesso fornitore si possono effettuare più ordini, ma un ordine si riferisce ad un singolo fornitore. \emph{Ordine} e \emph{Fornitore} sono legati dalla relationship \emph{Acquisto}.
+			
 			\begin{figure}[H]
 				\centering
-				\includegraphics[width=11.5cm]{images/finitures/componente_fornitura_ordine_magazzino.png}
-				\caption{Sviluppo delle componenti di Magazzino, Ordine, Componente, Fornitura}
+				\includegraphics[width=13cm]{images/finitures/fornitore_ordine_fornitura_componente}
+				\caption{Sviluppo delle relazioni che legano il Fornitore, l'Ordine d'acquisto, le Forniture e i Componenti}
+				\label{fig:fornitore_ordine_fornitura_componente}
+			\end{figure}
+			
+			Ogni ordine è composto da una o più forniture, le quali, a loro volta, sono composte da uno o più articoli dello stesso componente. Ad ogni istanza dell'entità \emph{Fornitura} si associa - tramite la relationship \emph{Riferimento} - una ed una sola istanza dell'entità \emph{Componente}. Di contro, lo stesso componente può essere acquistato in diverse forniture.
+			Quindi ogni istanza di \emph{Fornitura} sarà associata ad una ed una sola istanza di \emph{Ordine} tramite la relationship \emph{Formazione}. Un ordine vedrà associate a sè una o più forniture.
+			
+			\begin{figure}[H]
+				\centering
+				\includegraphics[width=13cm]{images/finitures/componente_fornitura_ordine_magazzino.png}
+				\caption{Introduzione del Magazzino}
 				\label{fig:componente_fornitura_ordine_magazzino}
 			\end{figure}
-		
-		\subsubsection{Fornitore}
 			
-			\begin{figure}[H]
-				\centering
-				\includegraphics[width=11.5cm]{images/finitures/ordine_fornitore.png}
-				\caption{Sviluppo delle componenti di Fornitore}
-				\label{fig:ordine_fornitore}
-			\end{figure}
+			Un'ulteriore entità da aggiungere a questo gruppo è quella del magazzino. Abbiamo definito \emph{Magazzino} come una raccolta di forniture attive, cioè di forniture i quali articoli sono ancora presenti nel magazzino fisico, pronti per essere utilizzati. Legando \emph{Magazzino} con \emph{Fornitura} si modella tale associazione. La relationship \emph{Composizione} associa ad ogni istanza di \emph{Magazzino} una ed una sola istanza di \emph{Fornitura}. Da notare che il codice della fornitura e il codice del componente di riferimento, formano la chiave primaria di tale entità.
+			Fare riferimento al diagramma in figura \ref{fig:componente_fornitura_ordine_magazzino}.
 			
-		\subsubsection{Prestazione e Fornitura}
+			Da notare che l'attributo \emph{quantità} dell'entità \emph{Magazzino} descrive il numero di articoli di uno specifico componente, acquistati in una certa fornitura, ancora disponibili in magazzino.
 			
+			All'esecuzione di una prestazione, come da specifiche, è necessario specificare il tipo e la quantità di articoli utilizzati. La prima soluzione che ci è sembrata valida è stata quella di associare, ad ogni istanza dell'entità \emph{Prestazione} le istanze interessate dell'entità \emph{Componente} attraverso la relationship \emph{Utilizzo}. Tale relationship avrebbe avuto l'attributo "Quantità", necessario per specificare la quantità degli articoli utilizzati per ogni componente.
+			
+			Tuttavia, tale design si è rivelato non adeguato a soddisfare tutte le specifiche. Il problema più evidente risiedeva nel fatto che, essendo le istanze dell'entità \emph{Componente} composte da informazioni descrittive, pressocchè invarianti (eccezion fatta per quanto riguarda il "Prezzo di Vendita"), non vi è il modo per risalire al preciso articolo fisico utilizzato nella riparazione\footnote{Non potendo risalire al preciso articolo utilizzato, non si ha a disposizione la data di acquisto, quindi viene meno la realizzabilità del meccanismo che permette di utilizzare per primi gli articoli dei componenti la cui data di scadenza è più vicina di altri.}.
+			
+			All'entità \emph{Prestazione} vengono quindi associate zero, una o più istanze dell'entità \emph{Fornitura}, avendo così a disposizione sia le informazioni che descrivono genericamente il componente, sia quelle che caratterizzano con precisione l'articolo utilizzato nella prestazione. 
+
 			\begin{figure}[H]
 				\centering
 				\includegraphics[width=11.5cm]{images/finitures/prestazione_fornitura.png}
-				\caption{Sviluppo}
+				\caption{Utilizzo di componenti un una prestazione}
 				\label{fig:ordine_fornitore}
 			\end{figure}
-		
-		\subsubsection{Operatore}
-		
+			
+			L'attributo "Quantità" della relationship \emph{Utilizzo} non necessita di ulteriori spiegazioni, mentre l'attributo "Prezzo Unitario" si rende necessario, in quanto il prezzo di vendita di un componente, ragionevolmente, varia nel tempo.
+			
+			Ad esecuzione ultimata di una prestazione avviene la registrazione della fattura. Ad ogni istanza dell'entità \emph{Prestazione} sarà associata, tramite la relationship \emph{Registrazione} obbligatoriamente una ed una sola istanza dell'entità \emph{Fattura}. 		
+			Le istanze dell'entità \emph{Fattura} vengono identificate dalla coppia di attributi "Numero Progressivo" ed "Anno", così come avviene nella realtà di interesse\footnote{Le fatture vengono identificate dall'anno di emissione e dal numero progressivo. Ogni anno tale numero viene azzerato.}.
+			
+			Sul significato di altri attributi ("Tipo Pagamento", "Sistema Pagamento", "Stato Pagamento", "Data Scadenza") presenti nel diagramma in figura \ref{fig:prestazione_fattura}, si rimanda alla lettura dell'apposita documentazione nelle sezioni successive.
+			
 			\begin{figure}[H]
 				\centering
-				\includegraphics[width=11.5cm]{images/finitures/operatore_turno_prestazione.png}
-				\caption{Sviluppo di Operatore, Turno, Prestazione}
-				\label{fig:operatore_turno_prestazione}
+				\includegraphics[width=11.5cm]{images/finitures/prestazione_fattura.png}
+				\caption{Sviluppo della relationship tra Prestazione e Fattura}
+				\label{fig:prestazione_fattura}
 			\end{figure}
 			
+			Gli sviluppi dei diagrammi introdotti fin'ora permettono di affrontare il legame di \emph{Transazione} con le altre entità. A quest'ultima si possono associare istanze di tutte le entità che modellano dati di porzioni di processo che prevedono il verificarsi di transazioni monetarie. Alla stipulazione di un preventivo può essere richiesto il versamento di un acconto, alla consegna gli ordine sarà necessario effettuare una versamento al fornitore, mensilmente bisognerà registrare gli stipendi versati agli operatori e quando una fattura viene saldata bisognerà registrare tale transazione di denaro.
+			
+			\begin{figure}[H]
+				\centering
+				\includegraphics[width=13cm]{images/finitures/transazione_fattura_preventivo_operatore_ordine.png}
+				\caption{Sviluppo delle relationship con cui Transazione si lega alle altre entità}
+				\label{fig:transazione_fattura_preventivo_operatore_ordine}
+			\end{figure}
+			
+			Nel diagramma in figura \ref{fig:transazione_fattura_preventivo_operatore_ordine} vi è la rappresentazione di come le entità \emph{Preventivo}, \emph{Ordine}, \emph{Operatore}, \emph{Fattura} vengono associate a \emph{Transazione}.
+			
+			Esaminiamo le ultime componenti del diagramma ER che non sono state ancora analizzate.
+			
+			In figura \ref{fig:operatore_prestazione} il diagramma descrive la relationship \emph{Occupazione} che associa le istanze di \emph{Prestazione} a quelle di \emph{Operatore}. Ad ogni istanza di \emph{Prestazione} infatti devono essere associate una o più instanze di \emph{Operatore}, in modo da tener traccia dei dipendenti che sono stati impiegati nell'esecuzione della prestazione ad un'autovettura. Ovviamente la stessa istanza di \emph{Operatore} può essere associata a più istanze di \emph{Prestazione}.
+			
+			\begin{figure}[H]
+				\centering
+				\includegraphics[width=11.5cm]{images/finitures/operatore_prestazione.png}
+				\caption{Sviluppo della relationship tra Prestazione e Operatore}
+				\label{fig:operatore_prestazione}
+			\end{figure}
+			
+			Riguardo gli operatori è necessario, come da specifiche, registrarne le presenze e gli orari di lavoro. L'entità \emph{Turno}, legata ad \emph{Operatore} tramite la relationship \emph{Presenza} (diagramma in figura \ref{fig:operatore_turno}), assolve tale funzione.
+			
+			\begin{figure}[H]
+				\centering
+				\includegraphics[width=11.5cm]{images/finitures/operatore_turno.png}
+				\caption{Turni degli Operatori}
+				\label{fig:operatore_turno}
+			\end{figure}
+			
+			L'ultimo punto da sviluppare consiste nella gestione dei recapiti, di qualunque natura essi siano. L'entità \emph{Recapito} è costituita dagli attributi "Recapito" (che è anche chiave primaria) e dall'attributo "Tipo" (consultare le Regole Aziendali alla sezione \ref{sec:business_rules} per i valori che tale attributo può assumere).
+			Ad ogni istanza di \emph{Persona} devono essere associati una o più istanze di \emph{Recapito}.
+			
+			\begin{figure}[H]
+				\centering
+				\includegraphics[width=11.5cm]{images/finitures/persona_rubrica.png}
+				\caption{Turni degli Operatori}
+				\label{fig:persona_recapito}
+			\end{figure}
+	
+	% Diagramma definitivo
+	\subsection{Diagramma Entity-Relationship}
+		
+		{\color{red}{Inserire il diagramma finale}}
 
 	\subsection{Analisi Qualitativa dello Schema ER}
 	
