@@ -95,7 +95,7 @@
 			\includegraphics[width=9cm]{images/diagrams/persona_recapito.png}
 		\end{figure}
 		
-		Possiamo concludere lo sviluppo della struttura del diagramma ER affrontando la questione delle transazioni. Avviene una \emph{Transazione} ogni volta che viene versato un acconto per un \emph{Preventivo}, ogni volta che viene saldata la \emph{Fattura} di una \emph{Prestazione}, ogni volta che viene pagato un \emph{Ordine} ed ogni volta che viene pagato il salario di un \emph{Operatore}.
+		Possiamo concludere lo sviluppo della struttura del diagramma ER affrontando la questione delle transazioni. Avviene una \emph{Transazione} ogni volta che viene versato un acconto per un \emph{Preventivo}, ogni volta che viene saldata la \emph{Fattura} di una \emph{Prestazione}, ogni volta che viene pagato un \emph{Ordine} ed ogni volta che viene pagato lo stipendio di un \emph{Operatore}.
 		
 		\begin{figure}[H]
 			\centering
@@ -116,9 +116,6 @@
 		Ottenuto lo scheletro generale del diagramma ER procediamo ad esplicitare, delle entità principali, l'insieme degli attributi che ognuna di esse possiede.
 		Una volta sviluppati gli attributi delle entità principali svilupperemo le relationship che le legano, raggruppandole tra loro sulla falsariga dei modelli elaborati allo step precedente.
 		
-		Gli attributi di ogni entità derivano ovviamente dall'analisi dei requisi della base di dati, quindi le successive sezioni si limitano a presentare graficamente i successivi raffinamenti sulle componenti dello schema ER, con l'aggiunta di eventuali descrizioni per integrare ciò che non era stato già detto.
-		Per una lettura più accurata e rigorosa di tali diagrammi si rimanda alla consultazione della documentazione di supporto (Dizionario dei Dati alla sezione \ref{sec:data_dict} e Regole Aziendali \ref{sec:business_rules}).
-		
 		\begin{description}
 			\item[NB]
 				Ogni generalizzazione effettuata è da considerarsi totale.
@@ -127,6 +124,16 @@
 		\subsubsection{Persona}
 		
 			In figura \ref{fig:persona} troviamo lo sviluppo degli attributi dell'entità \emph{Persona} e delle relative entità che la estendono.
+			
+			L'identificativo dell'entità \emph{Persona} è costituito dall'attributo "Codice Fiscale o P.Iva", capace di identificare così sia privati che aziende. Ogni \emph{Persona} è caratterizzata anche dall'attributo composto "Indirizzo", sviluppabile in "Città", "Via", "Civico", "CAP", che identifica l'indirizzo di riferimento della persona stessa.
+			
+			Le entità figlie di \emph{Persona} sono \emph{Fornitore}, \emph{Operatore} e \emph{Cliente}. Quest'ultimo può essere ulteriormente scomposto in altre due entità figlie \emph{Privato} e \emph{Azienda}.
+			
+			\emph{Privato} possiede gli attributi "Nome", "Cognome" e "Numero Documento Identità", mentre per l'entità \emph{Azienda} si è reso necessario avere solamente l'attributo "Ragione Sociale".
+			
+			\emph{Fornitore} è dotato degli attributi "Ragione Sociale", "IBAN", "Tempi Consegna" (numero di giorni feriali necessari in media affinchè la merce ordinata al fornitore arrivi) e "Modalità Pagamento" (specifica la modalità di pagamento tra assegno e bonifico bancario).
+			
+			\emph{Operatore} ha gli attributi "Nome", "Cognome", "IBAN", "Stipendio" (ammontare dello stipendio mensile, se il lavoratore ha un contratto a retribuzione fissa), "Retribuzione oraria" (se il lavoratore ha un contratto che prevede uno stipendio calcolato in base alle ore di lavoro), "Modalità Riscossione" (specifica la modalità di riscossione dello stipendio tra assegno, bonifico o contanti\footnote{Applicabile solo nel caso in cui l'ammontare del pagamento non superi l'importo massimo a norma di legge. Attualmente il limite per i pagamenti in contanti ammonta a 1000.00\EUR.}) e "Dati Anagrafici" (attributo composto da "Data di Nascita", "Comune di Nascita", "Provinicia").
 						
 			\begin{figure}[H]
 				\centering
@@ -134,8 +141,6 @@
 				\caption{Sviluppo di Persona}
 				\label{fig:persona}
 			\end{figure}
-			
-			Di ogni \emph{Persona} coinvolta nelle attività dell'azienda, suddivisibili in \emph{Clienti}, \emph{Fornitori} ed \emph{Operatori}, è necessario memorizzare all'interno della base di dati il codice fiscale e l'indirizzo di riferimento.
 		
 		\subsubsection{Autovettura}
 			
@@ -148,15 +153,19 @@
 				\label{fig:autovettura}
 			\end{figure}
 			
-			Si è scelto l'attrubuto \emph{Targa} come chiave primaria della relazione piuttosto che l'attributo \emph{Telaio} (numero di serie del telaio) nonostante anche quest'ultimo identifichi univocamente l'autovettura. Riteniamo che sia più agevole identificare un'autovettura attraverso la targa poichè tale informazione è più facilmente reperibile rispetto al seriale del telaio.
+			\emph{Autovettura} comprende gli attributi "Targa", "Marca", "Modello", "Telaio" (numero di serie del telaio che identifica univocamente un veicolo che viene inciso sul telaio del veicolo e viene indicato nel libretto di circolazione), "Ultima Revisione" e "Ultimo Collaudo" (rispettivamente le date in cui è stata effettuata la revisione dell'auto e il collaudo di un eventuale impianto di alimentazione differente da quello di fabbricazione), "Anno di Immatricolazione", "Cilindrata".
+		
+			Si è scelto l'attrubuto "Targa" come chiave primaria dell'entità piuttosto che l'attributo "Telaio" nonostante anche quest'ultimo identifichi univocamente l'autovettura. Riteniamo che sia più agevole identificare un'autovettura attraverso la targa poichè tale informazione è più facilmente reperibile rispetto al seriale del telaio.
 			
 		\subsubsection{Preventivo}
 		
 			In figura \ref{fig:preventivo}, il diagramma espone gli attributi dell'entità \emph{Preventivo}.
 			
+			\emph{Preventivo} è costituito dagli attributi "Codice" (identificativo numerico interno all'azienda del preventivo fornito), "Data Emissione", "Tempo Stimato" (ovvero la stima del numero di giorni necessari all'esecuzione del lavoro), "Data Inizio" (data in cui il lavoro è stato pianificato per essere eseguito), "Categoria" (riparazione, installazione di un impianto a metano, installazione di un impianto a gpl, collaudo o revisione), "Sistema Alimentazione" (attributo necessario per le installazioni di nuovi impianti, necessari a specificare il sistema di alimentazione tra sistema a iniezione e sistema ad aspirazione), "Sintomi" (ovvero una breve descrizione del malfunzionamento riscontrato, nel caso in cui si tratti di una riparazione), "Costo Servizi" (composizione della stima dei costi dei servizi aggiuntivi e della manodopera).
+			
 			\begin{figure}[H]
 				\centering
-				\includegraphics[width=9cm]{images/finitures/preventivo.png}
+				\includegraphics[width=12cm]{images/finitures/preventivo.png}
 				\caption{Sviluppo dell'entità Preventivo}
 				\label{fig:preventivo}
 			\end{figure}
@@ -164,6 +173,10 @@
 		\subsubsection{Prestazione}
 			
 			Gli attributi dell'entità \emph{Prestazione} vengono esplicitati dal diagramma in figura \ref{fig:prestazione}.
+			
+			\emph{Prestazione} è composta dagli attributi "Preventivo" (codice identificativo del preventivo di riferimento), "Tempi Esecuzione" (giorni necessari effettivamente all'esecuzione del lavoro preventivato), "Malfunzionamento" (descrizione breve della natura e dell'origine del malfunzionamento riscontrato), "Procedimento" (descrizione concisa ed essenziale del procedimento utilizzato per eliminare i malfunzionamenti), "Costo Servizi" (attributo composto dal costo \emph{effettivo} dei servizi aggiuntivi e della manodopera).
+		
+			Dovendo tener traccia del preventivo di riferimento a fronte di una prestazione fornita, abbiamo scelto l'attributo \emph{Preventivo} come chiave primaria, dal momento che non vi possono essere più prestazioni a fronte dello stesso preventivo.
 		
 			\begin{figure}[H]
 				\centering
@@ -171,12 +184,12 @@
 				\caption{Sviluppo dell'entità Prestazione}
 				\label{fig:prestazione}
 			\end{figure}
-			
-			Dovendo tener traccia del preventivo di riferimento a fronte di una prestazione fornita, abbiamo scelto l'attributo \emph{Preventivo} (il codice identificativo del preventivo) come chiave primaria, dal momento che non vi possono essere più prestazioni a fronte dello stesso preventivo.
 		
 		\subsubsection{Componente}
 			
 			Nel diagramma in figura \ref{fig:componente} troviamo l'entità \emph{Componente} ed i relativi attributi.
+			
+			L'entità \emph{Componente} comprende gli attributi "Codice" (identificativo numerico interno del componente), "Nome", "Validità" (giorni dalla data di acquisto dopo i quali il componente diventa inutilizzabile), "Quantità Minima" (quantitativo minimo da avere sempre in magazzino), "Prezzo Vendita" (prezzo unitario al quale il componente viene venduto). 
 			
 			\begin{figure}[H]
 				\centering
@@ -191,16 +204,18 @@
 		
 			\begin{figure}[H]
 				\centering
-				\includegraphics[width=7cm]{images/finitures/fattura.png}
+				\includegraphics[width=9cm]{images/finitures/fattura.png}
 				\caption{Sviluppo di Transazione}
 				\label{fig:fattura}
 			\end{figure}
 			
-			L'attributo "Totale", che descrive il prezzo totale della prestazione, è composto da "Imposte" ed "Imponibile".
+			\emph{Fattura} è composta dagli attributi "Numero Progressivo" e "Anno" (coppia di attributi identificatori, derivano direttamente dalla struttura reale delle fatture), "Totale" (descrive il prezzo totale della prestazione, è composto da "Imposte" ed "Imponibile"), "Data Emissione", "Sistema Pagamento" (specifica uno dei due sistemi di pagamento accettati: rimessa diretta e rimessa differita), "Tipo Pagamento" (metodologie di pagamento accettate: bonifico, contanti o assegno), "Stato Pagamento" (attributo booleano che permette di distinguere le fatture saldate da quelle non ancora pagate), "Data Scadenza" (data entro la quale la fattura deve essere saldata).
 		
 		\subsubsection{Transazione}
 			
 			Il diagramma in figura \ref{fig:transazione} raffigura lo sviluppo degli attributi dell'entità \emph{Transazione}.
+			
+			L'entità \emph{Transazione} è semplicemente composta dagli attributi "Codice", "Quota" (ammontare della transazione di denaro: quantità positiva per le transazioni entranti, negativa per quelle uscenti), "Data".
 						
 			\begin{figure}[H]
 				\centering
@@ -215,7 +230,7 @@
 			
 			Ripercorrendo i passi dello sviluppo dello scheletro del diagramma ER, partiamo dalle relationship che legano le entità \emph{Cliente}, \emph{Autovettura}, \emph{Preventivo} (diagramma in figura \ref{fig:cliente_autovettura_preventivo}).		
 		
-			\begin{figure}[H]
+			\begin{figure}
 				\centering
 				\includegraphics[width=13cm]{images/finitures/cliente_autovettura_preventivo.png}
 				\caption{Sviluppo delle relationship che legano Cliente, Autovettura e Preventivo}
@@ -259,7 +274,7 @@
 			Ogni ordine è composto da una o più forniture, le quali, a loro volta, sono composte da uno o più articoli dello stesso componente. Ad ogni istanza dell'entità \emph{Fornitura} si associa - tramite la relationship \emph{Riferimento} - una ed una sola istanza dell'entità \emph{Componente}. Di contro, lo stesso componente può essere acquistato in diverse forniture.
 			Quindi ogni istanza di \emph{Fornitura} sarà associata ad una ed una sola istanza di \emph{Ordine} tramite la relationship \emph{Formazione}. Un ordine vedrà associate a sè una o più forniture.
 			
-			\begin{figure}[H]
+			\begin{figure}
 				\centering
 				\includegraphics[width=13cm]{images/finitures/componente_fornitura_ordine_magazzino.png}
 				\caption{Introduzione del Magazzino}
@@ -269,7 +284,7 @@
 			Un'ulteriore entità da aggiungere a questo gruppo è quella del magazzino. Abbiamo definito \emph{Magazzino} come una raccolta di forniture attive, cioè di forniture i quali articoli sono ancora presenti nel magazzino fisico, pronti per essere utilizzati. Legando \emph{Magazzino} con \emph{Fornitura} si modella tale associazione. La relationship \emph{Composizione} associa ad ogni istanza di \emph{Magazzino} una ed una sola istanza di \emph{Fornitura}. Da notare che il codice della fornitura e il codice del componente di riferimento, formano la chiave primaria di tale entità.
 			Fare riferimento al diagramma in figura \ref{fig:componente_fornitura_ordine_magazzino}.
 			
-			Da notare che l'attributo \emph{quantità} dell'entità \emph{Magazzino} descrive il numero di articoli di uno specifico componente, acquistati in una certa fornitura, ancora disponibili in magazzino.
+			Da notare che l'attributo "Quantità" dell'entità \emph{Magazzino} descrive il numero di articoli di uno specifico componente, acquistati in una certa fornitura, ancora disponibili in magazzino.
 			
 			All'esecuzione di una prestazione, come da specifiche, è necessario specificare il tipo e la quantità di articoli utilizzati. La prima soluzione che ci è sembrata valida è stata quella di associare, ad ogni istanza dell'entità \emph{Prestazione} le istanze interessate dell'entità \emph{Componente} attraverso la relationship \emph{Utilizzo}. Tale relationship avrebbe avuto l'attributo "Quantità", necessario per specificare la quantità degli articoli utilizzati per ogni componente.
 			
@@ -277,7 +292,7 @@
 			
 			All'entità \emph{Prestazione} vengono quindi associate zero, una o più istanze dell'entità \emph{Fornitura}, avendo così a disposizione sia le informazioni che descrivono genericamente il componente, sia quelle che caratterizzano con precisione l'articolo utilizzato nella prestazione. 
 
-			\begin{figure}[H]
+			\begin{figure}
 				\centering
 				\includegraphics[width=11.5cm]{images/finitures/prestazione_fornitura.png}
 				\caption{Utilizzo di componenti un una prestazione}
@@ -287,9 +302,8 @@
 			L'attributo "Quantità" della relationship \emph{Utilizzo} non necessita di ulteriori spiegazioni, mentre l'attributo "Prezzo Unitario" si rende necessario, in quanto il prezzo di vendita di un componente, ragionevolmente, varia nel tempo.
 			
 			Ad esecuzione ultimata di una prestazione avviene la registrazione della fattura. Ad ogni istanza dell'entità \emph{Prestazione} sarà associata, tramite la relationship \emph{Registrazione} obbligatoriamente una ed una sola istanza dell'entità \emph{Fattura}. 		
-			Le istanze dell'entità \emph{Fattura} vengono identificate dalla coppia di attributi "Numero Progressivo" ed "Anno", così come avviene nella realtà di interesse\footnote{Le fatture vengono identificate dall'anno di emissione e dal numero progressivo. Ogni anno tale numero viene azzerato.}.
 			
-			Sul significato di altri attributi ("Tipo Pagamento", "Sistema Pagamento", "Stato Pagamento", "Data Scadenza") presenti nel diagramma in figura \ref{fig:prestazione_fattura}, si rimanda alla lettura dell'apposita documentazione nelle sezioni successive.
+			Le istanze dell'entità \emph{Fattura} vengono identificate dalla coppia di attributi "Numero Progressivo" ed "Anno", così come avviene nella realtà di interesse\footnote{Le fatture vengono identificate dall'anno di emissione e dal numero progressivo. Ogni anno tale numero viene azzerato.}.
 			
 			\begin{figure}[H]
 				\centering
@@ -300,7 +314,7 @@
 			
 			Gli sviluppi dei diagrammi introdotti fin'ora permettono di affrontare il legame di \emph{Transazione} con le altre entità. A quest'ultima si possono associare istanze di tutte le entità che modellano dati di porzioni di processo che prevedono il verificarsi di transazioni monetarie. Alla stipulazione di un preventivo può essere richiesto il versamento di un acconto, alla consegna gli ordine sarà necessario effettuare una versamento al fornitore, mensilmente bisognerà registrare gli stipendi versati agli operatori e quando una fattura viene saldata bisognerà registrare tale transazione di denaro.
 			
-			\begin{figure}[H]
+			\begin{figure}
 				\centering
 				\includegraphics[width=13cm]{images/finitures/transazione_fattura_preventivo_operatore_ordine.png}
 				\caption{Sviluppo delle relationship con cui Transazione si lega alle altre entità}
@@ -313,7 +327,7 @@
 			
 			In figura \ref{fig:operatore_prestazione} il diagramma descrive la relationship \emph{Occupazione} che associa le istanze di \emph{Prestazione} a quelle di \emph{Operatore}. Ad ogni istanza di \emph{Prestazione} infatti devono essere associate una o più instanze di \emph{Operatore}, in modo da tener traccia dei dipendenti che sono stati impiegati nell'esecuzione della prestazione ad un'autovettura. Ovviamente la stessa istanza di \emph{Operatore} può essere associata a più istanze di \emph{Prestazione}.
 			
-			\begin{figure}[H]
+			\begin{figure}
 				\centering
 				\includegraphics[width=11.5cm]{images/finitures/operatore_prestazione.png}
 				\caption{Sviluppo della relationship tra Prestazione e Operatore}
@@ -322,7 +336,7 @@
 			
 			Riguardo gli operatori è necessario, come da specifiche, registrarne le presenze e gli orari di lavoro. L'entità \emph{Turno}, legata ad \emph{Operatore} tramite la relationship \emph{Presenza} (diagramma in figura \ref{fig:operatore_turno}), assolve tale funzione.
 			
-			\begin{figure}[H]
+			\begin{figure}
 				\centering
 				\includegraphics[width=11.5cm]{images/finitures/operatore_turno.png}
 				\caption{Turni degli Operatori}
@@ -332,7 +346,7 @@
 			L'ultimo punto da sviluppare consiste nella gestione dei recapiti, di qualunque natura essi siano. L'entità \emph{Recapito} è costituita dagli attributi "Recapito" (che è anche chiave primaria) e dall'attributo "Tipo" (consultare le Regole Aziendali alla sezione \ref{sec:business_rules} per i valori che tale attributo può assumere).
 			Ad ogni istanza di \emph{Persona} devono essere associati una o più istanze di \emph{Recapito}.
 			
-			\begin{figure}[H]
+			\begin{figure}
 				\centering
 				\includegraphics[width=11.5cm]{images/finitures/persona_rubrica.png}
 				\caption{Turni degli Operatori}
@@ -342,7 +356,14 @@
 	% Diagramma definitivo
 	\subsection{Diagramma Entity-Relationship}
 		
-		{\color{red}{Inserire il diagramma finale}}
+		L'intero diagramma ER si può trovare in figura \ref{fig:er}.
+			
+		\begin{sidewaysfigure}
+			\centering
+			\includegraphics[width=22cm]{images/finitures/schema.png}
+			\caption{Scheletro del diagramma ER}
+			\label{fig:er}
+		\end{sidewaysfigure}
 
 	\subsection{Analisi Qualitativa dello Schema ER}
 	
@@ -352,23 +373,249 @@
 		
 		\subsubsection{Entità}
 		\label{sec:entities}
-		
-			\begin{longtable}{| p{2.5cm} | p{4.5cm} | p{2cm} | p{2.5cm} |}
+			
+			{\small
+			\begin{longtable}{| p{2cm} | p{4cm} | p{4cm} | p{2cm} |}
+				
+				\hline
+				\textbf{Nome} & 
+				\textbf{Descrizione} & 
+				\textbf{Attributi} & 
+				\textbf{Identificatore} \\ 
 				\hline
 				
-					\textbf{Nome} & \textbf{Descrizione} & \textbf{Attributi} & \textbf{Identificatore} \\ \hline
-					
-					Nome entità & 
-					Descrizione entità & 
-					Attributi entità & 
-					Identificatore entità
-					\\
-					
+				\endfirsthead
+				
 				\hline
+				\textbf{Nome} & 
+				\textbf{Descrizione} & 
+				\textbf{Attributi} & 
+				\textbf{Identificatore} \\ 
+				\hline
+				
+				\endhead
+				
+				Persona &
+				Soggetto generico che intrattenga rapporti di ogni tipo con l'azienda. &
+				Codice Fiscale o P.IVA (Stringa), Città (Stringa), Via (Stringa), Civico (Numerico), CAP (Numerico) &
+				Codice Fiscale o P.IVA (Stringa)
+				\\ \hline
+
+				Cliente &
+				Soggetto che necessita di un servizio da parte dell'azienda. &
+				// &
+				//
+				\\ \hline
+
+				Privato &
+				Cliente non dotato di partita IVA. &
+				Attributi di Persona, Nome (Stringa), Cognome (Stringa), Numero Documento Identità (Stringa) &
+				//
+				\\ \hline
+
+				Azienda  &
+				Cliente dotato di partita IVA. &
+				Attributi di Persona, Ragione Sociale (Stringa) &
+				//
+				\\ \hline
+
+				Fornitore &
+				Azienda che abbia fornito all’officina qualsiasi tipo di componente necessario. &
+				Attributi di Persona, Ragione Sociale (Stringa), Tempi Consegna (Numerico), Modalità Pagamento (Stringa), IBAN (Stringa) &
+				//
+				\\ \hline
+
+				Operatore &
+				Lavoratore dell'azienda. &
+				Attributi di Persona, Nome (Stringa), Cognome (Stringa), IBAN (Stringa), Stipendio (Numerico), Retribuzione Oraria (Numerico), Modalità Riscossione (Stringa), Comune Nascita (Stringa), Provincia (Stringa), Data Nascita (Data) &
+				//
+				\\ \hline
+
+				Autovettura &
+				Automobile di un cliente che debba subire o abbia già subito un intervento da parte dei lavoratori dell’azienda. &
+				Targa (Stringa), Modello (Stringa), Telaio (Stringa), Cilindrata (Numerico), Anno Immatricolazione (Numerico), Ultima Revisione (Data), Ultimo Collaudo (Data), Marca (Stringa) &
+				Targa (Stringa)
+				\\ \hline
+
+				Preventivo &
+				Stima dei costi, dei tempi e dei componenti necessari relativi all’esecuzione di un intervento su un’autovettura. &
+				Preventivo (Numerico), Data Emissione (Data), Data Inizio (Data), Categoria (Stringa), Servizi Aggiuntivi (Numerico), Manodopera (Numerico), Tempo Stimato (Numerico), Sintomi (Stringa), Sistema Alimentazione (Stringa) &
+				Preventivo (Numerico)
+				\\ \hline
+
+				Componente &
+				Qualsiasi oggetto fisico necessario alla corretta esecuzione di una riparazione o di una installazione di un impianto su di un’autovettura.  &
+				Codice (Numerico), Quantità Minima (Numerico), Prezzo Vendita (Numerico), Validità (Numerico), Nome (Stringa) &
+				Codice (Numerico)
+				\\ \hline
+
+				Fornitura &
+				Insieme dello stesso componente inviata da un fornitore. &
+				Codice (Numerico), Prezzo Unitario (Numerico), Quantità (Numerico) &
+				Codice (Numerico)
+				\\ \hline
+
+				Ordine &
+				Insieme di forniture inviate nello stesso momento e dallo stesso ordine. &
+				Codice (Numerico), Data Consegna (Data), Data Emissione (Data) &
+				Codice (Numerico)
+				\\ \hline
+				
+				Magazzino  &
+				Insieme di tutte le forniture non esaurite. &
+				Codice Componente (Numerico), Quantità (Numerico) &
+				Codice Componente (Numerico), Codice (di \emph{Fornitura})
+				\\ \hline
+
+				Prestazione &
+				Attività eseguita dagli operatori dell’officina su di un’autovettura. &
+				Preventivo (Numerico), Tempi Esecuzione (Numerico), Data Fine (Data), Manodopera (Numerico), Servizi Aggiuntivi (Numerico), Malfunzionamento (Stringa), Procedimento (Stringa) &
+				Codice (Numerico)
+				\\ \hline
+
+				Turno &
+				Arco temporale specifico in cui gli operatori compiono le loro mansioni. &
+				Ora Inizio (Numerico), Ora fine (Numerico), Data (Data) &
+				Ora Inizio (Numerico), Data (Data), Codice Fiscale o P.IVA (di \emph{Operatore})
+				\\ \hline
+
+				Transazione &
+				Flusso di denaro uscente o entrante nella cassa dell’attività. &
+				Codice (Numerico), Quota (Numerico), Data (Data) &
+				Codice (Numerico)
+				\\ \hline
+
+				Fattura &
+				Documento fiscale relativo ad un pagamento da ricevere da parte di un cliente. &
+				Numero Progressivo (Numerico), Anno (Numerico), Data Emissione (Data), Imponibile (Numerico), Imposte (Numerico), Sistema Pagamento (Stringa), Tipo Pagamento (Stringa), Stato Pagamento (Stringa), Data Scadenza (Data) &
+				Numero Progressivo (Numerico), Anno (Numerico)
+				\\ \hline
+				
+				Recapito &
+				Numero telefonico, indirizzo email o sito web. Qualsiasi recapito telematico utile a contattare una Persona. &
+				Recapito (Stringa), Tipo(Stringa) &
+				Recapito (Stringa)
+				\\ \hline
+				
 			\end{longtable}
+			}
 
 		\subsubsection{Relazioni}
 		\label{sec:relationships}
+			{\small
+			\begin{longtable}{| p{2cm} | p{4cm} | p{4cm} | p{2cm} |}
+				
+				\hline
+				\textbf{Nome} & 
+				\textbf{Descrizione} & 
+				\textbf{Entità Coinvolte} & 
+				\textbf{Attributi} \\ 
+				\hline
+				
+				\endfirsthead
+				
+				\hline
+				\textbf{Nome} & 
+				\textbf{Descrizione} & 
+				\textbf{Entità Coinvolte} & 
+				\textbf{Attributi} \\ 
+				\hline
+				
+				\endhead
+				
+				Esecuzione &
+				Associa ad un Preventivo una Prestazione &
+				Preventivo (0, 1) Prestazione (1, 1) &
+
+				\\ \hline
+
+				Previsione &
+				Associa i Componenti previsti in fase di stipulazione dei Preventivi &
+				Componente (0, N) Preventivo (0, N) &
+				Quantità (Numerico) indica la quantità del componente che si prevede di utilizzare
+				\\ \hline
+
+				Formazione &
+				Associa le forniture che compongono un ordine &
+				Fornitura (1, 1) Ordine (1, N) &
+
+				\\ \hline
+
+				Composizione &
+				Associa le Forniture che compongono il Magazzino aziendale &
+				Magazzino (1, 1) Fornitura (0, 1) &
+
+				\\ \hline
+
+				Riferimento &
+				Associa i Componenti che descrivono una Fornitura &
+				Componente (1, 1) Fornitura (1, N) &
+
+				\\ \hline
+
+				Utilizzo &
+				Associa i Componenti relativi ad un Fornitura effettivamente usati per compiere una prestazione &
+				Fornitura (0, N) Prestazione (0, N) &
+				Quantità (Numerico) indica la quantità del componente che si è utilizzata\\ \hline
+
+				Occupazione &
+				Associa un Operatore ad una Prestazione da svolgere &
+				Operatore (0, 1) Prestazione (0, N) &
+				\\ \hline
+
+				Presenza &
+				Associa un Operatore con il Turno di lavoro effettuato &
+				Operatore (1, 1) Turno (0, N) &
+				\\ \hline
+
+				Possesso &
+				Associa una o più Autovetture ad un Cliente &
+				Cliente (1, 1) Autovettura (1, N) &
+				\\ \hline
+
+				Richiesta &
+				Associa un Preventivo riferito ad una Prestazione da richiedere su una determinata Autovettura &
+				Autovettura (0, 1) Preventivo (0, N) &
+				\\ \hline
+
+				Acquisto &
+				Associa un Ordine effettuato da un determinato Fornitore &
+				Ordine (0, N) Fornitore (1, 1) &
+				\\ \hline
+
+				Rubrica &
+				Associa una generica Persona ai sui Recapiti &
+				Persona (0, N) Recapito (1, N) &
+				\\ \hline
+
+				Acconto  &
+				Associa un Preventivo e la Transazione monetaria che un cliente può lasciare &
+				Preventivo (0, 1) Transazione (0, 1) &
+				\\ \hline
+
+				Registrazione  &
+				Associa una Prestazione ad una Fattura  &
+				Prestazione (1, 1) Fattura (1, 1) &
+				\\ \hline
+
+				Pagamento &
+				Associa il manifestarsi della Transazione di pagamento riferita ad una Fattura &
+				Fattura (1, 1) Transazione (0, N) &
+				\\ \hline
+
+				Versamento &
+				Associa la Transazione monetaria relativa ad un Ordine &
+				Ordine (1, 1) Transazione (0, 1) &
+				\\ \hline
+
+				Stipendio &
+				Associa la Transazione relativa al pagamento dello stipendio di un Operatore &
+				Operatore (1, 1) Transazione (0, 1) &
+				\\ \hline
+
+			\end{longtable}
+			}
+		
 	
 	\subsection{Regole Aziendali}
 	\label{sec:business_rules}

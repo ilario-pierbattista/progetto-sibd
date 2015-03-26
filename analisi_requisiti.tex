@@ -128,118 +128,132 @@
 		\begin{longtable}{| p{2.5cm} | p{4.5cm} | p{2cm} | p{2.5cm} |}
 				
 			\hline
-				Termine & Descrizione & Sinonimi & Collegamenti \\ 
-				\hline
-				Cliente & 
-				Persona fisica o giuridica che abbia avuto rapporti con l'azienda.
-				&&\\ \hline
-				Autovettura &
-				Automobile di un cliente che debba subire o abbia già subito un intervento da parte dei lavoratori dell’azienda. &
-				Automobile, Veicolo &
-				Cliente, Preventivo
-				\\ \hline
-				Preventivo &
-				Stima dei costi, dei tempi e dei componenti necessari relativi all’esecuzione di un intervento su un’autovettura. & &
-				Autovettura, Componente, Prestazione
-				\\ \hline
-				Preventivo di Riparazione &
-				Preventivo relativo alla riparazione di un guasto di un’autovettura & &
-				Preventivo 
-				\\ \hline
-				Preventivo d'Installazione & 
-				Preventivo relativo all’installazione di un nuovo impianto in un’autovettura. & &
-				Preventivo
-				\\ \hline
-				Componente &
-				Qualsiasi oggetto fisico necessario alla corretta esecuzione di una riparazione o di una installazione di un impianto su di un’autovettura &
-				Prodotto &
-				Fornitore, Prestazione, Preventivo
-				\\ \hline
-				Fornitore & 
-				Azienda che abbia fornito all’officina qualsiasi tipo di componente necessario. & &
-				Componente, Fornitura
-				\\ \hline
-				Ordine &
-				Insieme di componenti acquistati presso un fornitore. I componenti omogenei sono organizzati in forniture. &
-				&
-				Componente, Fornitura
-				\\ \hline
-				Fornitura & 
-				Insieme omogeneo di componenti acquistati presso un fornitore nel medesimo ordine. &
-				&
-				Componente, Fornitore
-				\\ \hline
-				Magazzino &
-				Insieme totale dei componenti depositati fisicamente in una apposita area nei locali utilizzati dall'attività in attesa di essere utilizzati. &
-				Deposito &
-				Componente, Fornitura Attiva
-				\\ \hline
-				Fornitura Attiva &
-				Si fa riferimento a quelle forniture i cui componenti, totalmente o in parte, sono ancora presenti in magazzino in attesa di essere utilizzati. &
-				&
-				Componente, Fornitura, Magazzino
-				\\ \hline
-				Data di scadenza &
-				Riferito ad un componente è la data, calcolata a partire da quella d'acquisto, oltre il quale il componente diventa inutilizzabile per obsolescenza o per usura. &
-				&
-				Componente
-				\\ \hline
-				Dipendente & 
-				Persona fisica che abbia lavorato per l’officina &
-				Lavoratore, Operatore &
-				\\ \hline
-				Transazione &
-				Flusso di denaro uscente o entrante nella cassa dell’attività. &
-				Flusso di Cassa &
-				\\ \hline
-				Prestazione &
-				Attività eseguita dai lavoratori dell’officina su di un’autovettura. & &
-				Preventivo
-				\\ \hline
-				Sintomo &
-				Malfunzionamento direttamente verificabile di un autoveicolo, individuabile senza il bisogno di conoscerne le cause. &
-				& \\ \hline
-				Pagamento &
-				Transazione di denaro entrante a seguito di una prestazione fornita ad un cliente. &&
-				Prestazione, Transazione
-				\\ \hline
-				Versamento &
-				Transazione di denaro uscente a seguito di una fornitura ricevuta o di uno stipendio versato ad un dipendente. & 
-				Spesa & 
-				Transazione, Fornitore, Dipendente 
-				\\ \hline
-				Collaudo &
-				Attività relativa alla verifica specifica del corretto funzionamento del serbatoio installato con il nuovo impianto (che sia a metano o gpl). &&
-				Autovettura
-				\\ \hline
-				Revisione & 
-				Attività di verifica del corretto funzionamento dei tutte le parti dell’autovettura. &&
-				Autovettura
-				\\ \hline
-				Retribuzione Oraria & 
-				Ammontare della retribuzione di un dipendente per ogni ora di lavoro. && 
-				Dipendente
-				\\ \hline
-				Modalità di Riscossione &
-				Modalità, indicata dal dipendente, con cui quest’ultimo riceve lo stipendio. &&
-				Dipendente 
-				\\ \hline
-				Impianto & 
-				Infrastruttura di alimentazione di un’autovettura.
-				&&\\ \hline
-				Imponibile &
-				Somma di denaro su cui vanno calcolate le imposte previste per legge. &&
-				Pagamento 
-				\\ \hline
-				Rimessa diretta &
-				Si intende il sistema di pagamento nel quale la prestazione viene pagata immediatamente dopo la consegna della fattura &
-				& \\ \hline
-				Rimessa differita &
-				Si intende il sistema di pagamento nel quale la prestazione viene pagata dal cliente entro 30, 60 o 90 giorni dalla consegna della fattura. &
-				& \\ \hline
-				Tipo di pagamento &
-				Modalità di trasferimento di denaro. &
-				& \\ \hline
+			\textbf{Termine} & 
+			\textbf{Descrizione} & 
+			\textbf{Sinonimi} & 
+			\textbf{Collegamenti} \\
+			
+			\endfirsthead
+				
+			\hline
+			\textbf{Termine} & 
+			\textbf{Descrizione} & 
+			\textbf{Sinonimi} & 
+			\textbf{Collegamenti} \\
+			
+			\endhead
+			
+			\hline
+			Cliente & 
+			Persona fisica o giuridica che abbia avuto rapporti con l'azienda.
+			&&\\ \hline
+			Autovettura &
+			Automobile di un cliente che debba subire o abbia già subito un intervento da parte dei lavoratori dell’azienda. &
+			Automobile, Veicolo &
+			Cliente, Preventivo
+			\\ \hline
+			Preventivo &
+			Stima dei costi, dei tempi e dei componenti necessari relativi all’esecuzione di un intervento su un’autovettura. & &
+			Autovettura, Componente, Prestazione
+			\\ \hline
+			Preventivo di Riparazione &
+			Preventivo relativo alla riparazione di un guasto di un’autovettura & &
+			Preventivo 
+			\\ \hline
+			Preventivo d'Installazione & 
+			Preventivo relativo all’installazione di un nuovo impianto in un’autovettura. & &
+			Preventivo
+			\\ \hline
+			Componente &
+			Qualsiasi oggetto fisico necessario alla corretta esecuzione di una riparazione o di una installazione di un impianto su di un’autovettura &
+			Prodotto &
+			Fornitore, Prestazione, Preventivo
+			\\ \hline
+			Fornitore & 
+			Azienda che abbia fornito all’officina qualsiasi tipo di componente necessario. & &
+			Componente, Fornitura
+			\\ \hline
+			Ordine &
+			Insieme di componenti acquistati presso un fornitore. I componenti omogenei sono organizzati in forniture. &
+			&
+			Componente, Fornitura
+			\\ \hline
+			Fornitura & 
+			Insieme omogeneo di componenti acquistati presso un fornitore nel medesimo ordine. &
+			&
+			Componente, Fornitore
+			\\ \hline
+			Magazzino &
+			Insieme totale dei componenti depositati fisicamente in una apposita area nei locali utilizzati dall'attività in attesa di essere utilizzati. &
+			Deposito &
+			Componente, Fornitura Attiva
+			\\ \hline
+			Fornitura Attiva &
+			Si fa riferimento a quelle forniture i cui componenti, totalmente o in parte, sono ancora presenti in magazzino in attesa di essere utilizzati. &
+			&
+			Componente, Fornitura, Magazzino
+			\\ \hline
+			Data di scadenza &
+			Riferito ad un componente è la data, calcolata a partire da quella d'acquisto, oltre il quale il componente diventa inutilizzabile per obsolescenza o per usura. &
+			&
+			Componente
+			\\ \hline
+			Dipendente & 
+			Persona fisica che abbia lavorato per l’officina &
+			Lavoratore, Operatore &
+			\\ \hline
+			Transazione &
+			Flusso di denaro uscente o entrante nella cassa dell’attività. &
+			Flusso di Cassa &
+			\\ \hline
+			Prestazione &
+			Attività eseguita dai lavoratori dell’officina su di un’autovettura. & &
+			Preventivo
+			\\ \hline
+			Sintomo &
+			Malfunzionamento direttamente verificabile di un autoveicolo, individuabile senza il bisogno di conoscerne le cause. &
+			& \\ \hline
+			Pagamento &
+			Transazione di denaro entrante a seguito di una prestazione fornita ad un cliente. &&
+			Prestazione, Transazione
+			\\ \hline
+			Versamento &
+			Transazione di denaro uscente a seguito di una fornitura ricevuta o di uno stipendio versato ad un dipendente. & 
+			Spesa & 
+			Transazione, Fornitore, Dipendente 
+			\\ \hline
+			Collaudo &
+			Attività relativa alla verifica specifica del corretto funzionamento del serbatoio installato con il nuovo impianto (che sia a metano o gpl). &&
+			Autovettura
+			\\ \hline
+			Revisione & 
+			Attività di verifica del corretto funzionamento dei tutte le parti dell’autovettura. &&
+			Autovettura
+			\\ \hline
+			Retribuzione Oraria & 
+			Ammontare della retribuzione di un dipendente per ogni ora di lavoro. && 
+			Dipendente
+			\\ \hline
+			Modalità di Riscossione &
+			Modalità, indicata dal dipendente, con cui quest’ultimo riceve lo stipendio. &&
+			Dipendente 
+			\\ \hline
+			Impianto & 
+			Infrastruttura di alimentazione di un’autovettura.
+			&&\\ \hline
+			Imponibile &
+			Somma di denaro su cui vanno calcolate le imposte previste per legge. &&
+			Pagamento 
+			\\ \hline
+			Rimessa diretta &
+			Si intende il sistema di pagamento nel quale la prestazione viene pagata immediatamente dopo la consegna della fattura &
+			& \\ \hline
+			Rimessa differita &
+			Si intende il sistema di pagamento nel quale la prestazione viene pagata dal cliente entro 30, 60 o 90 giorni dalla consegna della fattura. &
+			& \\ \hline
+			Tipo di pagamento &
+			Modalità di trasferimento di denaro. &
+			& \\ \hline
 				
 		\end{longtable}
 		
