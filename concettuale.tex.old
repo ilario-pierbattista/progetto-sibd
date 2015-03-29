@@ -637,46 +637,33 @@
 			\setenumerate[1]{label=RV\arabic*:}
 			\begin{enumerate}
 				
-				% Si possono implementare le reference agli elementi delle liste
-				% impostando come sempre \label{itm:nome} e richiamandola con 
-				% \ref{itm:nome}. Si visualizza tutta la stringa che enumera
-				% l'elemento della lista
-						
-				\item "Codice fiscale" relativo alle entità "Persona" e "Operatore" deve essere una stringa alfanumerica di 16 caratteri
-				\item "CAP" relativo all'entità "Persona" deve essere una stringa numerica di 5 caratteri
-				\item "Codice fiscale" relativo alle entità "Azienda" deve essere una stringa alfanumerica di 11 caratteri
-				\item "Partita Iva" relativo all'entità "Fornitore" deve essere una stringa alfanumerica di 11 caratteri
-				\item "Numero Documento Identità" relativo all’entità "Privato" deve essere una stringa alfanumerica di 9 caratteri
-				\item "Targa" relativo all’entità "Autovettura" deve essere una stringa alfanumerica di 7 caratteri se l'anno di immatricolazione è compreso tra 1994 e oggi, altrimenti se minore di 1994 la sarà una stringa alfanumerica di 8 caretteri 
-				\item "Validità" relativo all’entità "Componente" deve essere un numero maggiore di zero 
-				\item "Quantità" e "Quantità Minima" relativi all’entità "Componente" devono essere numeri maggiori o uguali a zero
-				\item "Quantità" e "Prezzo Unitario" relativi all'entità "Fornitura" devono essere un numeri maggiori di zero
-				\item "Iban" relativo all’entità "Operatore" deve essere una stringa alfanumerica di 27 caratteri 
-				\item "Modalità Retribuzione" relativo all’entità "Operatore" deve essere "bonifico" o "contanti" o "assegno". Nel caso in cui risulti essere diverso da "bonifico", "Iban" relativo a "Operatore" può assumere il valore "NULL" 
-				\item "Ora Inizio" e "Ora Fine" relativi all’entità "Turno" devono essere orari. "Ora Inizio" deve essere antecedente a "Ora Fine" 
-				\item "Tipo" relativo all’entità "Recapito" deve essere "telefono" o "fax" o "email" o "sito web"
-				\item "Acconto" relativo all’entità "Preventivo" deve essere un numero maggiore o uguale a zero e minore del 70\% del valore di "Costo Stimato" relativo alla stessa entità 
-				\item "Tipologia Impianto" relativo all’entità "Preventivo" deve essere "metano" o "gpl" 
-				\item "Stato Pagamento" relativo all’entità "Fattura" deve essere un valore booleano 
-				\item "Telaio" relativo all'entità "Autovettura" deve essere una stringa alfanumerica di 17 caratteri 
-				\item "Costo Stimato" relativo all'entità "Preventivo" deve essere un numero maggio o uguale a 0 
-				\item "Data Emissione" e "Data Consegna" relativi all'entità "Ordine" sono due date e "Data Consegna" non può essere antecedente a "Data Emissione" 
-				\item "Costo Manodopera" e "Costi Aggiuntivi" relativi all'entità "Prestazione" sono numerici e non possono essere minori di 0 
-				\item "Quota" relativo all'entità "Transazione" è un numero deve essere maggiore di 0 
-				\item "Numero Progressivo" relativo all'entità "Fattura" è un numero che parte da 0 e si aumenta di uno ad ogni inserimento, va azzerato ogni anno 
-				\item "Imponibile" e "Imposte" relativi all'entità "Fattura" sono dei numeri maggiori di 0 
-				\item "Tipologia Pagamento" relativo all'entità "Fattura" deve essere "bonifico" o "contanti" o "assegno" 
-				\item "Data Emissione" e "Data Scadenza" relativi all'entità "Fattura" sono date e "Data Scadenza" non può essere antecedente a "Data Emissione" 
-				\item "Quantità" relativa alle relationship "Previsione" e "Utilizzo" è un numero e deve essere maggiore di 0
+				\item­ "Codice fiscale" relativo alle entità "Persona" e "Operatore" deve essere una stringa alfanumerica di 16 caratteri
+				\item­ "Cap" relativo all'entità "Persona deve essere una stringa numerica di 5 caratteri
+				\item­ "Codice fiscale" relativo alle entità "Azienda" deve essere una stringa alfanumerica di 11 caratteri
+				\item­ "Partita Iva" relativo all'entità "Fornitore" deve essere una stringa alfanumerica di 11 caratteri
+				\item­ "Numero Documento Identità" relativo all’entità "Privato" deve essere una stringa alfanumerica di 9 caratteri
+				\item­ "Targa" relativo all’entità "Autovettura" deve essere una stringa alfanumerica di 7 caratteri se l'anno di immatricolazione è compreso tra 1994 e oggi, altrimenti se minore di 1994 la sarà una stringa alfanumerica di 8 caretteri 
+				\item­ "Validità" relativo all’entità "Componente" deve essere un numero maggiore di zero 
+				\item­ "Quantità" e "Quantità Minima" relativi all’entità "Componente" devono essere numeri maggiori o uguali a zero
+				\item­ "Quantità" e "Prezzo Unitario" relativi all'entità "Fornitura" devono essere un numeri maggiori di zero
+				\item­ "Iban" relativo all’entità "Operatore" deve essere una stringa alfanumerica di 27 caratteri 
+				\item­ "Modalità Retribuzione" relativo all’entità "Operatore" deve essere "bonifico" o "contanti" o "assegno". Nel caso in cui risulti essere diverso da "bonifico", "Iban" relativo a "Operatore" può assumere il valore "NULL" 
+				\item­ "Ora Inizio" e "Ora Fine" relativi all’entità "Turno" devono essere orari. "Ora Inizio" deve essere antecedente a "Ora Fine" 
+				\item­ "Tipo" relativo all’entità "Recapito" deve essere "telefono" o "fax" o "email" o "sito web"
+				\item­ "Acconto" relativo all’entità "Preventivo" deve essere un numero maggiore o uguale a zero e minore del 70\% del valore di "Costo Stimato" relativo alla stessa entità 
+				\item­ "Tipologia Impianto" relativo all’entità "Preventivo" deve essere "metano" o "gpl" 
+				\item­ "Stato Pagamento" relativo all’entità "Fattura" deve essere un valore booleano 
+				\item­ "Telaio" relativo all'entità "Autovettura" deve essere una stringa alfanumerica di 17 caratteri 
+				\item­ "Costo Stimato" relativo all'entità "Preventivo" deve essere un numero maggio o uguale a 0 
+				\item­ "Data Emissione" e "Data Consegna" relativi all'entità "Ordine" sono due date e "Data Consegna" non può essere antecedente a "Data Emissione" 
+				\item­ "Costo Manodopera" e "Costi Aggiuntivi" relativi all'entità "Prestazione" sono numerici e non possono essere minori di 0 
+				\item­ "Quota" relativo all'entità "Transazione" è un numero deve essere maggiore di 0 
+				\item­ "Numero Progressivo" relativo all'entità "Fattura" è un numero che parte da 0 e si aumenta di uno ad ogni inserimento, va azzerato ogni anno 
+				\item­ "Imponibile" e "Imposte" relativi all'entità "Fattura" sono dei numeri maggiori di 0 
+				\item­ "Tipologia Pagamento" relativo all'entità "Fattura" deve essere "bonifico" o "contanti" o "assegno" 
+				\item­ "Data Emissione" e "Data Scadenza" relativi all'entità "Fattura" sono date e "Data Scadenza" non può essere antecedente a "Data Emissione" 
+				\item­ "Quantità" relativa alle relationship "Previsione" e "Utilizzo" è un numero e deve essere maggiore di 0
 				
 			\end{enumerate}
 		
 		\subsubsection{Regole di Derivazione}
-		
-			\setenumerate[1]{label=RD\arabic*:}
-			\begin{enumerate}
-			
-				\item "Costo Servizi" è la somma tra il "Servizi Aggiuntivi" e la "Manodopera" relativi all'entità Prestazione;
-				\item "Imponibile", relativo all'entità "Fattura", è la somma dei valori ottenuti moltiplicando "Prezzo Unitario" per "Quantità" della relationship "Utilizzo", alla quale va aggiunto l'ammontare di "Costo Servizi".
-				
-			\end{enumerate}

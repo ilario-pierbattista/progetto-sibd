@@ -637,13 +637,8 @@
 			\setenumerate[1]{label=RV\arabic*:}
 			\begin{enumerate}
 				
-				% Si possono implementare le reference agli elementi delle liste
-				% impostando come sempre \label{itm:nome} e richiamandola con 
-				% \ref{itm:nome}. Si visualizza tutta la stringa che enumera
-				% l'elemento della lista
-						
 				\item "Codice fiscale" relativo alle entità "Persona" e "Operatore" deve essere una stringa alfanumerica di 16 caratteri
-				\item "CAP" relativo all'entità "Persona" deve essere una stringa numerica di 5 caratteri
+				\item "Cap" relativo all'entità "Persona deve essere una stringa numerica di 5 caratteri
 				\item "Codice fiscale" relativo alle entità "Azienda" deve essere una stringa alfanumerica di 11 caratteri
 				\item "Partita Iva" relativo all'entità "Fornitore" deve essere una stringa alfanumerica di 11 caratteri
 				\item "Numero Documento Identità" relativo all’entità "Privato" deve essere una stringa alfanumerica di 9 caratteri
@@ -672,11 +667,3 @@
 			\end{enumerate}
 		
 		\subsubsection{Regole di Derivazione}
-		
-			\setenumerate[1]{label=RD\arabic*:}
-			\begin{enumerate}
-			
-				\item "Costo Servizi" è la somma tra il "Servizi Aggiuntivi" e la "Manodopera" relativi all'entità Prestazione;
-				\item "Imponibile", relativo all'entità "Fattura", è la somma dei valori ottenuti moltiplicando "Prezzo Unitario" per "Quantità" della relationship "Utilizzo", alla quale va aggiunto l'ammontare di "Costo Servizi".
-				
-			\end{enumerate}

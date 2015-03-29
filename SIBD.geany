@@ -23,10 +23,11 @@ long_line_behaviour=1
 long_line_column=72
 
 [files]
-current_page=1
-FILE_NAME_0=615;LaTeX;0;EUTF-8;1;1;1;%2Fhome%2Filario%2FDocuments%2FBasi%20di%20Dati%2FProgetto%2FProgetto.tex;0;4
-FILE_NAME_1=30288;LaTeX;0;EUTF-8;1;1;1;%2Fhome%2Filario%2FDocuments%2FBasi%20di%20Dati%2FProgetto%2Fconcettuale.tex;0;4
-FILE_NAME_2=16083;LaTeX;0;EUTF-8;1;1;1;%2Fhome%2Filario%2FDocuments%2FBasi%20di%20Dati%2FProgetto%2Fanalisi_requisiti.tex;0;4
+current_page=2
+FILE_NAME_0=1350;LaTeX;0;EUTF-8;1;1;1;%2Fhome%2Filario%2FDocuments%2FBasi%20di%20Dati%2FProgetto%2FProgetto.tex;0;4
+FILE_NAME_1=29156;LaTeX;0;EUTF-8;1;1;1;%2Fhome%2Filario%2FDocuments%2FBasi%20di%20Dati%2FProgetto%2Fanalisi_requisiti.tex;0;4
+FILE_NAME_2=34692;LaTeX;0;EUTF-8;1;1;1;%2Fhome%2Filario%2FDocuments%2FBasi%20di%20Dati%2FProgetto%2Fconcettuale.tex;0;4
+FILE_NAME_3=505;LaTeX;0;EUTF-8;1;1;1;%2Fhome%2Filario%2FDocuments%2FBasi%20di%20Dati%2FProgetto%2Flogica.tex;0;4
 
 [VTE]
 last_dir=/home/ilario
