@@ -14,6 +14,8 @@
 \usepackage{float} % Support for floated images
 \usepackage{hyperref} % Support for href in toc
 \usepackage{marvosym} % Currency symbols
+\usepackage{fancyhdr} % Fancy headers
+\usepackage[a4paper]{geometry} % Geometry Page
 
 % Setup Hyperef
 \hypersetup{
@@ -28,6 +30,9 @@
 \theoremstyle{definition}
 \newtheorem{example}{Esempio}[section]
 
+% layout setup
+\headsep=50pt
+\pagestyle{fancy}
 
 \makeindex
 

@@ -1,11 +1,139 @@
 \section{Progettazione Logica}
 	\subsection{Tavola dei Volumi}
+		\subsubsection{Tavola dei Volumi}
+		
+			\begin{longtable}{| p{4cm} | p{4cm} | p{4cm} |}
+				
+				\hline
+				\textbf{Concetto} & 
+				\textbf{Tipo} & 
+				\textbf{Volume} \\
+				\hline
+				
+				\endfirsthead
+				
+				\hline
+				\textbf{Concetto} & 
+				\textbf{Tipo} & 
+				\textbf{Volume} \\
+				\hline
+				
+				\endhead
+			
+				Persona			& E & 161\\ \hline
+				Cliente 		& E & 156\\ \hline
+				Fornitore 		& E & 4\\ \hline
+				Operatore 		& E & 1\\ \hline
+				Autovettura 	& E & 208\\ \hline
+				Preventivo		& E & 520\\ \hline
+				Componente		& E & 424\\ \hline
+				Fornitura 		& E & 260\\ \hline
+				Ordine			& E & 52 \\ \hline
+				Magazzino 		& E & 636\\ \hline
+				Prestazione 	& E & 494\\ \hline
+				Turno 			& E & 365\\ \hline
+				Transazione 	& E & 1026 \\ \hline
+				Fattura 		& E & 494\\ \hline
+				Recapito		& E & 165\\ \hline
+				Esecuzione		& R & 494\\ \hline
+				Previsione		& R & 3120 \\ \hline
+				Riferimento 	& R & 260\\ \hline
+				Formazione		& R & 260\\ \hline
+				Composizione	& R & 233\\ \hline
+				Utilizzo		& R & 2964 \\ \hline
+				Occupazione 	& R & 988\\ \hline
+				Presenza		& R & 365\\ \hline
+				Possesso		& R & 208\\ \hline
+				Richiesta 		& R & 520\\ \hline
+				Acquisto		& R & 52 \\ \hline
+				Rubrica			& R & 165\\ \hline
+				Acconto 		& R & 260\\ \hline
+				Registrazione 	& R & 494\\ \hline
+				Pagamento 		& R & 494\\ \hline
+				Versamento		& R & 52 \\ \hline
+				Salario 		& R & 1\\ \hline
+				
+			\end{longtable}
+			
+		\subsubsection{Tavola delle Operazioni}
+		
+			\begin{longtable}{| p{6cm} | p{6cm} |}
+				
+				\hline
+				\textbf{Operazione} & 
+				\textbf{Frequenza} \\
+				\hline
+				
+				\endfirsthead
+				
+				\hline
+				\textbf{Operazione} & 
+				\textbf{Frequenza} \\
+				\hline
+				
+				\endhead
+				
+				1 & 6 volte a settimana \\ \hline
+				2 & 5 volte a settimana \\ \hline
+				3 & 2 volte all'anno\\ \hline
+				4 & 2 volte al mese \\ \hline
+				5 & 1 volta a settimana \\ \hline
+				6 & 5 volte a settimana \\ \hline
+				7 & 10 volte a settimana\\ \hline
+				8 & 3 volte a settimana \\ \hline
+				9 & 9 volte a settimana \\ \hline
+				10 & 10 volte a settimana\\ \hline
+				11 & 1 volta all'anno\\ \hline
+				12 & 1 volta per ogni nuovo cliente e per ogni operatore, in media 2 volte per ogni fornitore\\ \hline
+				13 & 1 volta al giorno per operatore \\ \hline
+				14 & 1 volta ogni 2 preventivi, 1 volta al mese per ogni operatore, 1 volta per ogni fornitura, 1 una volta per ogni prestazione \\ \hline
+				15 & 6 volte per ogni preventivo \\ \hline
+				16 & 6 volte per ogni prestazione\\ \hline
+				17 & 2 volte all'anno\\ \hline
+				18 & 1 volta all'anno\\ \hline
+				19 & 1 volta all'anno\\ \hline
+				20 & 1 volta al mese \\ \hline
+				21 & 1 volta a settimana \\ \hline
+				22 & 1 volta a settimana \\ \hline
+				23 & 1 volta a settimana \\ \hline
+				24 & 2 volte al giorno \\ \hline
+				25 & 2 volte al giorno \\ \hline
+				26 & 4 volte al giorno \\ \hline
+				27 & 1 volta al mese \\ \hline
+				28 & 1 volta al mese \\ \hline
+				29 & 2 volte al mese \\ \hline
+				30 & 1 volta a settimana \\ \hline
+				31 & 1 volta al giorno \\ \hline
+				32 & 1 volta a settimana \\ \hline
+				33 & 1 volta a settimana \\ \hline
+				34 & 1 volta al giorno \\ \hline
+				35 & 1 volta al giorno \\ \hline
+				36 & 10 volte a settimana\\ \hline
+				37 & 1 volta al mese \\ \hline
+				38 & 1 volta a settimana \\ \hline
+				39 & 1 volta a settimana \\ \hline
+		
+			\end{longtable}
+		
+			
 	\subsection{Ristrutturazione dello Schema Concettuale}
 		\subsubsection{Analisi delle Derivazioni e della Ridondanza}
+			Ridondanze da analizzare e decidere se introdurre:
+			\begin{enumerate}
+				\item Totale in fattura
+				\item Paga in operatore
+				\item Totale negli ordini
+			\end{enumerate}
+			
 		\subsubsection{Eliminazione delle Generalizzazioni}
+			
+			Da eliminare la generalizzazione Persona. Scorpararla in Clienti, Fornitori, Operatori. Accorpare Privati e Aziende in Cliente.
+			
 		\subsubsection{Partizionamento e Accorpamento di Concetti}
 	\subsection{Scelta degli Identificatori Principali}
+		
+		Tabella con gli identificatori
+		
 	\subsection{Normalizzazione}
 		Da mettere prima o dopo la traduzione verso il modello relazionale
 	\subsection{Traduzione verso il Modello Relazionale}
-	

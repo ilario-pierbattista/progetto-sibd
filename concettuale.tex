@@ -209,7 +209,7 @@
 				\label{fig:fattura}
 			\end{figure}
 			
-			\emph{Fattura} è composta dagli attributi "Numero Progressivo" e "Anno" (coppia di attributi identificatori, derivano direttamente dalla struttura reale delle fatture), "Totale" (descrive il prezzo totale della prestazione, è composto da "Imposte" ed "Imponibile"), "Data Emissione", "Sistema Pagamento" (specifica uno dei due sistemi di pagamento accettati: rimessa diretta e rimessa differita), "Tipo Pagamento" (metodologie di pagamento accettate: bonifico, contanti o assegno), "Stato Pagamento" (attributo booleano che permette di distinguere le fatture saldate da quelle non ancora pagate), "Data Scadenza" (data entro la quale la fattura deve essere saldata).
+			\emph{Fattura} è composta dagli attributi "Numero Progressivo" e "Anno" (coppia di attributi identificatori, derivano direttamente dalla struttura reale delle fatture), "Totale" (descrive il prezzo totale della prestazione, è composto da "Imposte", "Imponibile", "Sconto", "Incentivi"), "Data Emissione", "Sistema Pagamento" (specifica uno dei due sistemi di pagamento accettati: rimessa diretta e rimessa differita), "Tipo Pagamento" (metodologie di pagamento accettate: bonifico, contanti o assegno), "Stato Pagamento" (attributo booleano che permette di distinguere le fatture saldate da quelle non ancora pagate), "Data Scadenza" (data entro la quale la fattura deve essere saldata).
 		
 		\subsubsection{Transazione}
 			
@@ -385,6 +385,10 @@
 		\subsubsection{Entità}
 		\label{sec:entities}
 			
+			\begin{description}
+				\item[NB] Esplicitiamo gli attributi composti elencando tra le parentesi quadre gli attributi semplici di cui sono costituiti.
+			\end{description}
+	
 			{\small
 			\begin{longtable}{| p{2cm} | p{4cm} | p{4cm} | p{2cm} |}
 				
@@ -408,7 +412,7 @@
 				
 				Persona &
 				Soggetto generico che intrattenga rapporti di ogni tipo con l'azienda. &
-				Codice Fiscale o P.IVA (Stringa), Città (Stringa), Via (Stringa), Civico (Numerico), CAP (Numerico) &
+				Codice Fiscale o P.IVA (Stringa), Indirizzo [Città (Stringa), Via (Stringa), Civico (Numerico), CAP (Numerico)] &
 				Codice Fiscale o P.IVA (Stringa)
 				\\ \hline
 
@@ -438,7 +442,7 @@
 
 				Operatore &
 				Lavoratore dell'azienda. &
-				Attributi di Persona, Nome (Stringa), Cognome (Stringa), IBAN (Stringa), Stipendio (Numerico), Retribuzione Oraria (Numerico), Modalità Riscossione (Stringa), Comune Nascita (Stringa), Provincia (Stringa), Data Nascita (Data) &
+				Attributi di Persona, Nome (Stringa), Cognome (Stringa), IBAN (Stringa), Stipendio (Numerico), Retribuzione Oraria (Numerico), Modalità Riscossione (Stringa), Dati Anagrafici [Comune Nascita (Stringa), Provincia (Stringa), Data Nascita (Data)] &
 				//
 				\\ \hline
 
@@ -450,7 +454,7 @@
 
 				Preventivo &
 				Stima dei costi, dei tempi e dei componenti necessari relativi all’esecuzione di un intervento su un’autovettura. &
-				Preventivo (Numerico), Data Emissione (Data), Data Inizio (Data), Categoria (Stringa), Servizi Aggiuntivi (Numerico), Manodopera (Numerico), Tempo Stimato (Numerico), Sintomi (Stringa), Sistema Alimentazione (Stringa) &
+				Preventivo (Numerico), Data Emissione (Data), Data Inizio (Data), Categoria (Stringa), Costo Servizi [Servizi Aggiuntivi (Numerico), Manodopera (Numerico)], Tempo Stimato (Numerico), Sintomi (Stringa), Sistema Alimentazione (Stringa) &
 				Preventivo (Numerico)
 				\\ \hline
 
@@ -480,7 +484,7 @@
 
 				Prestazione &
 				Attività eseguita dagli operatori dell’officina su di un’autovettura. &
-				Preventivo (Numerico), Tempi Esecuzione (Numerico), Data Fine (Data), Manodopera (Numerico), Servizi Aggiuntivi (Numerico), Malfunzionamento (Stringa), Procedimento (Stringa) &
+				Preventivo (Numerico), Tempi Esecuzione (Numerico), Data Fine (Data), Costo Servizi [Manodopera (Numerico), Servizi Aggiuntivi (Numerico)], Malfunzionamento (Stringa), Procedimento (Stringa) &
 				Codice (Numerico)
 				\\ \hline
 
@@ -498,7 +502,7 @@
 
 				Fattura &
 				Documento fiscale relativo ad un pagamento da ricevere da parte di un cliente. &
-				Numero Progressivo (Numerico), Anno (Numerico), Data Emissione (Data), Imponibile (Numerico), Imposte (Numerico), Sistema Pagamento (Stringa), Tipo Pagamento (Stringa), Stato Pagamento (Stringa), Data Scadenza (Data) &
+				Numero Progressivo (Numerico), Anno (Numerico), Data Emissione (Data), Totale [Imponibile (Numerico), Imposte (Numerico), Sconto (Numerico), Incentivi (Numerico)], Sistema Pagamento (Stringa), Tipo Pagamento (Stringa), Stato Pagamento (Stringa), Data Scadenza (Data) &
 				Numero Progressivo (Numerico), Anno (Numerico)
 				\\ \hline
 				
@@ -641,42 +645,81 @@
 				% impostando come sempre \label{itm:nome} e richiamandola con 
 				% \ref{itm:nome}. Si visualizza tutta la stringa che enumera
 				% l'elemento della lista
-						
-				\item "Codice fiscale" relativo alle entità "Persona" e "Operatore" deve essere una stringa alfanumerica di 16 caratteri
-				\item "CAP" relativo all'entità "Persona" deve essere una stringa numerica di 5 caratteri
-				\item "Codice fiscale" relativo alle entità "Azienda" deve essere una stringa alfanumerica di 11 caratteri
-				\item "Partita Iva" relativo all'entità "Fornitore" deve essere una stringa alfanumerica di 11 caratteri
-				\item "Numero Documento Identità" relativo all’entità "Privato" deve essere una stringa alfanumerica di 9 caratteri
-				\item "Targa" relativo all’entità "Autovettura" deve essere una stringa alfanumerica di 7 caratteri se l'anno di immatricolazione è compreso tra 1994 e oggi, altrimenti se minore di 1994 la sarà una stringa alfanumerica di 8 caretteri 
-				\item "Validità" relativo all’entità "Componente" deve essere un numero maggiore di zero 
-				\item "Quantità" e "Quantità Minima" relativi all’entità "Componente" devono essere numeri maggiori o uguali a zero
-				\item "Quantità" e "Prezzo Unitario" relativi all'entità "Fornitura" devono essere un numeri maggiori di zero
-				\item "Iban" relativo all’entità "Operatore" deve essere una stringa alfanumerica di 27 caratteri 
-				\item "Modalità Retribuzione" relativo all’entità "Operatore" deve essere "bonifico" o "contanti" o "assegno". Nel caso in cui risulti essere diverso da "bonifico", "Iban" relativo a "Operatore" può assumere il valore "NULL" 
-				\item "Ora Inizio" e "Ora Fine" relativi all’entità "Turno" devono essere orari. "Ora Inizio" deve essere antecedente a "Ora Fine" 
-				\item "Tipo" relativo all’entità "Recapito" deve essere "telefono" o "fax" o "email" o "sito web"
-				\item "Acconto" relativo all’entità "Preventivo" deve essere un numero maggiore o uguale a zero e minore del 70\% del valore di "Costo Stimato" relativo alla stessa entità 
-				\item "Tipologia Impianto" relativo all’entità "Preventivo" deve essere "metano" o "gpl" 
-				\item "Stato Pagamento" relativo all’entità "Fattura" deve essere un valore booleano 
-				\item "Telaio" relativo all'entità "Autovettura" deve essere una stringa alfanumerica di 17 caratteri 
-				\item "Costo Stimato" relativo all'entità "Preventivo" deve essere un numero maggio o uguale a 0 
-				\item "Data Emissione" e "Data Consegna" relativi all'entità "Ordine" sono due date e "Data Consegna" non può essere antecedente a "Data Emissione" 
-				\item "Costo Manodopera" e "Costi Aggiuntivi" relativi all'entità "Prestazione" sono numerici e non possono essere minori di 0 
-				\item "Quota" relativo all'entità "Transazione" è un numero deve essere maggiore di 0 
-				\item "Numero Progressivo" relativo all'entità "Fattura" è un numero che parte da 0 e si aumenta di uno ad ogni inserimento, va azzerato ogni anno 
-				\item "Imponibile" e "Imposte" relativi all'entità "Fattura" sono dei numeri maggiori di 0 
-				\item "Tipologia Pagamento" relativo all'entità "Fattura" deve essere "bonifico" o "contanti" o "assegno" 
-				\item "Data Emissione" e "Data Scadenza" relativi all'entità "Fattura" sono date e "Data Scadenza" non può essere antecedente a "Data Emissione" 
-				\item "Quantità" relativa alle relationship "Previsione" e "Utilizzo" è un numero e deve essere maggiore di 0
 				
+				% Persona
+				\item \emph{Codice Fiscale o P.IVA} relativo all'entità \emph{Persona} deve essere o una stringa alfanumerica di 16 caratteri, nel caso in cui rappresenti il codice fiscale di un privato, o una stringa numerica di 11 caratteri, nel caso in cui rappresenti la partita iva di un soggetto fiscale.
+				\item \emph{CAP} relativo all'entità \emph{Persona} deve essere una stringa numerica di 5 caratteri.
+				
+				% Recapito
+				\item \emph{Tipo} relativo all’entità \emph{Recapito} deve essere uno tra i seguenti: "telefono", "fax", "tel\_fax", "sito\_web", "email".
+				
+				% Privato
+				\item \emph{Numero Documento Identità} relativo all’entità \emph{Privato} deve essere una stringa alfanumerica di 9 caratteri.
+				
+				% Operatore
+				\item \emph{Provincia} relativa all'entità \emph{Operatore} deve essere una stringa alfabetica di 2 caratteri maiuscoli.
+				\item \emph{Stipendio} relativo all'entità \emph{Operatore} deve essere un numero maggiore di zero o NULL.
+				\item \emph{Retribuzione Oraria} relativo all'entità \emph{Operatore}  deve essere un numero maggiore di zero o NULL.
+				\item \emph{Stipendio} e \emph{Retribuzione Oraria} relativi all'entità \emph{Operatore} non possono essere entrambi NULL, nè entrambi diversi da NULL.
+				\item \emph{Modalità Riscossione} relativo all'entità \emph{Operatore} deve essere una tra le seguenti: "bonifico", "assegno", "contanti". Se \emph{Stipendio}, relativo alla stessa entità, è maggiore o uguale a 1000, allora \emph{Modalità Riscossione} non può essere "contanti".
+				\item \emph{IBAN} relativo all’entità \emph{Operatore} deve essere una stringa alfanumerica di 27 caratteri. Se \emph{Modalità Riscossione} è "bonifico", allora non può essere NULL.
+				
+				% Turno
+				\item \emph{Ora Inizio} e \emph{Ora Fine} relativi all’entità \emph{Turno} devono essere orari. \emph{Ora Inizio} deve essere antecedente a \emph{Ora Fine}.
+				
+				% Fornitore
+				\item \emph{Modalità Pagamento} relativo all'entità \emph{Fornitore} deve essere una tra le seguenti: "bonifico", "assegno".
+				\item \emph{IBAN} relativo all’entità \emph{Fornitore} deve essere una stringa alfanumerica di 27 caratteri. Se \emph{Modalità Pagamento} è "bonifico" allora non può essere NULL.
+				
+				% Autovettura
+				\item \emph{Targa} relativo all'entità \emph{Autovettura} deve essere una stringa alfanumerica di 8 caratteri se \emph{Anno Immatricolazione} è maggiore di 1927 e minore di 1994, deve essere una stringa alfanumerica di 7 caratteri se \emph{Anno Immatricolazione} è maggiore di 1994, deve essere una stringa alfanumerica di 7 o di 8 caratteri se \emph{Anno Immatricolazione} è uguale a 1994.
+				\item \emph{Telaio} relativo all'entità \emph{Autovettura} deve essere una stringa alfanumerica di 17 caratteri.
+				
+				% Preventivo
+				\item \emph{Categoria} relativa all'entità \emph{Preventivo} deve essere una tra le seguenti: "riparazione", "installazione\_impianto\_metano", "instalazione\_impianto\_gpl", "collaudo", "revisione".
+				\item \emph{Sistema Alimentazione} relativo all'entità \emph{Preventivo} deve essere NULL se \emph{Categoria}, relativa alla stessa entità, non è "installazione\_impianto\_gpl" o "installazione\_impianto\_metano", altrimenti deve essere una tra le seguenti: "aspirazione", "iniezione".
+				
+				% Componente				
+				\item \emph{Validità} relativo all’entità \emph{Componente} deve essere un numero maggiore di zero se il componente ha una data di scadenza, uguale a zero altrimenti.
+				\item \emph{Quantità Minima} relativa all’entità \emph{Componente} deve essere un numero maggiore di zero se il componente prevede una quantità minima, uguale a zero altrimenti.
+				
+				% Previsione
+				\item \emph{Ubicazione} relativo alla relationship \emph{Previsione} deve essere NULL se \emph{Categoria}, relativa all'entità \emph{Preventivo}, non è "installazione\_impianto\_metano" o "installazione\_impianto\_gpl", altrimenti deve essere una tra le seguenti: "motore", "bagagliaio".
+				\item \emph{Quantità} relativa alla relationship \emph{Previsione} è un numero e deve essere maggiore di 0.
+				
+				% Prestazione
+				\item \emph{Data Fine} relativa all'entità \emph{Prestazione} deve essere successiva a \emph{Data Emissione}, relativa all'entità \emph{Preventivo}.
+				
+				% Utilizzo
+				\item \emph{Quantità} relativa alla relationship \emph{Utilizzo} è un numero e deve essere maggiore di 0.
+				
+				% Fornitura		
+				\item \emph{Quantità} relativa all'entità \emph{Fornitura} deve essere un numero maggiore di zero.
+				\item \emph{Prezzo Unitario} relativa all'entità \emph{Fornitura} deve essere un numero maggiore di zero.
+				
+				% Ordine
+				\item \emph{Data Emissione} e \emph{Data Consegna} relativi all'entità \emph{Ordine} sono due date e \emph{Data Consegna} non può essere antecedente a \emph{Data Emissione}.
+				
+				% Fattura
+				\item \emph{Tipo Pagamento} relativo all'entità \emph{Fattura} deve essere una tra le seguenti: "bonifico", "assegno", "contanti".
+				\item \emph{Sistema Pagamento} relativo all'entità \emph{Fattura} deve essere una tra le seguenti: "rimessa\_diretta", "rimessa\_differita".
+				\item \emph{Data Emissione} e \emph{Data Scadenza} relativi all'entità \emph{Fattura} sono date e \emph{Data Scadenza} non può essere antecedente a \emph{Data Emissione}. Se \emph{Sistema Pagamento} relativo alla stessa entità è "rimessa\_diretta", allora \emph{Data Scadenza} deve essere uguale a \emph{Data Emissione}.
+				\item \emph{Stato Pagamento} relativo all’entità \emph{Fattura} deve essere un valore booleano non NULL. Assume "TRUE" se la fattura è stata saldata, "FALSE" altrimenti.
+				
+				% Transazione
+				\item \emph{Quota} relativa all'entità \emph{Transazione}, se attributo di un'istanza associata ad un'istanza di \emph{Preventivo}, è un numero maggiore di zero e minore del 70\% del Costo Stimato del Preventivo.
+								
 			\end{enumerate}
 		
 		\subsubsection{Regole di Derivazione}
 		
+			{\color{red}{Da correggere di qui in poi.}}
+			
 			\setenumerate[1]{label=RD\arabic*:}
 			\begin{enumerate}
 			
-				\item "Costo Servizi" è la somma tra il "Servizi Aggiuntivi" e la "Manodopera" relativi all'entità Prestazione;
-				\item "Imponibile", relativo all'entità "Fattura", è la somma dei valori ottenuti moltiplicando "Prezzo Unitario" per "Quantità" della relationship "Utilizzo", alla quale va aggiunto l'ammontare di "Costo Servizi".
+				\item \emph{Costo Servizi} relativo all'entità \emph{Preventivo} e \emph{Prestazione} è la somma dei valori di \emph{Servizi Aggiuntivi} e \emph{Manodopera}.
+				\item \emph{Imponibile} relativo all'entità \emph{Fattura} è la somma dei valori ottenuti moltiplicando l'attributo \emph{Prezzo Unitario} di ogni istanza associata alla prestazione di riferimento, per \emph{Quantità} (entrambi relativi alla relationship \emph{Utilizzo}). A tale valore va aggiunto l'ammontare di \emph{Costo Servizi}.
+				\item \emph{Totale} relativo all'entità \emph{Fattura} è la somma dei valori di \emph{Imponibile} e \emph{Imposte}, cui va sottratto il valore di \emph{Incentivi} e \emph{Sconto}.
 				
 			\end{enumerate}

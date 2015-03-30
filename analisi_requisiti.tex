@@ -78,8 +78,18 @@
 				
 		\subsubsection{Documenti raccolti}
 			Aggiungere le immagini dei documenti raccolti
+			
 		\subsubsection{Analisi dei processi interni}
-			Aggiungere lo schema dei flussi interni
+			
+			Abbiamo realizzato uno schema informale (figura \ref{fig:internal_processes}) che descrive il flusso dei dati all'effettuarsi delle procedure tipiche dell'attività.
+			
+			
+			\begin{sidewaysfigure}
+				\centering
+				\includegraphics[width=22cm]{images/internal_processes.png}
+				\caption{Analisi dei Processi Interni}
+				\label{fig:internal_processes}
+			\end{sidewaysfigure}
 		
 	\subsection{Requisiti Espressi nel Linguaggio Naturale}
 	
@@ -118,7 +128,7 @@
 		Riguardo le prestazioni, eseguite a fronte di un preventivo, si vuole conoscere il preventivo di riferimento, i tempi effettivi di esecuzione, la data in cui è stato finito il lavoro, i componenti che sono stati effettivamente utilizzati, costo manodopera, il costo di eventuali servizi aggiuntivi, i lavoratori che hanno le hanno eseguite.
 		Nel caso di riparazioni è utile aggiungere anche una brevissima descrizione del danno riscontrato ed una descrizione più approfondita sul procedimento utilizzato per effettuare la riparazione.
 		
-		Ad ogni prestazione fa capo una fattura. I dati delle fatture di cui è importante tener traccia sono il numero progressivo di fattura (da azzerare all'inizio di ogni anno), la data di emissione, l'ammontare dell'imponibile, l'ammontare delle imposte, il sistema di pagamento (rimessa diretta o rimessa differita), il tipo di pagamento (assegno, bonifico o contanti), lo stato del pagamento. Nel caso di pagamenti con rimessa differita sarà necessario conoscere anche la data di scadenza.
+		Ad ogni prestazione fa capo una fattura. I dati delle fatture di cui è importante tener traccia sono il numero progressivo di fattura (da azzerare all'inizio di ogni anno), la data di emissione, l'ammontare dell'imponibile, l'ammontare delle imposte, ammontare di un eventuale sconto, ammontare di eventuali incentivi il sistema di pagamento (rimessa diretta o rimessa differita), il tipo di pagamento (assegno, bonifico o contanti), lo stato del pagamento. Nel caso di pagamenti con rimessa differita sarà necessario conoscere anche la data di scadenza.
 		
 		Si vogliono conoscere anche i dati relativi alle transazioni monetarie, entranti o uscenti che siano. Nel dettaglio, si vuole tener traccia della quota delle singole transazioni e della data di emissione.
 		
@@ -336,7 +346,7 @@
 			
 		\subsubsection{Frasi relative alle Fatture}
 		
-			Ad ogni prestazione fa capo una fattura. I dati delle fatture di cui è importante tener traccia sono il numero progressivo di fattura (da azzerare all'inizio di ogni anno), la data di emissione, l'ammontare dell'imponibile, l'ammontare delle imposte, il sistema di pagamento (rimessa diretta o rimessa differita), il tipo di pagamento (assegno, bonifico o contanti), lo stato del pagamento. Nel caso di pagamenti con rimessa differita sarà necessario conoscere anche la data di scadenza.
+			Ad ogni prestazione fa capo una fattura. I dati delle fatture di cui è importante tener traccia sono il numero progressivo di fattura (da azzerare all'inizio di ogni anno), la data di emissione, l'ammontare dell'imponibile, l'ammontare delle imposte, ammontare di un eventuale sconto, ammontare di eventuali incentivi il sistema di pagamento (rimessa diretta o rimessa differita), il tipo di pagamento (assegno, bonifico o contanti), lo stato del pagamento. Nel caso di pagamenti con rimessa differita sarà necessario conoscere anche la data di scadenza.
 		
 		\subsubsection{Frasi relative alle Transazioni}
 		
@@ -344,22 +354,25 @@
 			
 	\subsection{Specifica delle Operazioni}
 		
-		Queste operazioni vanno riviste
+		Abbiamo individuato le operazioni che, con lo sviluppo di tale base di dati, si intendono svolgere sulla stessa. Abbiamo aggiunto ad ogni operazione una stima della frequenza con la quale l'operazione stessa viene effettuata.
+		
+		Non sono presenti operazioni di cancellazione. Quest'ultime infatti sono previste solo nel caso in cui vengano commessi degli errori in fase di inserimento.
 	
 		\setenumerate[1]{label=OP\arabic*:}
 		\begin{enumerate}
 			
 			% Inserimenti
-			\item Inserimento di un nuovo cliente (6 volte a settimana)
-			\item Inserimento di una nuova autovettura (5 volte a settimana)
-			\item Inserimento di un nuovo fornitore (2 volte all’anno)
+			\item Inserimento di un nuovo cliente (3 volte a settimana)
+			\item Inserimento di una nuova autovettura (3 volte a settimana)
+			\item Inserimento di un nuovo fornitore (4 volte all’anno)
 			\item Inserimento di un nuovo componente (2 volte al mese)
-			\item Inserimento di una nuova fornitura (5 volte a settimana)
-			\item Inserimento di un nuovo ordine (1 volta a settimana)
+			\item Inserimento di un nuovo ordine (2 volta a settimana)
+			\item Inserimento di una nuova fornitura (10 volte a settimana)
 			\item Inserimento di un nuovo preventivo (10 volte a settimana)
-			\item Inserimento di un nuovo preventivo per l’installazione di un impianto (3 volte a settimana)
-			\item Inserimento di un nuovo preventivo per una riparazione (7 volte a settimana)
+			%\item Inserimento di un nuovo preventivo per l’installazione di un impianto (3 volte a settimana)
+			%\item Inserimento di un nuovo preventivo per una riparazione (7 volte a settimana)
 			\item Inserimento di una nuova prestazione (10 volte a settimana)
+			\item Inserimento di una nuova fattura (10 volte a settimana)
 			\item Inserimento di un nuovo dipendente (1 volta all’anno)
 			\item Inserimento di un nuovo recapito (1 volta per ogni nuovo cliente e per ogni dipendente, in media 2 volte per ogni nuovo fornitore)
 			\item Inserimento di una nuova presenza (1 volta al giorno per ogni dipendente)
@@ -384,13 +397,13 @@
 			\item Consultazione della disponibilità di un componente (4 volte al giorno)
 			\item Consultazione delle presenze di un dipendente in un arco temporale (1 volta al mese)
 			\item Consultazione della lista dei componenti presenti (1 volta al mese)
-			\item Consultazione della lista dei componti più usati (2 volte al mese)
-			\item Consultazione della lista dei componti che si dovrebbero acquistare nuovamente (1 volta a settimana)
+			\item Consultazione della lista dei componenti più usati (2 volte al mese)
+			\item Consultazione della lista dei componenti che si dovrebbero acquistare nuovamente (1 volta a settimana)
 			\item Consultazione della lista dei recapiti per un cliente (1 volta al giorno)
 			\item Consultazione della lista dei recapiti per un fornitore (1 volta a settimana)
 			\item Consultazione della lista dei recapiti per un dipendente (1 volta a settimana)
-			\item Consultazione della lista delle prestazioni che devono essere ancora pagate (1 volta al giorno)
-			\item Consultazione della lista dei lavori da eseguire (1 volta al giorno)
+			\item Consultazione della lista delle fatture che devono essere ancora pagate (1 volta al giorno)
+			\item Consultazione della lista dei lavori da eseguire (2 volta al giorno)
 			\item Consultazione dei dati per stilare una fattura o una ricevuta fiscale (10 volte a settimana)
 			\item Calcolo dello stipendio per un dipendente (1 volta al mese)
 			\item Consultazione delle statistiche riguardanti lo scostamento tra i costi preventivati e i costi effettivi delle prestazioni, con la possibilità di scomporre le voci dei costi tra costi dei componenti, costi della manodopera e costi dei servizi aggiuntivi (1 volta a settimana).
