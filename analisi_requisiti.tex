@@ -1,3 +1,4 @@
+%!TEX root = Progetto.tex
 \section{Analisi dei Requisiti}
 \label{sec:req_analysis}
 
@@ -358,55 +359,57 @@
 		
 		Non sono presenti operazioni di cancellazione. Quest'ultime infatti sono previste solo nel caso in cui vengano commessi degli errori in fase di inserimento.
 	
-		\setenumerate[1]{label=OP\arabic*:}
+		% Impostare un separatore custom
+		\setenumerate[1]{label=OP\arabic*}
 		\begin{enumerate}
 			
 			% Inserimenti
-			\item Inserimento di un nuovo cliente (3 volte a settimana)
-			\item Inserimento di una nuova autovettura (3 volte a settimana)
-			\item Inserimento di un nuovo fornitore (4 volte all’anno)
-			\item Inserimento di un nuovo componente (2 volte al mese)
-			\item Inserimento di un nuovo ordine (2 volta a settimana)
-			\item Inserimento di una nuova fornitura (10 volte a settimana)
-			\item Inserimento di un nuovo preventivo (10 volte a settimana)
-			%\item Inserimento di un nuovo preventivo per l’installazione di un impianto (3 volte a settimana)
-			%\item Inserimento di un nuovo preventivo per una riparazione (7 volte a settimana)
-			\item Inserimento di una nuova prestazione (10 volte a settimana)
-			\item Inserimento di una nuova fattura (10 volte a settimana)
-			\item Inserimento di un nuovo dipendente (1 volta all’anno)
-			\item Inserimento di un nuovo recapito (1 volta per ogni nuovo cliente e per ogni dipendente, in media 2 volte per ogni nuovo fornitore)
-			\item Inserimento di una nuova presenza (1 volta al giorno per ogni dipendente)
-			\item Inserimento di una nuova transazione (1 volta ogni 2 preventivi, 1 volta al mese per ogni dipendente, 1 volta per ogni fornitura, 1 volta per ogni prestazione)
+			\item \label{op:new_cliente} Inserimento di un nuovo cliente (3 volte a settimana)
+			\item \label{op:new_privato} Inserimento di un nuovo cliente non dotato di partita iva (2 volte a settimana)
+			\item \label{op:new_azienda} Inserimento di un nuovo cliente dotato di partita iva (1 volta a settimana)
+			\item \label{op:new_auto} Inserimento di una nuova autovettura (3 volte a settimana)
+			\item \label{op:new_fornitore} Inserimento di un nuovo fornitore (4 volte all’anno)
+			\item \label{op:new_componente} Inserimento di un nuovo componente (2 volte al mese)
+			\item \label{op:new_ordine} Inserimento di un nuovo ordine (2 volte a settimana)
+			\item \label{op:new_fornitura} Inserimento di una nuova fornitura (10 volte a settimana)
+			\item \label{op:new_preventivo} Inserimento di un nuovo preventivo (10 volte a settimana)
+			\item \label{op:new_prestazione} Inserimento di una nuova prestazione (10 volte a settimana)
+			\item \label{op:new_fattura} Inserimento di una nuova fattura (10 volte a settimana)
+			\item \label{op:new_operatore} Inserimento di un nuovo dipendente (1 volta all’anno)
+			\item \label{op:new_recapito}Inserimento di un nuovo recapito (2 volta per ogni nuovo cliente, 3 volte per ogni dipendente, in media 4 volte per ogni nuovo fornitore)
+			\item \label{op:new_presenza}Inserimento di una nuova presenza (1 volta al giorno per ogni dipendente)
+			\item \label{op:new_transazione}Inserimento di una nuova transazione (1 volta ogni 2 preventivi, 1 volta al mese per ogni dipendente, 1 volta per ogni fornitura, 1 volta per ogni prestazione)
 			
 			% Assegnazioni
-			\item Assegnazione di un componente ad un preventivo (6 volte per ogni preventivo)
-			\item Assegnazione di un componente ad una prestazione (6 volte per ogni prestazione)
+			\item \label{op:ass_componente_preventivo}Assegnazione di un componente ad un preventivo (6 volte per ogni preventivo)
+			\item \label{op:ass_componente_prestazione}Assegnazione di un componente ad una prestazione (6 volte per ogni prestazione)
+			\item \label{op:ass_fornitura_ordine}Assegnazione di una fornitura ad un ordine (5 volte per ogni ordine)
 			
 			% Aggiornamento
-			\item Modifica dei dati di un cliente (2 volte l’anno)
-			\item Modifica dei dati di un fornitore (1 volta l’anno)
-			\item Modifica dei dati di un dipendente (1 volta l’anno)
-			\item Modifica del prezzo di vendita di un componente (1 volta al mese)
+			\item \label{op:edit_cliente}Modifica dei dati di un cliente (30 volte l’anno)
+			\item \label{op:edit_fornitore}Modifica dei dati di un fornitore (2 volte l’anno)
+			\item \label{op:edit_operatore}Modifica dei dati di un dipendente (1 volta l’anno)
+			\item \label{op:edit_componente}Modifica del prezzo di vendita di un componente (5 volte al mese)
 			
 			% Consultazione
-			\item Consultazione della data dell’ultimo collaudo per un’autovettura (1 volte a settimana)
-			\item Consultazione della data dell’ultima revisione per un’autovettura (1 volte a settimana)
-			\item Consultazione delle transazioni avvenute in un certo periodo (1 volta a settimana)
-			\item Consultazione dello storico delle riparazioni (2 volte al giorno)
-			\item Consultazione dello storico dei preventivi (2 volte al giorno)
-			\item Consultazione della disponibilità di un componente (4 volte al giorno)
-			\item Consultazione delle presenze di un dipendente in un arco temporale (1 volta al mese)
-			\item Consultazione della lista dei componenti presenti (1 volta al mese)
-			\item Consultazione della lista dei componenti più usati (2 volte al mese)
-			\item Consultazione della lista dei componenti che si dovrebbero acquistare nuovamente (1 volta a settimana)
-			\item Consultazione della lista dei recapiti per un cliente (1 volta al giorno)
-			\item Consultazione della lista dei recapiti per un fornitore (1 volta a settimana)
-			\item Consultazione della lista dei recapiti per un dipendente (1 volta a settimana)
-			\item Consultazione della lista delle fatture che devono essere ancora pagate (1 volta al giorno)
-			\item Consultazione della lista dei lavori da eseguire (2 volta al giorno)
-			\item Consultazione dei dati per stilare una fattura o una ricevuta fiscale (10 volte a settimana)
-			\item Calcolo dello stipendio per un dipendente (1 volta al mese)
-			\item Consultazione delle statistiche riguardanti lo scostamento tra i costi preventivati e i costi effettivi delle prestazioni, con la possibilità di scomporre le voci dei costi tra costi dei componenti, costi della manodopera e costi dei servizi aggiuntivi (1 volta a settimana).
-			\item Consultazione delle statistiche riguardanti la variazione dei costi di un componente (1 volta a settimana)
+			\item \label{op:show_collaudo}Consultazione della data dell’ultimo collaudo per un’autovettura (1 volte a settimana)
+			\item \label{op:show_revisione}Consultazione della data dell’ultima revisione per un’autovettura (1 volte a settimana)
+			\item \label{op:show_transazioni}Consultazione delle transazioni avvenute in un certo periodo (1 volta a settimana)
+			\item \label{op:show_riparazioni}Consultazione dello storico delle riparazioni (2 volte al giorno)
+			\item \label{op:show_preventivi}Consultazione dello storico dei preventivi (2 volte al giorno)
+			\item \label{op:check_componente}Consultazione della disponibilità di un componente (4 volte al giorno)
+			\item \label{op:check_turni}Consultazione delle presenze di un dipendente in un arco temporale (1 volta al mese)
+			\item \label{op:list_componenti}Consultazione della lista dei componenti presenti (1 volta a settimana)
+			\item \label{op:stats_componenti}Consultazione della lista dei componenti più usati (2 volte al mese)
+			\item \label{op:tobuy_componenti}Consultazione della lista dei componenti che si dovrebbero acquistare nuovamente (1 volta a settimana)
+			\item \label{op:show_recapiti_cliente}Consultazione della lista dei recapiti per un cliente (10 volte a settimana)
+			\item \label{op:show_recapiti_fornitore}Consultazione della lista dei recapiti per un fornitore (2 volte a settimana)
+			\item \label{op:show_recapiti_operatore}Consultazione della lista dei recapiti per un dipendente (1 volta a settimana)
+			\item \label{op:list_fatture_pending}Consultazione della lista delle fatture che devono essere ancora pagate (1 volta al giorno)
+			\item \label{op:todo_list}Consultazione della lista dei lavori da eseguire (2 volta al giorno)
+			\item \label{op:show_fattura}Consultazione dei dati per stilare una fattura o una ricevuta fiscale (10 volte a settimana)
+			\item \label{op:calc_stipendio_operatore}Calcolo dello stipendio per un dipendente (1 volta al mese)
+			\item \label{op:stats_prevetivi_prestazioni}Consultazione delle statistiche riguardanti lo scostamento tra i costi preventivati e i costi effettivi delle prestazioni, con la possibilità di scomporre le voci dei costi tra costi dei componenti, costi della manodopera e costi dei servizi aggiuntivi (1 volta a settimana).
+			\item \label{op:stats_costi}Consultazione delle statistiche riguardanti la variazione dei costi di un componente (1 volta a settimana)
 			
 		\end{enumerate}
