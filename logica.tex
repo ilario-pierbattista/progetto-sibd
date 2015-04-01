@@ -130,12 +130,18 @@
 			\end{longtable}
 			
 	\subsection{Ristrutturazione dello Schema Concettuale}
+
 		\subsubsection{Analisi delle Derivazioni e della Ridondanza}
-			Ridondanze da analizzare e decidere se introdurre:
+
+			Il modello elaborato nella precedente fase di sviluppo non rispondeva al criterio di minimalità. Gli attributi \emph{Imponibile} e \emph{Imposte} relativi all'entità \emph{Fattura} sono infatti attributi derivabili (Prendere in visione le Regole di Derivazione \ref{rd:imponibile} e \ref{rd:imposte}).
+
+			Giunti ora all'ultima fase progettuale prima dell'effettiva implementazione della base di dati, ci occuperemo di valutare se eliminare o mantenere tale ridondanza, al fine da minimizzare i costi computazionali ed il numero di accessi. Inoltre, sempre nella stessa ottica, valuteremo anche l'introduzione di ridondanze non presenti in precedenza, nel caso in cui tale introduzione apportasse sensibili miglioramenti alle prestazioni.
+
 			\begin{enumerate}
 				\item Totale in fattura
 				\item Paga in operatore
-				\item Totale negli ordini
+				\item Totale negli ordini 
+				\item Totale componenti in magazzino
 			\end{enumerate}
 			
 		\subsubsection{Eliminazione delle Generalizzazioni}

@@ -306,7 +306,7 @@
 			
 			Le istanze dell'entità \emph{Fattura} vengono identificate dalla coppia di attributi "Numero Progressivo" ed "Anno", così come avviene nella realtà di interesse\footnote{Le fatture vengono identificate dall'anno di emissione e dal numero progressivo. Ogni anno tale numero viene azzerato.}.
 			
-			\begin{figure}[H]
+			\begin{figure}
 				\centering
 				\includegraphics[width=11.5cm]{images/finitures/prestazione_fattura.png}
 				\caption{Sviluppo della relationship tra Prestazione e Fattura}
@@ -347,10 +347,10 @@
 			L'ultimo punto da sviluppare consiste nella gestione dei recapiti, di qualunque natura essi siano. L'entità \emph{Recapito} è costituita dagli attributi "Recapito" (che è anche chiave primaria) e dall'attributo "Tipo" (consultare le Regole Aziendali alla sezione \ref{sec:business_rules} per i valori che tale attributo può assumere).
 			Ad ogni istanza di \emph{Persona} devono essere associati una o più istanze di \emph{Recapito}.
 			
-			\begin{figure}
+			\begin{figure}[H]
 				\centering
 				\includegraphics[width=11.5cm]{images/finitures/persona_rubrica.png}
-				\caption{Turni degli Operatori}
+				\caption{Recapiti associati ad una Persona}
 				\label{fig:persona_recapito}
 			\end{figure}
 	
@@ -366,6 +366,8 @@
 			\label{fig:er}
 		\end{sidewaysfigure}
 
+		\newpage
+
 	\subsection{Analisi Qualitativa dello Schema ER}
 		
 		Effettuiamo una breve analisi in termini qualitativi del diagramma ER sviluppato.
@@ -374,10 +376,10 @@
 			\item[Correttezza] Il diagramma sviluppato fa un uso sintatticamente e semanticamente corretto dei costrutti disponibili del modello Entità-Relazione.
 			\item[Completezza] Confrontando il diagramma risultante con le specifiche che abbiamo individuato nell'Analisi dei Requisiti (sezione \ref{sec:req_analysis}), reputiamo che quest'ultime siano soddisfatte.
 			\item[Leggibilità] Abbiamo strutturato graficamente il diagramma in modo da favorirne il più possibile la leggibilità. In particolare ci siamo focalizzati sul minimizzare il numero di intersezioni tra gli archi che collegano entità e relationship, non riuscendo tuttavia ad evitarle del tutto.
-			\item[Minimalità] Il diagramma è privo di parti ridondanti, ogni scecifica risulta rappresentata una sola volta.
+			\item[Minimalità] Il diagramma non è del tutto privo di parti ridondanti. Gli attributi \emph{Imponibile} ed \emph{Imposte} relative all'entità \emph{Fattura} introductono ridondanza nella rappresentazione dell'imformazione (consultare per maggiori informazioni le Regole di Derivazione \ref{rd:imponibile} e \ref{rd:imposte}). Valuteremo nelle prossime fasi progettuali se eliminare o meno tale ridondanza.
 		\end{description}
 		
-		Il diagramma risulta valido, adeguato per procedere ai successivi passi progettuali.
+		Il diagramma, nonostante l'assenza di minimalità, risulta valido, adeguato per procedere ai successivi passi progettuali.
 	
 	% Sezione documentativa della progettazione concettuale
 	\subsection{Dizionario dei Dati}
@@ -718,9 +720,9 @@
 			
 			\setenumerate[1]{label=RD\arabic*:}
 			\begin{enumerate}
-			
-				\item \emph{Costo Servizi} relativo all'entità \emph{Preventivo} e \emph{Prestazione} è la somma dei valori di \emph{Servizi Aggiuntivi} e \emph{Manodopera}.
-				\item \emph{Imponibile} relativo all'entità \emph{Fattura} è la somma dei valori ottenuti moltiplicando l'attributo \emph{Prezzo Unitario} di ogni istanza associata alla prestazione di riferimento, per \emph{Quantità} (entrambi relativi alla relationship \emph{Utilizzo}). A tale valore va aggiunto l'ammontare di \emph{Costo Servizi}.
-				\item \emph{Totale} relativo all'entità \emph{Fattura} è la somma dei valori di \emph{Imponibile} e \emph{Imposte}, cui va sottratto il valore di \emph{Incentivi} e \emph{Sconto}.
+
+				\item \label{rd:imponibile} \emph{Imponibile} relativo all'entità \emph{Fattura} è la somma dei valori ottenuti moltiplicando l'attributo \emph{Prezzo Unitario} di ogni istanza associata alla prestazione di riferimento, per \emph{Quantità} (entrambi relativi alla relationship \emph{Utilizzo}). A tale valore va aggiunto l'ammontare di \emph{Costo Servizi}.
+
+				\item \label{rd:imposte} \emph{Imposte} relativo all'entità \emph{Fattura} è pari al valore dell'IVA calcolato sul valore dell'attributo \emph{Imponibile}, relativo all'entità stessa (Cfr. \ref{rd:imponibile})
 				
 			\end{enumerate}
