@@ -16,7 +16,8 @@
 \usepackage{marvosym} % Currency symbols
 \usepackage{fancyhdr} % Fancy headers
 \usepackage[a4paper]{geometry} % Geometry Page
-\usepackage{array} 
+\usepackage{array}
+\usepackage{footnote}
 
 % Setup Hyperef
 \hypersetup{
@@ -37,16 +38,20 @@
 
 % Redefining arraystretch
 \renewcommand{\arraystretch}{1.5}
+% Save notes into tables
+% \makesavenoteenv{tabular}
 
 \makeindex
 
 %Document begin
 \begin{document}
 
-\title{Progettazione di una Base di Dati per un'Offinica Meccanica}
-\author{Gruppo 809\\
-	Ilario Pierbattista\\
-	Alessandro Staffolani\\
+\title{Progettazione di una Base di Dati per un'Offinica Meccanica \\
+		Relazione del Progetto per l'Esame di Basi di Dati \\
+		Gruppo 809
+	}
+\author{Ilario Pierbattista \and
+	Alessandro Staffolani \and
 	Luka Petrovic}
 \date{\today{}}
 \maketitle

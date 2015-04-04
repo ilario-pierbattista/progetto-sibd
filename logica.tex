@@ -2,6 +2,7 @@
 \section{Progettazione Logica}
 	\subsection{Tavola dei Volumi}
 		\subsubsection{Tavola dei Volumi}
+		\label{sec:volume_table}
 
 			I volumi delle entità e delle relazioni sono stati stimati facendo riferimento ad un ciclo di vita della base di dati di circa 3 anni. In tale calcolo abbiamo considerato che alcune entità sono soggette ad una iniziale migrazione di dati (come ad esempio l'entità \emph{Fornitore} o \emph{Componente}).
 		
@@ -99,16 +100,19 @@
 				\ref{op:ass_componente_preventivo} & 60 volte a settimana \\ \hline
 				\ref{op:ass_componente_prestazione} & 60 volte a settimana \\ \hline
 				\ref{op:ass_fornitura_ordine} & 10 volte a settimana \\ \hline
+				\ref{op:ass_fornitura_magazzino} & 10 volte a settimana \\ \hline
 
 				% Aggiornamenti
 				\ref{op:edit_cliente} & 30 volte l'anno \\ \hline
 				\ref{op:edit_fornitore} & 2 volte l'anno \\ \hline
 				\ref{op:edit_operatore} & 1 volta l'anno \\ \hline
 				\ref{op:edit_componente} & 5 volte al mese \\ \hline
+				\ref{op:reg_ordine} & 2 volte a settimana \\ \hline
 
 				% Consultazioni
 				\ref{op:show_collaudo} & 1 volta a settimana \\ \hline
 				\ref{op:show_revisione} & 1 volta a settimana \\ \hline
+				\ref{op:show_fattura} & 10 volte a settimana \\ \hline
 				\ref{op:show_transazioni} & 1 volta a settimana \\ \hline
 				\ref{op:show_riparazioni} & 2 volte al giorno \\ \hline
 				\ref{op:show_preventivi} & 2 volte al giorno \\ \hline
@@ -121,8 +125,8 @@
 				\ref{op:show_recapiti_fornitore} & 2 volte a settimana \\ \hline
 				\ref{op:show_recapiti_operatore} & 1 volta a settimana \\ \hline
 				\ref{op:list_fatture_pending} & 1 volta al giorno \\ \hline
+				\ref{op:list_ordini_pending} & 1 volta a settimana \\ \hline
 				\ref{op:todo_list} & 1 volta al giorno \\ \hline
-				\ref{op:show_fattura} & 10 volte a settimana \\ \hline
 				\ref{op:calc_stipendio_operatore} & 1 volta al mese per ogni operatore \\\hline
 				\ref{op:stats_prevetivi_prestazioni} & 1 volta a settimana \\ \hline
 				\ref{op:stats_costi} & 1 volta a settimana \\ \hline
@@ -135,15 +139,387 @@
 
 			Il modello elaborato nella precedente fase di sviluppo non rispondeva al criterio di minimalità. Gli attributi \emph{Imponibile} e \emph{Imposte} relativi all'entità \emph{Fattura} sono infatti attributi derivabili (Prendere in visione le Regole di Derivazione \ref{rd:imponibile} e \ref{rd:imposte}).
 
-			Giunti ora all'ultima fase progettuale prima dell'effettiva implementazione della base di dati, ci occuperemo di valutare se eliminare o mantenere tale ridondanza, al fine da minimizzare i costi computazionali ed il numero di accessi. Inoltre, sempre nella stessa ottica, valuteremo anche l'introduzione di ridondanze non presenti in precedenza, nel caso in cui tale introduzione apportasse sensibili miglioramenti alle prestazioni.
+			Giunti ora all'ultima fase progettuale prima dell'effettiva implementazione della base di dati, ci occuperemo di valutare se eliminare o mantenere tale ridondanza, al fine da minimizzare i costi computazionali ed il numero di accessi. Inoltre valuteremo anche l'introduzione di ridondanze non presenti in precedenza, nel caso in cui tale introduzione apportasse sensibili miglioramenti alle prestazioni.
 
+			Le stime degli accessi in lettura/scrittura verranno calcolate in riferimento ad un arco temporale pari ad un mese.
+
+			Le operazioni legate agli attributi ridondanti \emph{Imponibile} ed \emph{Imposte} sono: \ref{op:new_fattura}, \ref{op:new_transazione}, \ref{op:show_fattura}).
+
+			Abbiamo rintracciato altri dati derivabili utilizzati sistematicamente nelle nostre operazioni:
+
+			\setenumerate[1]{label=\arabic*:}
 			\begin{enumerate}
-				\item Totale in fattura
-				\item Paga in operatore
-				\item Totale negli ordini 
-				\item Totale componenti in magazzino
-			\end{enumerate}
+
+				\item \emph{Imponibile} relativo agli ordini effettuati presso i fornitori (\ref{op:new_ordine}\footnote{L'aggiunta di un nuovo ordine prevedere l'inserimento di nuove forniture. Nel calcolo degli accessi, calcoleremo anche questi ultimi}, \ref{op:new_transazione}));
 			
+				\item \emph{Quantità Presente} dei componenti in magazzino (\ref{op:reg_ordine}, \ref{op:check_componente}, \ref{op:list_componenti}, \ref{op:tobuy_componenti});
+			
+				\item \emph{Ore di Lavoto} relative agli operatori.
+			
+			\end{enumerate}
+
+			\paragraph{\emph{Imponibile} in Fattura}
+
+				L'\emph{Imponibile} di una fattura può essere ogni volta calcolato basandosi sui valori degli attributi:
+				\setenumerate[1]{label=\arabic*)}
+				\begin{enumerate}
+					\item \emph{Quantità} ($q_i$) e \emph{Prezzo Unitario} ($p_i$) della relationship \emph{Utilizzo} che lega l'istanza della \emph{Prestazione} cui la fattura fa riferimento all'i-esima istanza di \emph{Fornitura}, in riferimento ai componenti utilizzati nella prestazione;
+					\item \emph{Servizi Aggiuntivi} ($C_s$) e \emph{Manodopera} ($C_m$) relativi all'entità \emph{Prestazione};
+					\item \emph{Sconto} ($S$), relativo all'entità \emph{Fattura}.
+				\end{enumerate}
+
+				$$ Imponibile = \left( C_s + C_m + \sum_{i=1}^n p_i q_i \right)\left(1 - \frac{S}{100}\right) $$
+
+				Valutiamo la possibilità eliminare l'attributo ridondante \emph{Imponibile}.
+
+				\subparagraph{Assenza di Ridondanza}
+					Analizziamo il numero di accessi ipotizzando di non avere a disposizione l'attributo \emph{Imponibile} per l'entità \emph{Fattura}.
+
+					\vspace{2ex}
+					% Nuova fattura, no ridondanza
+					\begin{tabular}{| p{3cm} | p{3cm} | p{3cm} | p{3cm} |}
+						\hline
+						\multicolumn{4}{|c|}{\textbf{\ref{op:new_fattura}}} \\ \hline
+						\textbf{Concetto} & \textbf{Costrutto} & \textbf{Accessi} & \textbf{Tipo} \\ \hline
+						Fattura & E & 1 & L \\
+						Fattura & E & 1 & S \\
+						\hline
+					\end{tabular}
+
+					% Nuova transazione, no ridondanza
+					\begin{tabular}{| p{3cm} | p{3cm} | p{3cm} | p{3cm} |}
+						\hline
+						\multicolumn{4}{|c|}{\textbf{\ref{op:new_transazione}}} \\ \hline
+						\textbf{Concetto} & \textbf{Costrutto} & \textbf{Accessi} & \textbf{Tipo} \\ \hline
+						Fattura 		& E & 1 & L \\
+						Prestazione 	& E & 1 & L \\
+						Utilizzo 		& R & 6 & L \\
+						Transazione 	& E & 1 & S \\
+						\hline
+					\end{tabular}
+
+					% Dati per la stampa di fatture, no ridondanza
+					\begin{tabular}{| p{3cm} | p{3cm} | p{3cm} | p{3cm} |}
+						\hline
+						\multicolumn{4}{|c|}{\textbf{\ref{op:show_fattura}}} \\ \hline
+						\textbf{Concetto} & \textbf{Costrutto} & \textbf{Accessi} & \textbf{Tipo} \\ \hline
+						Fattura 	& E & 1 & L \\
+						Prestazione & E & 1 & L \\
+						Utilizzo 	& R & 6 & L \\
+						Preventivo 	& E & 1 & L \\
+						Autovettura & E & 1 & L \\
+						Cliente 	& E & 1 & L \\
+						\hline
+					\end{tabular}
+					\vspace{2ex}
+
+				\subparagraph{Presenza di Ridondanza} 
+					Analizziamo il numero di accessi avendo a disposizione l'attributo \emph{Importo} relativo all'entità \emph{Fattura}.
+
+					\vspace{2ex}
+					% Nuova fattura, ridondanza
+					\begin{tabular}{| p{3cm} | p{3cm} | p{3cm} | p{3cm} |}
+						\hline
+						\multicolumn{4}{|c|}{\textbf{\ref{op:new_fattura}}} \\ \hline
+						\textbf{Concetto} & \textbf{Costrutto} & \textbf{Accessi} & \textbf{Tipo} \\ \hline
+						Prestazione & E & 1 & L \\
+						Utilizzo 	& R & 6 & L \\
+						Fattura 	& E & 1 & L \\
+						Fattura 	& E & 1 & S \\
+						\hline
+					\end{tabular}
+
+					% Nuova transazione, ridondanza
+					\begin{tabular}{| p{3cm} | p{3cm} | p{3cm} | p{3cm} |}
+						\hline
+						\multicolumn{4}{|c|}{\textbf{\ref{op:new_transazione}}} \\ \hline
+						\textbf{Concetto} & \textbf{Costrutto} & \textbf{Accessi} & \textbf{Tipo} \\ \hline
+						Fattura & E & 1 & L \\
+						Transazione & E & 1 & S \\
+						\hline
+					\end{tabular}
+
+					% Dati per la stampa di fatture, ridondanza
+					\begin{tabular}{| p{3cm} | p{3cm} | p{3cm} | p{3cm} |}
+						\hline
+						\multicolumn{4}{|c|}{\textbf{\ref{op:show_fattura}}} \\ \hline
+						\textbf{Concetto} & \textbf{Costrutto} & \textbf{Accessi} & \textbf{Tipo} \\ \hline
+						Fattura & E & 1 & L \\
+						Prestazione & E & 1 & L \\
+						Autovettura & E & 1 & L \\
+						Cliente & E & 1 & L \\
+						\hline
+					\end{tabular}
+					\vspace{2ex}
+
+				\subparagraph{Calcolo dei Costi Totali}
+					Valutiamo la convenienza di lasciare o rimuovere l'attributi \emph{Imponibile} in \emph{Fattura}.
+
+					\vspace{2ex}
+					\begin{tabular}{| p{3cm} | p{3cm} | p{3cm} | p{3cm} |}
+						\hline
+						\textbf{Operazione} & \textbf{Costo} & \textbf{Frequenza} & \textbf{Totale} \\ \hline
+						\ref{op:new_fattura} & 3 & $10 \cdot 4w = 40$ & 120 \\
+						\ref{op:new_transazione} & 10 & $10 \cdot 4w = 40$ & 400 \\
+						\ref{op:show_fattura} & 11 & $10 \cdot 4w = 40$ & 440 \\
+						\hline
+						\multicolumn{3}{|c|}{\textbf{Costo totale senza ridondanza}} & 960 \\
+						\hline
+					\end{tabular}
+
+					\begin{tabular}{| p{3cm} | p{3cm} | p{3cm} | p{3cm} |}
+						\hline
+						\textbf{Operazione} & \textbf{Costo} & \textbf{Frequenza} & \textbf{Totale} \\ \hline
+						\ref{op:new_fattura} & 10 & $10 \cdot 4w = 40$ & 400 \\
+						\ref{op:new_transazione} & 3 & $10 \cdot 4w = 40$ & 120 \\
+						\ref{op:show_fattura} & 4 & $10 \cdot 4w = 40$ & 160 \\
+						\hline
+						\multicolumn{3}{|c|}{\textbf{Costo totale con ridondanza}} & 680 \\
+						\hline
+
+					\end{tabular}
+					\vspace{2ex}
+
+					È conveniente lasciare l'attributo ridondante \emph{Imponibile} in \emph{Fattura}.
+
+			\paragraph{\emph{Imposte} in Fattura}
+				Le \emph{Imposte} in una fattura corrispondono all'ammontare dell'IVA. Attualmente l'IVA corrisponde al 22\% dell'\emph{Imponibile}. Ricordiamo che, anche in questo caso, le operazioni interessate sono: \ref{op:new_fattura}, \ref{op:new_transazione}, \ref{op:show_fattura}.
+
+				Avendo a disposizione l'attributo \emph{Imponibile} nella stessa entità, il numero di accessi nel caso senza ridondanza risulta identico al caso con ridondanza. Possiamo fare a meno di tale dato ridondante.
+
+				\begin{figure}[H]
+					\includegraphics[width=9cm]{images/refactor/fattura.png}
+					\centering
+					\label{fig:fattura_refactor}
+					\caption{Ristrutturazione di \emph{Fattura}}
+				\end{figure}
+
+			\paragraph{\emph{Imponibile} in Ordine}
+				L'imponibile di un ordine corrisponde al costo delle forniture che lo compongono, su cui vanno calcolate le imposte. La somma di imponibile ed imposte di ordine, indica l'ammontare dell'effettiva transazione monetaria da parte dell'attività al fornitore presso cui è stato effettuato l'ordine.
+
+				Valutiamo la possibilità di aggiungere l'attributo \emph{Imponibile} all'entità \emph{Ordine}.
+
+				\subparagraph{Assenza di Ridondanza}
+					Analizziamo il numero di accessi per le operazioni specificate senza introdurre dati ridondanti.
+
+					\vspace{2ex}
+					% Nuovo ordine, no ridondanza
+					\begin{tabular}{| p{3cm} | p{3cm} | p{3cm} | p{3cm} |}
+						\hline
+						\multicolumn{4}{|c|}{\textbf{\ref{op:new_ordine}}} \\ \hline
+						\textbf{Concetto} & \textbf{Costrutto} & \textbf{Accessi} & \textbf{Tipo} \\ \hline
+						Fornitura 	& E & 5 & S \\
+						Formazione 	& R & 5 & S \\
+						Ordine 		& E & 1 & S \\
+						\hline
+					\end{tabular}
+
+					% Nuova transazione, no ridondanza
+					\begin{tabular}{| p{3cm} | p{3cm} | p{3cm} | p{3cm} |}
+						\hline
+						\multicolumn{4}{|c|}{\textbf{\ref{op:new_transazione}}} \\ \hline
+						\textbf{Concetto} & \textbf{Costrutto} & \textbf{Accessi} & \textbf{Tipo} \\ \hline
+						Ordine 		& E & 1 & L \\
+						Formazione	& R & 5 & L \\
+						Fornitura 	& E & 5 & L \\
+						Transazione & E & 1 & S \\
+						\hline
+					\end{tabular}
+					\vspace{2ex}
+
+				\subparagraph{Presenza di Ridondanza}
+					Analizziamo ora il numero di accessi introducendo l'attributo \emph{Imponibile} in \emph{Ordine}.
+
+					\vspace{2ex}
+					% Nuovo ordine, con ridondanza
+					\begin{tabular}{| p{3cm} | p{3cm} | p{3cm} | p{3cm} |}
+						\hline
+						\multicolumn{4}{|c|}{\textbf{\ref{op:new_ordine}}} \\ \hline
+						\textbf{Concetto} & \textbf{Costrutto} & \textbf{Accessi} & \textbf{Tipo} \\ \hline
+						Fornitura 	& E & 5 & S \\
+						Formazione 	& R & 5 & S \\
+						Ordine 		& E & 1 & S \\
+						\hline
+					\end{tabular}
+
+					% Nuova transazione, con ridondanza
+					\begin{tabular}{| p{3cm} | p{3cm} | p{3cm} | p{3cm} |}
+						\hline
+						\multicolumn{4}{|c|}{\textbf{\ref{op:new_transazione}}} \\ \hline
+						\textbf{Concetto} & \textbf{Costrutto} & \textbf{Accessi} & \textbf{Tipo} \\ \hline
+						Ordine 		& E & 1 & L \\
+						\hline
+					\end{tabular}
+					\vspace{2ex}
+
+				\subparagraph{Calcolo dei Costi Totali}
+					Valutiamo l'introduzione dell'attributo \emph{Imponibile} in \emph{Ordine}.
+
+					\vspace{2ex}
+					\begin{tabular}{| p{3cm} | p{3cm} | p{3cm} | p{3cm} |}
+						\hline
+						\textbf{Operazione} & \textbf{Costo} & \textbf{Frequenza} & \textbf{Totale} \\ \hline
+						\ref{op:new_ordine} & 22 & $2 \cdot 4w = 8$ & 176 \\
+						\ref{op:new_transazione} & 13 & $2 \cdot 4w = 8$ & 104 \\
+						\hline
+						\multicolumn{3}{|c|}{\textbf{Costo totale senza ridondanza}} & 280 \\
+						\hline
+					\end{tabular}
+
+					\begin{tabular}{| p{3cm} | p{3cm} | p{3cm} | p{3cm} |}
+						\hline
+						\textbf{Operazione} & \textbf{Costo} & \textbf{Frequenza} & \textbf{Totale} \\ \hline
+						\ref{op:new_ordine} & 22 & $2 \cdot 4w = 8$ & 176 \\
+						\ref{op:new_transazione} & 1 & $2 \cdot 4w = 8$ & 8 \\
+						\hline
+						\multicolumn{3}{|c|}{\textbf{Costo totale con ridondanza}} & 184 \\
+						\hline
+
+					\end{tabular}
+					\vspace{2ex}
+
+					Conviene introdurre l'attributo \emph{Imponibile} nell'entità e \emph{Componente}.
+
+					\begin{figure}[H]
+						\includegraphics[width=12cm]{images/refactor/fornitore_ordine_fornitura_componente.png}
+						\centering
+						\label{fig:ordine_refactor}
+						\caption{Ristrutturazione di \emph{Ordine}}
+					\end{figure}
+
+			\paragraph{\emph{Quantità} in Componente}
+				Con \emph{Quantità}, riferito all'entità \emph{Componente}, si intende la quantità degli articoli per uno specifico componente disponibili in magazzino, a prescindere dalla fornitura d'appartenenza.
+				Tale definizione fornisce la modalità con cui la quantità presente di un componente può essere calcolata fino a questo momento. Ci occuperemo di stabilire, ora, se possa essere vantaggioso introdurre tale dato derivabile come attributo dell'entità \emph{Componente}.
+
+				\subparagraph{Assenza di Ridondanza}
+					Analizziamo gli accessi necessari a svolgere le seguenti operazioni considerando il caso privo di dati ridondanti.
+
+					\vspace{2ex}
+					% Consegna ordine, senza ridondanza
+					\begin{tabular}{| p{3cm} | p{3cm} | p{3cm} | p{3cm} |}
+						\hline
+						\multicolumn{4}{|c|}{\textbf{\ref{op:reg_ordine}}} \\ \hline
+						\textbf{Concetto} & \textbf{Costrutto} & \textbf{Accessi} & \textbf{Tipo} \\ \hline
+						Ordine 		& E & 1 & L \\
+						Formazione	& R & 5 & L \\
+						Fornitura 	& E & 5 & L \\
+						Magazzino  	& E & 5 & S \\
+						\hline
+					\end{tabular}
+
+					% Controlla componente, no ridondanza
+					\begin{tabular}{| p{3cm} | p{3cm} | p{3cm} | p{3cm} |}
+						\hline
+						\multicolumn{4}{|c|}{\textbf{\ref{op:check_componente}}} \\ \hline
+						\textbf{Concetto} & \textbf{Costrutto} & \textbf{Accessi} & \textbf{Tipo} \\ \hline
+						Componente 	& E & 1 & L \\
+						Magazzino 	& E & 1\footnotemark & L \\
+						\hline
+					\end{tabular}
+
+					\footnotetext{Valore medio. Per i componenti non presenti in magazzino non ci sarà alcun accesso, per quelli presenti ci saranno tanti accessi quante sono le forniture non ancora esaurite.}
+
+					% Lista componenti presenti, no ridondanza
+					\begin{tabular}{| p{3cm} | p{3cm} | p{3cm} | p{3cm} |}
+						\hline
+						\multicolumn{4}{|c|}{\textbf{\ref{op:list_componenti}}} \\ \hline
+						\textbf{Concetto} & \textbf{Costrutto} & \textbf{Accessi} & \textbf{Tipo} \\ \hline
+						Magazzino 	& E & $1 \cdot 189=189$ \footnotemark & L \\
+						Componente 	& E & $1 \cdot 189=189$ \footnotemark & L \\
+						\hline
+					\end{tabular}
+					\footnotetext{Quantità derivante dalla Tavolta dei Volumi \ref{sec:volume_table}. Sebbene la Tavola dei Volumi sia riferita ad un arco temporale di 3 anni, il volume dell'entità \emph{Magazzino} rimane pressoché costante nel tempo.}
+					\footnotetext{Stima massimale. Ad ogni istanza di \emph{Componente} possono corrispondere più istanze di \emph{Magazzino}.}
+
+					% Lista componenti da comprare, no ridondanza
+					\begin{tabular}{| p{3cm} | p{3cm} | p{3cm} | p{3cm} |}
+						\hline
+						\multicolumn{4}{|c|}{\textbf{\ref{op:tobuy_componenti}}} \\ \hline
+						\textbf{Concetto} & \textbf{Costrutto} & \textbf{Accessi} & \textbf{Tipo} \\ \hline
+						Magazzino 	& E & $1 \cdot 189=189$ & L \\
+						Componente 	& E & $1 \cdot 189=189$ & L \\
+						\hline
+					\end{tabular}
+					\vspace{2ex}
+
+				\subparagraph{Presenza di Ridondanza}
+					Analizziamo nuovamente il numero di accessi considerando l'attributo ridondante \emph{Quantità}.
+
+					\vspace{2ex}
+					% Consegna ordine, con ridondanza
+					\begin{tabular}{| p{3cm} | p{3cm} | p{3cm} | p{3cm} |}
+						\hline
+						\multicolumn{4}{|c|}{\textbf{\ref{op:reg_ordine}}} \\ \hline
+						\textbf{Concetto} & \textbf{Costrutto} & \textbf{Accessi} & \textbf{Tipo} \\ \hline
+						Ordine 		& E & 1 & L \\
+						Formazione	& R & 5 & L \\
+						Fornitura 	& E & 5 & L \\
+						Magazzino  	& E & 5 & S \\
+						Componente 	& E & 1 & L \\
+						Componente 	& E & 1 & S \\
+						\hline
+					\end{tabular}
+
+					% Controlla componente, con ridondanza
+					\begin{tabular}{| p{3cm} | p{3cm} | p{3cm} | p{3cm} |}
+						\hline
+						\multicolumn{4}{|c|}{\textbf{\ref{op:check_componente}}} \\ \hline
+						\textbf{Concetto} & \textbf{Costrutto} & \textbf{Accessi} & \textbf{Tipo} \\ \hline
+						Componente 	& E & 1 & L \\
+						\hline
+					\end{tabular}
+
+					% Lista componenti presenti, con ridondanza
+					\begin{tabular}{| p{3cm} | p{3cm} | p{3cm} | p{3cm} |}
+						\hline
+						\multicolumn{4}{|c|}{\textbf{\ref{op:list_componenti}}} \\ \hline
+						\textbf{Concetto} & \textbf{Costrutto} & \textbf{Accessi} & \textbf{Tipo} \\ \hline
+						Componente 	& E & $1 \cdot 472 = 472$ \footnotemark & L \\
+						\hline
+					\end{tabular}
+					\footnotetext{Dalla Tavola dei Volumi \ref{sec:volume_table}}
+
+					% Lista componenti da comprare, con ridondanza
+					\begin{tabular}{| p{3cm} | p{3cm} | p{3cm} | p{3cm} |}
+						\hline
+						\multicolumn{4}{|c|}{\textbf{\ref{op:tobuy_componenti}}} \\ \hline
+						\textbf{Concetto} & \textbf{Costrutto} & \textbf{Accessi} & \textbf{Tipo} \\ \hline
+						Componente 	& E & $1 \cdot 472 = 472$ & L \\
+						\hline
+					\end{tabular}
+					\vspace{2ex}
+
+				\subparagraph{Calcolo dei Costi Totali}
+					Valutiamo l'introduzione dell'attributo \emph{Quantità} in \emph{Componente}.
+
+					\vspace{2ex}
+					\begin{tabular}{| p{3cm} | p{3cm} | p{3cm} | p{3cm} |}
+						\hline
+						\textbf{Operazione} & \textbf{Costo} & \textbf{Frequenza} & \textbf{Totale} \\ \hline
+						\ref{op:reg_ordine}			& 21	& $2 \cdot 4w = 8$		& 168 	\\
+						\ref{op:check_componente}	& 2 	& $4 \cdot 24d = 96$	& 192	\\
+						\ref{op:list_componenti}	& 378	& $1 \cdot 4w = 4$		& 1512	\\ 
+						\ref{op:tobuy_componenti}	& 378	& $1 \cdot 4w = 4$		& 1512	\\
+						\hline
+						\multicolumn{3}{|c|}{\textbf{Costo totale senza ridondanza}} & 3384 \\
+						\hline
+					\end{tabular}
+
+					\begin{tabular}{| p{3cm} | p{3cm} | p{3cm} | p{3cm} |}
+						\hline
+						\textbf{Operazione} & \textbf{Costo} & \textbf{Frequenza} & \textbf{Totale} \\ \hline
+						\ref{op:reg_ordine}			& 24	& $2 \cdot 4w = 8$		& 192 	\\
+						\ref{op:check_componente}	& 1 	& $4 \cdot 24d = 96$	& 96	\\
+						\ref{op:list_componenti}	& 472	& $1 \cdot 4w = 4$		& 1888	\\ 
+						\ref{op:tobuy_componenti}	& 472	& $1 \cdot 4w = 4$		& 1888	\\
+						\hline
+						\multicolumn{3}{|c|}{\textbf{Costo totale con ridondanza}} & 4064 \\
+						\hline
+					\end{tabular}
+					\vspace{2ex}
+
+					L'introduzione dell'attributo \emph{Quantità} in \emph{Componente} aumenterebbe il numero di accessi necessari ad eseguire le operazioni necessarie. Non è necessaria alcuna ristrutturazione.
+
 		\subsubsection{Eliminazione delle Generalizzazioni}
 			
 			Da eliminare la generalizzazione Persona. Scorpararla in Clienti, Fornitori, Operatori. Accorpare Privati e Aziende in Cliente.

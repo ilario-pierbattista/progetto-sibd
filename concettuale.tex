@@ -17,7 +17,7 @@
 			\includegraphics[width=9cm]{images/diagrams/preventivo_prestazione.png}
 		\end{figure}
 		
-		Alla formulazione di ogni preventivo, si fa una stima dei componenti che si reputa saranno necessari per eseguire la prestazione preventivata. Non sempre tale previsione è completamente completamente esatta, generalmente i componenti effettivamente utilizzati in una prestazione sono diversi da quelli previsti in un preventivo.
+		Alla formulazione di ogni preventivo, si fa una stima dei componenti che si reputa saranno necessari per eseguire la prestazione preventivata. Non sempre tale previsione è completamente esatta, generalmente i componenti effettivamente utilizzati in una prestazione sono diversi da quelli previsti in un preventivo.
 		L'associazione tra i \emph{Componenti} e il \emph{Preventivo} risulta immediata.
 		
 		\begin{figure}[H]
@@ -210,7 +210,7 @@
 				\label{fig:fattura}
 			\end{figure}
 			
-			\emph{Fattura} è composta dagli attributi "Numero Progressivo" e "Anno" (coppia di attributi identificatori, derivano direttamente dalla struttura reale delle fatture), "Totale" (descrive il prezzo totale della prestazione, è composto da "Imposte", "Imponibile", "Sconto", "Incentivi"), "Data Emissione", "Sistema Pagamento" (specifica uno dei due sistemi di pagamento accettati: rimessa diretta e rimessa differita), "Tipo Pagamento" (metodologie di pagamento accettate: bonifico, contanti o assegno), "Stato Pagamento" (attributo booleano che permette di distinguere le fatture saldate da quelle non ancora pagate), "Data Scadenza" (data entro la quale la fattura deve essere saldata).
+			\emph{Fattura} è composta dagli attributi "Numero Progressivo" e "Anno" (coppia di attributi identificatori, derivano direttamente dalla struttura reale delle fatture), "Totale" (descrive il prezzo totale della prestazione, è composto da "Imposte", "Imponibile", "Sconto"\footnote{Quantità espressa in percentuale. Consultare \ref{rv:sconto}. }, "Incentivi"), "Data Emissione", "Sistema Pagamento" (specifica uno dei due sistemi di pagamento accettati: rimessa diretta e rimessa differita), "Tipo Pagamento" (metodologie di pagamento accettate: bonifico, contanti o assegno), "Stato Pagamento" (attributo booleano che permette di distinguere le fatture saldate da quelle non ancora pagate), "Data Scadenza" (data entro la quale la fattura deve essere saldata).
 		
 		\subsubsection{Transazione}
 			
@@ -260,6 +260,7 @@
 			\end{figure}
 			
 			L'attributo "Ubicazione" della relazione \emph{Previsione} rappresenta l'ubicazione dei componenti utilizzati nelle installazioni di nuovi impianti (si consultino anche le specifiche riguardanti i preventivi alla sottosezione "Frasi relative ai Preventivi" \ref{sec:frasi_preventivi}).
+			L'attributo "Prezzo Unitario" della relazione \emph{Previsione} si rivela necessario, in quanto il prezzo di vendita dei singoli componenti è soggetto a variazioni nel tempo.
 			
 			Per la registrazione degli articoli acquistati sono state introdotte in fase di sviluppo dello scheletro dello schema ER le entità \emph{Ordine} e \emph{Fornitura}. Tali entità, prese singolarmente, sono poco significative, essendo fortemente legate tra di loro (si faccia riferimento al diagramma in figura \ref{fig:fornitore_ordine_fornitura_componente}).
 			
@@ -457,8 +458,8 @@
 
 				Preventivo &
 				Stima dei costi, dei tempi e dei componenti necessari relativi all’esecuzione di un intervento su un’autovettura. &
-				Preventivo (Numerico), Data Emissione (Data), Data Inizio (Data), Categoria (Stringa), Costo Servizi [Servizi Aggiuntivi (Numerico), Manodopera (Numerico)], Tempo Stimato (Numerico), Sintomi (Stringa), Sistema Alimentazione (Stringa) &
-				Preventivo (Numerico)
+				Codice (Numerico), Data Emissione (Data), Data Inizio (Data), Categoria (Stringa), Costo Servizi [Servizi Aggiuntivi (Numerico), Manodopera (Numerico)], Tempo Stimato (Numerico), Sintomi (Stringa), Sistema Alimentazione (Stringa) &
+				Codice (Numerico)
 				\\ \hline
 
 				Componente &
@@ -487,8 +488,8 @@
 
 				Prestazione &
 				Attività eseguita dagli operatori dell’officina su di un’autovettura. &
-				Preventivo (Numerico), Tempi Esecuzione (Numerico), Data Fine (Data), Costo Servizi [Manodopera (Numerico), Servizi Aggiuntivi (Numerico)], Malfunzionamento (Stringa), Procedimento (Stringa) &
-				Codice (Numerico)
+				Codice (di \emph{Preventivo}), Tempi Esecuzione (Numerico), Data Fine (Data), Costo Servizi [Manodopera (Numerico), Servizi Aggiuntivi (Numerico)], Malfunzionamento (Stringa), Procedimento (Stringa) &
+				Codice (di \emph{Preventivo})
 				\\ \hline
 
 				Turno &
@@ -550,7 +551,7 @@
 				Previsione &
 				Associa i Componenti previsti in fase di stipulazione dei Preventivi &
 				Componente (0, N), Preventivo (0, N) &
-				Quantità (Numerico) indica la quantità del componente che si prevede di utilizzare; Ubicazione (Stringa) indica la posizione del componente preventivato nell'autovettura.
+				Quantità (Numerico) indica la quantità del componente che si prevede di utilizzare; Ubicazione (Stringa) indica la posizione del componente preventivato nell'autovettura; Prezzo Unitario (Numerico) indica il prezzo attuale del componente.
 				\\ \hline
 
 				Formazione &
@@ -641,7 +642,7 @@
 	
 		\subsubsection{Regole di Vincolo}
 		
-			\setenumerate[1]{label=RV\arabic*:}
+			\setenumerate[1]{label=RV\arabic*}
 			\begin{enumerate}
 				
 				% Si possono implementare le reference agli elementi delle liste
@@ -708,21 +709,26 @@
 				\item \emph{Sistema Pagamento} relativo all'entità \emph{Fattura} deve essere una tra le seguenti: "rimessa\_diretta", "rimessa\_differita".
 				\item \emph{Data Emissione} e \emph{Data Scadenza} relativi all'entità \emph{Fattura} sono date e \emph{Data Scadenza} non può essere antecedente a \emph{Data Emissione}. Se \emph{Sistema Pagamento} relativo alla stessa entità è "rimessa\_diretta", allora \emph{Data Scadenza} deve essere uguale a \emph{Data Emissione}.
 				\item \emph{Stato Pagamento} relativo all’entità \emph{Fattura} deve essere un valore booleano non NULL. Assume "TRUE" se la fattura è stata saldata, "FALSE" altrimenti.
+				\item \label{rv:sconto} \emph{Sconto} relativo all'entità \emph{Fattura} deve essere un numero decimale maggiore o uguale a 0 e minore di 100.
 				
 				% Transazione
-				\item \emph{Quota} relativa all'entità \emph{Transazione}, se attributo di un'istanza associata ad un'istanza di \emph{Preventivo}, è un numero maggiore di zero e minore del 70\% del Costo Stimato del Preventivo.
-				
+				\item \emph{Quota} relativa all'entità \emph{Transazione}, relativamente ad un'istanza dell'entità stessa associata ad un'istanza di \emph{Fattura}, è un numero pari alla somma dei valori degli attributi (relativi a \emph{Fattura}) \emph{Imponibile} ed \emph{Imposte}, meno il valore di \emph{Incentivi}.
+				\item \emph{Quota} relativa all'entità \emph{Transazione}, relativamente ad un'istanza dell'entità stessa associata ad un'istanza di \emph{Preventivo}, se attributo di un'istanza associata ad un'istanza di \emph{Preventivo}, è un numero maggiore di zero e minore del 70\% del Costo Stimato del Preventivo.
+				\item \emph{Quota} relativa all'entità \emph{Transazione}, relativamente ad un'istanza dell'entità stessa associata ad un'istanza di \emph{Operatore}, è un numero pari all'attributo \emph{Stipendio} di \emph{Operatore}, oppure è pari al numero delle ore di lavoro effettuate, moltiplicate per \emph{Retribuzione Oraria} di \emph{Operatore}.
+				\item \emph{Quota} relativa all'entità \emph{Transazione}, relativamente ad un'istanza dell'entità stessa associata ad un'istanza di \emph{Ordine}, è un numero pari alla somma dei valori ottenuti moltiplicando \emph{Prezzo Unitario} e \emph{Quantità} relativi alle istanze di \emph{Fornitura} associate all'istanza interessata di \emph{Ordine}.
+
 			\end{enumerate}
 		
 		\subsubsection{Regole di Derivazione}
 		
 			{\color{red}{Da correggere di qui in poi.}}
-			
-			\setenumerate[1]{label=RD\arabic*:}
+			\setenumerate[1]{label=RD\arabic*}
 			\begin{enumerate}
 
 				\item \label{rd:imponibile} \emph{Imponibile} relativo all'entità \emph{Fattura} è la somma dei valori ottenuti moltiplicando l'attributo \emph{Prezzo Unitario} di ogni istanza associata alla prestazione di riferimento, per \emph{Quantità} (entrambi relativi alla relationship \emph{Utilizzo}). A tale valore va aggiunto l'ammontare di \emph{Costo Servizi}.
 
 				\item \label{rd:imposte} \emph{Imposte} relativo all'entità \emph{Fattura} è pari al valore dell'IVA calcolato sul valore dell'attributo \emph{Imponibile}, relativo all'entità stessa (Cfr. \ref{rd:imponibile})
+
+				\item \label{rd:prezzo_unitario} \emph{Prezzo Unitario} relativo alla relationship \emph{Utilizzo} è pari al valore di \emph{Prezzo di Vendita} dell'entità \emph{Componente} al momento dell'inserimento
 				
 			\end{enumerate}
