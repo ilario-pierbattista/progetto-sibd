@@ -154,7 +154,7 @@
 			
 				\item \emph{Quantità Presente} dei componenti in magazzino (\ref{op:reg_ordine}, \ref{op:check_componente}, \ref{op:list_componenti}, \ref{op:tobuy_componenti});
 			
-				\item \emph{Ore di Lavoto} relative agli operatori.
+				\item \emph{Costo Componenti} relativo a \emph{Preventivo} (\ref{op:new_preventivo}, \ref{op:show_preventivi})
 			
 			\end{enumerate}
 
@@ -519,6 +519,95 @@
 					\vspace{2ex}
 
 					L'introduzione dell'attributo \emph{Quantità} in \emph{Componente} aumenterebbe il numero di accessi necessari ad eseguire le operazioni necessarie. Non è necessaria alcuna ristrutturazione.
+
+			\paragraph{\emph{Costo Componenti} in Preventivo}
+				L'entità \emph{Componente} è soggetta ad operazioni simili a quelle cui sono soggette le entità \emph{Fattura} ed \emph{Ordine}, quindi è ragionevole valutare l'evenienza di aggiungere il dato derivabile \emph{Costo Componenti}.
+
+				\subparagraph{Assenza di Ridondanza}
+					Analizziamo il numero degli accessi necessari per effettuare le operazioni allo stato attuale del modello.
+
+					\vspace{2ex}
+					% Nuovo preventivo, no ridondanza
+					\begin{tabular}{| p{3cm} | p{3cm} | p{3cm} | p{3cm} |}
+						\hline
+						\multicolumn{4}{|c|}{\textbf{\ref{op:new_preventivo}}} \\ \hline
+						\textbf{Concetto} & \textbf{Costrutto} & \textbf{Accessi} & \textbf{Tipo} \\ \hline
+						Preventivo 		& E & 1 & S \\
+						Componente 		& E & 6 & L \\
+						Previsione		& R & 6 & S \\
+						\hline
+					\end{tabular}
+
+					% Show preventivo, no ridondanza
+					\begin{tabular}{| p{3cm} | p{3cm} | p{3cm} | p{3cm} |}
+						\hline
+						\multicolumn{4}{|c|}{\textbf{\ref{op:show_preventivi}}} \\ \hline
+						\textbf{Concetto} & \textbf{Costrutto} & \textbf{Accessi} & \textbf{Tipo} \\ \hline
+						Preventivo 		& E & 1 & L \\
+						Previsione		& R & 6 & L \\
+						\hline
+					\end{tabular}
+					\vspace{2ex}
+
+				\subparagraph{Presenza di Ridondanza}
+					Vediamo ora il numero di accessi introducendo l'attributo \emph{Costo Componenti} in \emph{Preventivo}.
+
+					\vspace{2ex}
+					% Nuovo preventivo, con ridondanza
+					\begin{tabular}{| p{3cm} | p{3cm} | p{3cm} | p{3cm} |}
+						\hline
+						\multicolumn{4}{|c|}{\textbf{\ref{op:new_preventivo}}} \\ \hline
+						\textbf{Concetto} & \textbf{Costrutto} & \textbf{Accessi} & \textbf{Tipo} \\ \hline
+						Componente 		& E & 6 & L \\
+						Preventivo 		& E & 1 & S \\
+						Previsione		& R & 6 & S \\
+						\hline
+					\end{tabular}
+
+					% Show preventivo, con ridondanza
+					\begin{tabular}{| p{3cm} | p{3cm} | p{3cm} | p{3cm} |}
+						\hline
+						\multicolumn{4}{|c|}{\textbf{\ref{op:show_preventivi}}} \\ \hline
+						\textbf{Concetto} & \textbf{Costrutto} & \textbf{Accessi} & \textbf{Tipo} \\ \hline
+						Preventivo 		& E & 1 & L \\
+						\hline
+					\end{tabular}
+					\vspace{2ex}
+
+				\subparagraph{Calcolo dei Costi Totali}
+
+					Calcoliamo i costi totali nei due casi.
+
+					\vspace{2ex}
+					\begin{tabular}{| p{3cm} | p{3cm} | p{3cm} | p{3cm} |}
+						\hline
+						\textbf{Operazione} & \textbf{Costo} & \textbf{Frequenza} & \textbf{Totale} \\ \hline
+						\ref{op:new_preventivo}		& 20 	& $10 \cdot 4w = 40$	& 800	\\
+						\ref{op:show_preventivi} 	& 7 	& $2 \cdot 24d = 48$	& 336	\\
+						\hline
+						\multicolumn{3}{|c|}{\textbf{Costo totale senza ridondanza}} & 1136 \\
+						\hline
+					\end{tabular}
+
+					\begin{tabular}{| p{3cm} | p{3cm} | p{3cm} | p{3cm} |}
+						\hline
+						\textbf{Operazione} & \textbf{Costo} & \textbf{Frequenza} & \textbf{Totale} \\ \hline
+						\ref{op:new_preventivo}		& 20 	& $10 \cdot 4w = 40$	& 800	\\
+						\ref{op:show_preventivi} 	& 1 	& $2 \cdot 24d = 48$	& 48	\\
+						\hline
+						\multicolumn{3}{|c|}{\textbf{Costo totale con ridondanza}} & 848 \\
+						\hline
+					\end{tabular}
+					\vspace{2ex}
+
+					È conveniente inserire l'attributo ridondante \emph{Costo Componenti} all'entità \emph{Preventivo}, alla luce dei risultati ottenuti.
+
+					\begin{figure}[H]
+						\includegraphics[width=11cm]{images/refactor/preventivo.png}
+						\centering
+						\label{fig:preventivo_refactor}
+						\caption{Ristrutturazione di \emph{Preventivo}}
+					\end{figure}
 
 		\subsubsection{Eliminazione delle Generalizzazioni}
 			
