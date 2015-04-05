@@ -610,14 +610,92 @@
 					\end{figure}
 
 		\subsubsection{Eliminazione delle Generalizzazioni}
-			
-			Da eliminare la generalizzazione Persona. Scorpararla in Clienti, Fornitori, Operatori. Accorpare Privati e Aziende in Cliente.
+
+			Il modello concettuale, su cui ci stiamo basando in questa fase progettuale, non è ancora adeguato ad essere tradotto in un modello logico. Le generalizzazioni, che con questo passo andremo ad eliminare, sono dei costrutti del modello concettuale che permettono di modellare agevolmente la realtà d'interesse, ma che purtroppo non sono disponibili nel modello relazionale.
+
+			Nel nostro modello concettuale sono presenti due generalizzazioni, quella che coinvolge le entità \emph{Cliente}, \emph{Fornitore} ed \emph{Operatore}, e quella che coinvolge le entità \emph{Privato} ed \emph{Azienda}.
+
+			\begin{description}
+				\item [Cliente] 
+					Riguardo l'entità \emph{Cliente} abbiamo scelto di accorpare in essa le entità figlie. La motivazione principale sta nel fatto che, effettivamente, le entità figlie non sono direttamente in relazione con nessun'altra parte del modello che fin'ora abbiamo sviluppato.
+
+				\item [Persona]
+					Per quanto riguarda le invece le entità figlie di \emph{Persona}, l'accorpamento delle figlie nell'entità padre non è una strada percorribile, sia dal punto di vista tecnico (tale accorpamento genererebbe una tabella troppo corposa, con parecchi valori \emph{NULL}), sia dal punto di vista concettuale (tali entità modellano persone che hanno dei ruoli totalmente diversi tra loro all'interno dell'azienda).
+
+					La scelta che ci sembra più adeguata per questa generalizzazione è quella di accorpare l'entità padre nelle entità figlie, rendendo isolate ed indipendenti tra loro le entità \emph{Cliente}, \emph{Fornitore} e \emph{Operatore}.
+			\end{description}
+
+			\begin{figure}[H]
+				\includegraphics[width=13cm]{images/refactor/persona.png}
+				\centering
+				\label{fig:preventivo_refactor}
+				\caption{Eliminazione delle generalizzazioni}
+			\end{figure}
 			
 		\subsubsection{Partizionamento e Accorpamento di Concetti}
+
+			\paragraph{Partizionamento di Concetti}
+				L'eliminazione dell'entità padre \emph{Persona} induce un partizionamento della relationship \emph{Rubrica} con la quale veniva associata all'entità \emph{Recapito}.
+
+				Il partizionamento più naturale per tale relationship ricalca il concetto della separazione delle entità \emph{Cliente}, \emph{Fornitore} e \emph{Operatore} effettuata nel precedente passo.
+
+				Tale relationship sarà sostituita da tre relationship distinte (figura \ref{fig:rubrica_refactor}): \emph{Rubrica Cliente}, \emph{Rubrica Fornitore} e \emph{Rubrica Operatore}.
+
+				\begin{sidewaysfigure}
+					\centering
+					\includegraphics[width=22cm]{images/refactor/persona-recapito.png}
+					\caption{Partizionamento di Rubrica}
+					\label{fig:rubrica_refactor}
+				\end{sidewaysfigure}
+
 	\subsection{Scelta degli Identificatori Principali}
+
+		Per quanto possibile, abbiamo scelto degli identificatori primari che fossero il più possibile significativi per ognuna delle entità. Purtroppo non abbiamo trovato degli identificativi, per così dire, \emph{naturali} tra gli attributi delle entità quali \emph{Componente}, \emph{Preventivo}, \emph{Fornitura} ed \emph{Ordine}, dovendo introdurre dei codici identificativi interni.
+
+		Per alcune entità, come \emph{Fattura} e \emph{Magazzino}, mantenuto le superchiavi evitando di aggiungere altri attributi \emph{Codice}, con il fine di mantenere le rappresentazioni dei concetti che modellano, fedeli alla realtà.
+
+		Per quanto riguarda invece l'entità \emph{Turno}, sembrava effettivamente superfluo e poco intuitivo insierire un attributo che fungesse da identificatore primario.
+
+		In figura \ref{fig:schema_refactor} troviamo l'intero modello ER alla fine della sua ristrutturazione.
 		
-		Tabella con gli identificatori
-		
+		\vspace{2ex}
+		\begin{longtable}{| p{6.2cm} | p{6.2cm} |}
+			\hline
+			\textbf{Nome Entità} & \textbf{Identificatore} \\
+			\hline
+			\endfirsthead
+
+			\hline
+			\textbf{Nome Entità} & \textbf{Identificatore} \\
+			\hline
+			\endhead
+
+			Cliente 		& Codice Fiscale o P.IVA 	\\ \hline
+			Fornitore 		& Partita IVA 				\\ \hline
+			Operatore 		& Codice Fiscale 			\\ \hline
+			Autovettura  	& Targa						\\ \hline
+			Preventivo 		& Codice					\\ \hline
+			Componente 		& Codice					\\ \hline
+			Fornitura 		& Codice					\\ \hline
+			Ordine 			& Codice					\\ \hline
+			Magazzino  		& Codice Componente, Codice (di \emph{Fornitura}			\\ \hline
+			Prestazione 	& Codice (di \emph{Preventivo})								\\ \hline
+			Turno			& Ora Inizio, Data, Codice Fiscale (di \emph{Operatore})	\\ \hline
+			Transazione 	& Codice					\\ \hline
+			Fattura         & Numero Progressivo, Anno 	\\ \hline
+			Recapito 		& Recapito 					\\ \hline
+
+			\hline			
+		\end{longtable}
+		\vspace{2ex}
+
+		\begin{sidewaysfigure}
+			\centering
+			\includegraphics[width=22cm]{images/refactor/schema.png}
+			\caption{Diagramma Entity-Relationship Ristrutturato}
+			\label{fig:schema_refactor}
+		\end{sidewaysfigure}
+
 	\subsection{Normalizzazione}
 		Da mettere prima o dopo la traduzione verso il modello relazionale
 	\subsection{Traduzione verso il Modello Relazionale}
