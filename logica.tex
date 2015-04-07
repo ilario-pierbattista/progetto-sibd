@@ -628,7 +628,7 @@
 			\begin{figure}[H]
 				\includegraphics[width=13cm]{images/refactor/persona.png}
 				\centering
-				\label{fig:preventivo_refactor}
+				\label{fig:persona_refactor}
 				\caption{Eliminazione delle generalizzazioni}
 			\end{figure}
 			
@@ -659,7 +659,7 @@
 		In figura \ref{fig:schema_refactor} troviamo l'intero modello ER alla fine della sua ristrutturazione.
 		
 		\vspace{2ex}
-		\begin{longtable}{| p{6.2cm} | p{6.2cm} |}
+		\begin{longtable}{| p{3cm} | p{9.4cm} |}
 			\hline
 			\textbf{Nome Entità} & \textbf{Identificatore} \\
 			\hline
@@ -683,7 +683,7 @@
 			Turno			& Ora Inizio, Data, Codice Fiscale (di \emph{Operatore})	\\ \hline
 			Transazione 	& Codice					\\ \hline
 			Fattura         & Numero Progressivo, Anno 	\\ \hline
-			Recapito 		& Recapito 					\\ \hline
+			Recapito 		& Recapito 					\\
 
 			\hline			
 		\end{longtable}
@@ -697,5 +697,43 @@
 		\end{sidewaysfigure}
 
 	\subsection{Normalizzazione}
-		Da mettere prima o dopo la traduzione verso il modello relazionale
+
+		Dallo schema concettuale ristrutturato, notiamo che tutte le relationship sono già in BCNF, in quanto tutte binarie.
+
+		\vspace{2ex}
+		\begin{longtable}{| p{2.5cm} | p{12cm} |}
+			\hline
+			\textbf{Nome Entità} & \textbf{Identificatore} \\
+			\hline
+			\endfirsthead
+
+			\hline
+			\textbf{Nome Entità} & \textbf{Identificatore} \\
+			\hline
+			\endhead
+
+			Cliente 		& Non esistono dipendenze non banali tra gli attributi 	\\ \hline
+			Fornitore 		& Non esistono dipendenze non banali tra gli attributi	\\ \hline
+			Operatore 		& Non esistono dipendenze non banali tra gli attributi	\\ \hline
+			Autovettura		& È in terza forma normale	\\
+							& $Telaio \rightarrow Targa, Marca, Modello, Cilindrata, Anno Immatricolazione$ \\
+							& Telaio è superchiave, Targa è la chiave di Autovettura \\ \hline
+			Preventivo 		& Non esistono dipendenze non banali tra gli attributi	\\ \hline
+			Componente		& È in terza forma normale	\\
+							& $Nome \rightarrow Codice, Prezzo Vendita, Validit\acute{a}, Quantit\acute{a} Minima$ \\
+							& Nome è superchiave, Codice è la chiave di Componente  \\ \hline
+			Fornitura 		& Non esistono dipendenze non banali tra gli attributi	\\ \hline
+			Ordine 			& Non esistono dipendenze non banali tra gli attributi	\\ \hline
+			Magazzino  		& Non esistono dipendenze non banali tra gli attributi	\\ \hline
+			Prestazione 	& Non esistono dipendenze non banali tra gli attributi	\\ \hline
+			Turno			& Non esistono dipendenze non banali tra gli attributi	\\ \hline
+			Transazione 	& Non esistono dipendenze non banali tra gli attributi	\\ \hline
+			Fattura         & Non esistono dipendenze non banali tra gli attributi	\\ \hline
+			Recapito 		& Non esistono dipendenze non banali tra gli attributi	\\
+
+			\hline			
+		\end{longtable}
+		\vspace{2ex}
+		
 	\subsection{Traduzione verso il Modello Relazionale}
+	
