@@ -346,7 +346,10 @@
 			\end{figure}
 			
 			L'ultimo punto da sviluppare consiste nella gestione dei recapiti, di qualunque natura essi siano. L'entità \emph{Recapito} è costituita dagli attributi "Recapito" (che è anche chiave primaria) e dall'attributo "Tipo" (consultare le Regole Aziendali alla sezione \ref{sec:business_rules} per i valori che tale attributo può assumere).
-			Ad ogni istanza di \emph{Persona} devono essere associati una o più istanze di \emph{Recapito}.
+
+			Ad ogni istanza di \emph{Persona} devono essere associati una o più istanze di \emph{Recapito}. 
+			Più istanze di \emph{Persona} possono essere associate alla stessa istanza di \emph{Recapito}: si tratta di un caso particolare, legato soprattutto all'entità \emph{Cliente}, figlia di \emph{Persona}.
+			Ad esempio due clienti dello stesso nucleo familiare condividono lo stesso numero di telefono, da qui la necessità di non vincolare le partecipazioni delle istanze di \emph{Recapito} nella relationship \emph{Rubrica} ad una ed una sola.
 			
 			\begin{figure}[H]
 				\centering

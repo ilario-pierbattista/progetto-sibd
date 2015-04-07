@@ -641,6 +641,8 @@
 
 				Tale relationship sarà sostituita da tre relationship distinte (figura \ref{fig:rubrica_refactor}): \emph{Rubrica Cliente}, \emph{Rubrica Fornitore} e \emph{Rubrica Operatore}.
 
+				Da notare sono le partecipazioni delle entità alle relationship. Nella fase progettuale precedente era stato necessario permettere che più istanze di \emph{Recapito} potessero partecipare alla relationship \emph{Rubrica}. Con l'eliminazione delle gerarchie ed il partizionamento della relationship, possiamo vincolare le partecipazioni con più precisione: permetteremo solamente alla relationship \emph{Rubrica Cliente} di accettare più istanze di \emph{Recapito} per la stessa istanza di \emph{Cliente}.
+
 				\begin{sidewaysfigure}
 					\centering
 					\includegraphics[width=22cm]{images/refactor/persona-recapito.png}
@@ -736,4 +738,166 @@
 		\vspace{2ex}
 		
 	\subsection{Traduzione verso il Modello Relazionale}
-	
+
+	\vspace{2ex}
+		\begin{longtable}{| p{3cm} | p{11.5cm} |}
+			\hline
+			\textbf{Entità/Relazione} & \textbf{Traduzione} \\
+			\hline
+			\endfirsthead
+
+			\hline
+			\textbf{Entità/Relazione} & \textbf{Traduzione} \\
+			\hline
+			\endhead
+
+			Cliente & 
+				Cliente(\underline{CF\_PIVA}, Nome, Cognome, RagioneSociale, Citta, Via, Civico, CAP, NDocID) \\
+				\hline
+			Fornitore &
+				Fornitore(\underline{PIVA}, RagioneSociale, TempiConsegna, ModPagamento, IBAN, Citta, Via, Civico, CAP) \\
+				\hline
+			Operatore &
+				Operatore(\underline{CF}, Nome, Cognome, Citta, Via, Civico, CAP, DataNasc, ComuneNasc, ProvinciaNasc, Stipendio, RetribuzioneH, ModRiscossione, IBAN) \\
+				\hline
+			Transazione &
+				Transazione(\underline{Codice}, Quota, Data) \\
+				\hline
+			Autovettura &
+				Autovettura(\underline{Targa}, Telaio, Marca, Modello, Cilindrata, AnnoImmatricolazione, UltimoCollaudo, UltimaRevisione, Cliente) \\
+				\hline
+			Preventivo &
+				Preventivo(\underline{Codice}, DataEmissione, DataInizio, Categoria, Sintomi, SisAlimentazione, TempoStimato, CostoComponenti, Manodopera, ServAggiuntivi, Autovettura, Acconto) \\
+				\hline
+			Componente & 
+				Componente(\underline{Codice}, Nome, QuantitaMin, Validita, PrezzoVendita) \\
+				\hline
+			Previsione &
+				Previsione(\underline{Componente}, \underline{Preventivo}, Ubicazione, Quantita, PrezzoUnitario) \\
+				\hline
+			Prestazione &
+				Prestazione(\underline{Preventivo}, TempiEsecuzione, Procedimento, DataFine, Malfunzionamento, ServAggiuntivi, Manodopera) \\
+				\hline
+			Occupazione &
+				Occupazione(\underline{Prestazione}, \underline{Operatore}) \\
+				\hline
+			Ordine &
+				Ordine(\underline{Codice}, DataEmissione, DataConsegna, Imponibile, Fornitore, Versamento) \\
+				\hline
+			Fornitura & 
+				Fornitura(\underline{Codice}, Componente, Quantita, PrezzoUnitario, Ordine) \\
+				\hline
+			Utilizzo &
+				Utilizzo(\underline{Prestazione}, \underline{Fornitura}, PrezzoUnitario, Quantita) \\
+				\hline
+			Magazzino &
+				Magazzino(\underline{Componente}, \underline{Fornitura}, Quantita) \\
+				\hline
+			Fattura &
+				Fattura(\underline{Numero}, \underline{Anno}, Prestazione, Imponibile, Sconto, Incentivi, DataEmissione, DataScadenza, TipoPag, StatoPag, SisPag, Transazione) \\
+				\hline
+			Turno & 
+				Turno(\underline{Operatore}, \underline{Data}, \underline{OraInizio}, OraFine) \\
+				\hline
+			Stipendio &
+				Stipendio(\underline{Transazione}, Operatore) \\
+				\hline
+			Recapito &
+				Recapito(\underline{Recapito}, Tipo) \\
+				\hline
+			RubricaCliente &
+				RubricaCliente(\underline{Recapito}, \underline{Cliente}) \\
+				\hline
+			RubricaFornitore &
+				RubricaFornitore(\underline{Recapito}, \underline{Fornitore}) \\
+				\hline
+			RubricaOperatore &
+				RubricaOperatore(\underline{Recapito}, \underline{Operatore}) \\
+				\hline
+
+		\end{longtable}
+	\vspace{2ex}
+
+	\vspace{2ex}
+		\begin{longtable}{| p{8cm} | p{6.5cm} |}
+			\hline
+			\textbf{Traduzioni} & \textbf{Vincoli di Riferimento} \\
+			\hline
+			\endfirsthead
+
+			\hline
+			\textbf{Traduzioni} & \textbf{Vincoli di Riferimento} \\
+			\hline
+			\endhead
+
+			Cliente(\underline{CF\_PIVA}, Nome, Cognome, RagioneSociale, Citta, Via, Civico, CAP, NDocID) &
+			* \\ \hline
+			Fornitore(\underline{PIVA}, RagioneSociale, TempiConsegna, ModPagamento, IBAN, Citta, Via, Civico, CAP) &
+			* \\ \hline
+			Operatore(\underline{CF}, Nome, Cognome, Citta, Via, Civico, CAP, DataNasc, ComuneNasc, ProvinciaNasc, Stipendio, RetribuzioneH, ModRiscossione, IBAN) &
+			* \\ \hline
+			Transazione(\underline{Codice}, Quota, Data) &
+			* \\ \hline
+			Autovettura(\underline{Targa}, Telaio, Marca, Modello, Cilindrata, AnnoImmatricolazione, UltimoCollaudo, UltimaRevisione, Cliente) &
+			$Cliente \rightarrow Cliente.CF\_PIVA$ \\ 
+			\hline
+			Preventivo(\underline{Codice}, DataEmissione, DataInizio, Categoria, Sintomi, SisAlimentazione, TempoStimato, CostoComponenti, Manodopera, ServAggiuntivi, Autovettura, Acconto) &
+			$Autovettura \rightarrow Autovettura.Targa$ \\
+			& $Acconto \rightarrow Transazione.Codice$ \\
+			\hline
+			Componente(\underline{Codice}, Nome, QuantitaMin, Validita, PrezzoVendita) &
+			* \\ \hline
+			Previsione(\underline{Componente}, \underline{Preventivo}, Ubicazione, Quantita, PrezzoUnitario) &
+			$Componente \rightarrow Componente.Codice$ \\
+			& $Preventivo \rightarrow Preventivo.Codice$ \\
+			\hline
+			Prestazione(\underline{Preventivo}, TempiEsecuzione, Procedimento, DataFine, Malfunzionamento, ServAggiuntivi, Manodopera) &
+			$Preventivo \rightarrow Preventivo.Codice$ \\
+			\hline
+			Occupazione(\underline{Prestazione}, \underline{Operatore}) &
+			$Prestazione \rightarrow Prestazione.Preventivo$ \\
+			& $Operatore \rightarrow Operatore.CF$ \\
+			\hline
+			Ordine(\underline{Codice}, DataEmissione, DataConsegna, Imponibile, Fornitore, Versamento) &
+			$Versamento \rightarrow Transazione.Codice$ \\
+			\hline
+			Fornitura(\underline{Codice}, Componente, Quantita, PrezzoUnitario, Ordine) &
+			$Componente \rightarrow Componente.Codice$ \\
+			& $Ordine \rightarrow Ordine.Codice$ \\
+			\hline
+			Utilizzo(\underline{Prestazione}, \underline{Fornitura}, PrezzoUnitario, Quantita) &
+			$Prestazione \rightarrow Prestazione.Preventivo$ \\
+			& $Fornitura \rightarrow Fornitura.Codice$ \\
+			\hline
+			Magazzino(\underline{Componente}, \underline{Fornitura}, Quantita) &
+			$Componente \rightarrow Componente.Codice$ \\
+			& $Fornitura \rightarrow Fornitura.Codice$ \\
+			\hline
+			Fattura(\underline{Numero}, \underline{Anno}, Prestazione, Imponibile, Sconto, Incentivi, DataEmissione, DataScadenza, TipoPag, StatoPag, SisPag, Transazione) &
+			$Prestazione \rightarrow Prestazione.Preventivo$ \\
+			& $Transazione \rightarrow Transazione.Codice$ \\
+			\hline
+			Turno(\underline{Operatore}, \underline{Data}, \underline{OraInizio}, OraFine) &
+			$Operatore \rightarrow Operatore.CF$ \\
+			\hline
+			Stipendio(\underline{Transazione}, Operatore) &
+			$Transazione \rightarrow Transazione.Codice$ \\
+			& $Operatore \rightarrow Operatore.CF$ \\
+			\hline
+			Recapito(\underline{Recapito}, Tipo) &
+			* \\ \hline
+			RubricaCliente(\underline{Recapito}, \underline{Cliente}) &
+			$Recapito \rightarrow Recapito.Recapito$ \\
+			& $Cliente \rightarrow Cliente.CF\_PIVA$ \\
+			\hline
+			RubricaFornitore(\underline{Recapito}, \underline{Fornitore}) &
+			$Recapito \rightarrow Recapito.Recapito$ \\
+			& $Fornitore \rightarrow Fornitore.PIVA$ \\
+			\hline
+			RubricaOperatore(\underline{Recapito}, \underline{Operatore}) &
+			$Recapito \rightarrow Recapito.Recapito$ \\
+			& $Operatore \rightarrow Operatore.CF$ \\
+			\hline
+
+		\end{longtable}
+	\vspace{2ex}
