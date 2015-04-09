@@ -25,15 +25,15 @@ Insert Into Fornitore (PIVA, RagioneSociale, TempiConsegna, ModPagamento, IBAN, 
 
 Insert Into Operatore (CF, Nome, Cognome, Citta, Via, Civico, CAP, DataNasc, ComuneNasc, ProvinciaNasc, Stipendio, RetribuzioneH, ModRiscossione, IBAN)
 	Values ('STFDRN60A02E783V', 'Adriano', 'Staffolani', 'Pollenza', 'Via Cardarelli', '31', '62010', 
-		'1960-01-02', 'Macerata', 'MC', 1800, 12, 'bonifico');
+		'1960-01-02', 'Macerata', 'MC', 1800, 12, 'bonifico', 'IT02L1254312534123651074012');
 
 Insert Into Operatore (CF, Nome, Cognome, Citta, Via, Civico, CAP, DataNasc, ComuneNasc, ProvinciaNasc, Stipendio, RetribuzioneH, ModRiscossione, IBAN)
 	Values ('VNCNDR84T24I156L', 'Andrea', 'Vincenzetti', 'San Severino', 'Via della Repubblica', '12', '62300', 
-		'1984-12-24', 'San Severino', 'MC', 1200, 8, 'assegno');
+		'1984-12-24', 'San Severino', 'MC', 1200, 8, 'assegno', 'IT02L1254312004743501000012');
 
 Insert Into Operatore (CF, Nome, Cognome, Citta, Via, Civico, CAP, DataNasc, ComuneNasc, ProvinciaNasc, Stipendio, RetribuzioneH, ModRiscossione, IBAN)
 	Values ('VRDLCU90D15E783S', 'Luca', 'Verdi', 'Tolentino', 'Viale Isonzo', '87', '62150', 
-		'1990-04-15', 'Macerata', 'MC', 1000, 8, 'contanti');
+		'1990-04-15', 'Macerata', 'MC', 1000, 8, 'contanti', 'IT02L1254312000023451000012');
 
 /** Inserimento Autovettura */
 
