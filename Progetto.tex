@@ -18,6 +18,7 @@
 \usepackage[a4paper]{geometry} % Geometry Page
 \usepackage{array}
 \usepackage{footnote}
+\usepackage{setspace}
 
 % Setup Hyperef
 \hypersetup{
@@ -36,6 +37,47 @@
 \headsep=50pt
 \pagestyle{fancy}
 
+% Defining frontespice
+\newlength{\drop}% for my convenience
+\setlength{\drop}{1em}
+\newcommand*{\titleUnivpm}
+{
+	\begingroup
+		\begin{center}
+			{\Huge\bfseries\rmfamily Università Politecnica delle Marche}\\
+			[\baselineskip]
+		    \rule{\textwidth}{2pt}\par
+		    \vspace*{\drop}
+		    {\large\bfseries\rmfamily PROGETTAZIONE DI UNA BASE DI DATI}\\
+		    {\large\bfseries\rmfamily PER}\\
+		    {\Large\bfseries\rmfamily UN'OFFICINA MECCANICA}\\
+		    \vspace*{2cm}
+		    {\large\itshape\bfseries\rmfamily Relazione del Progetto per l'Esame di}\\
+		    {\large\itshape\bfseries\rmfamily Sistemi Informativi e Basi di Dati}\\
+	    \end{center}
+	    \vspace*{2cm}   
+	    \begin{minipage}{0.4\textwidth}
+		    \begin{flushleft}
+		    {\small\bfseries Docente di Riferimento:}\\
+		    {\bfseries Professoressa}\\
+		    {\bfseries\itshape Claudia DIAMANTINI }
+		    \end{flushleft}
+	    \end{minipage}
+	    \begin{minipage}{0.4\textwidth}
+		    \begin{flushright} 
+		    {\bfseries\small Gruppo 809:}\\
+		    {\bfseries\itshape Ilario Pierbattista}\\
+		   	{\bfseries\itshape Alessandro Staffolani}\\
+			{\bfseries\itshape Luka Petrovic}\\
+		    \end{flushright}
+	    \end{minipage}  
+	    \vfill
+	    \begin{center}
+		    {\large\bfseries\rmfamily ANNO ACCADEMICO 2014-2015}
+		\end{center}
+    \endgroup
+}
+
 % Redefining arraystretch
 \renewcommand{\arraystretch}{1.5}
 
@@ -44,23 +86,15 @@
 %Document begin
 \begin{document}
 
-\title{Progettazione di una Base di Dati per un'Offinica Meccanica \\
-		Relazione del Progetto per l'Esame di Basi di Dati \\
-		Gruppo 809
-	}
-\author{Ilario Pierbattista \and
-	Alessandro Staffolani \and
-	Luka Petrovic}
-\date{\today{}}
-\maketitle
+\titleUnivpm
 \newpage
 
 \tableofcontents
 \newpage
 
 % Introduzione
-\input{intro.tex}
-\newpage
+% \input{intro.tex}
+% \newpage
 
 % Sezione sull'analisi dei requisiti
 \input{analisi_requisiti.tex}

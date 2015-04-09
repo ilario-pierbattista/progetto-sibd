@@ -145,7 +145,7 @@ CREATE TABLE Preventivo (
 	Manodopera Decimal(7,2) DEFAULT 0,
 	ServAggiuntivi Decimal(7,2) DEFAULT 0,
 	Autovettura Varchar(8) NOT NULL,
-	Acconto Integer NOT NULL,
+	Acconto Integer,
 	FOREIGN KEY (Autovettura) REFERENCES Autovettura(Targa),
 	FOREIGN KEY (Acconto) REFERENCES Transazione(Codice)
 );
@@ -241,7 +241,7 @@ CREATE TABLE Fattura (
 	SisPag ENUM('rimessa_diretta', 'rimessa_differita')
 		DEFAULT 'rimessa_diretta' NOT NULL,
 	Prestazione Integer NOT NULL,
-	Transazione Integer NOT NULL,
+	Transazione Integer,
 	PRIMARY KEY(Numero, Anno),
 	FOREIGN KEY (Prestazione) REFERENCES Prestazione(Preventivo),
 	FOREIGN KEY (Transazione) REFERENCES Transazione(Codice)

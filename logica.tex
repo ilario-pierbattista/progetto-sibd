@@ -685,7 +685,7 @@
 			Turno			& Ora Inizio, Data, Codice Fiscale (di \emph{Operatore})	\\ \hline
 			Transazione 	& Codice					\\ \hline
 			Fattura         & Numero Progressivo, Anno 	\\ \hline
-			Recapito 		& Recapito 					\\
+			Recapito 		& Codice 					\\
 
 			\hline			
 		\end{longtable}
@@ -803,7 +803,7 @@
 				Stipendio(\underline{Transazione}, Operatore) \\
 				\hline
 			Recapito &
-				Recapito(\underline{Recapito}, Tipo) \\
+				Recapito(\underline{Codice}, Recapito, Tipo) \\
 				\hline
 			RubricaCliente &
 				RubricaCliente(\underline{Recapito}, \underline{Cliente}) \\
@@ -884,18 +884,18 @@
 			$Transazione \rightarrow Transazione.Codice$ \\
 			& $Operatore \rightarrow Operatore.CF$ \\
 			\hline
-			Recapito(\underline{Recapito}, Tipo) &
+			Recapito(\underline{Codice}, Recapito, Tipo) &
 			* \\ \hline
 			RubricaCliente(\underline{Recapito}, \underline{Cliente}) &
-			$Recapito \rightarrow Recapito.Recapito$ \\
+			$Recapito \rightarrow Recapito.Codice$ \\
 			& $Cliente \rightarrow Cliente.CF\_PIVA$ \\
 			\hline
 			RubricaFornitore(\underline{Recapito}, \underline{Fornitore}) &
-			$Recapito \rightarrow Recapito.Recapito$ \\
+			$Recapito \rightarrow Recapito.Codice$ \\
 			& $Fornitore \rightarrow Fornitore.PIVA$ \\
 			\hline
 			RubricaOperatore(\underline{Recapito}, \underline{Operatore}) &
-			$Recapito \rightarrow Recapito.Recapito$ \\
+			$Recapito \rightarrow Recapito.Codice$ \\
 			& $Operatore \rightarrow Operatore.CF$ \\
 			\hline
 

@@ -3,9 +3,7 @@
 	
 	\subsection{Strategia di Progetto}
 		
-		La strategia di progettazione che ci sembra più adatta per svolgere il nostro lavoro è la strategia \emph{Inside-Out}. Partiremo dai concetti più rilevanti, emersi in fase di analisi dei requisiti, e da questi 
-						
-		{\color{red}{Questa sezione va ampliata e corretta}}
+		Svilupperemo lo schema concettuale utilizzando in modo intensivo la tecnica di progettazione nota come \emph{Inside-Out}, mischiandola con la strategia \emph{Top-Down}. Partiremo da un'iniziale individuazione di uno scheletro del modello concettuale, quindi procederemo a successive raffinazioni delle componenti che condurranno alla definizione completa del diagramma ER.
 		
 	\subsection{Individuazione dello Scheletro dello Schema ER}
 		
@@ -345,7 +343,7 @@
 				\label{fig:operatore_turno}
 			\end{figure}
 			
-			L'ultimo punto da sviluppare consiste nella gestione dei recapiti, di qualunque natura essi siano. L'entità \emph{Recapito} è costituita dagli attributi "Recapito" (che è anche chiave primaria) e dall'attributo "Tipo" (consultare le Regole Aziendali alla sezione \ref{sec:business_rules} per i valori che tale attributo può assumere).
+			L'ultimo punto da sviluppare consiste nella gestione dei recapiti, di qualunque natura essi siano. L'entità \emph{Recapito} è costituita dagli attributi "Codice" (che ne è anche la chiave primaria), "Recapito" e "Tipo" (consultare le Regole Aziendali alla sezione \ref{sec:business_rules} per i valori che tale attributo può assumere).
 
 			Ad ogni istanza di \emph{Persona} devono essere associati una o più istanze di \emph{Recapito}. 
 			Più istanze di \emph{Persona} possono essere associate alla stessa istanza di \emph{Recapito}: si tratta di un caso particolare, legato soprattutto all'entità \emph{Cliente}, figlia di \emph{Persona}.
@@ -515,8 +513,8 @@
 				
 				Recapito &
 				Numero telefonico, indirizzo email o sito web. Qualsiasi recapito telematico utile a contattare una Persona. &
-				Recapito (Stringa), Tipo(Stringa) &
-				Recapito (Stringa)
+				Codice (Numerico), Recapito (Stringa), Tipo(Stringa) &
+				Codice (Numerico)
 				\\ \hline
 				
 			\end{longtable}
