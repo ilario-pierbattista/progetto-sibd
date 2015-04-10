@@ -3,63 +3,6 @@ CREATE SCHEMA Officina;
 USE Officina;
 
 /**********************************************
- *
- * Funzioni custom
- *
- **********************************************
- */
-
-DELIMITER ;;
-/*
- * Funzione per il controllo del codice fiscale
- * CF usati per il test:
- * - PRBLRI93R05I324O
- * - STFLSN93A08E783E
- */
-CREATE FUNCTION check_cf(cf Varchar(16)) 
-	RETURNS BOOLEAN
-BEGIN
-	DECLARE result BOOLEAN;
-	SELECT cf REGEXP '^[A-Z]{6}[0-9]{2}[A-Z]{1}[0-9]{2}[A-Z]{1}[0-9]{3}[A-Z]{1}$' INTO result;
-	RETURN result;
-END;;
-
-/*
- * Funzione per il controllo della partita iva
- */
-CREATE FUNCTION check_piva(piva Varchar(11))
-	RETURNS BOOLEAN
-BEGIN
-	DECLARE result BOOLEAN;
-	SELECT piva REGEXP '^[0-9]{11}$' INTO result;
-	RETURN result;
-END;;
-
-/*
- * Funzione per il controllo del codice fiscale 
- * o della partita iva
- */
-CREATE FUNCTION check_cf_piva(stringa Varchar(16)) 
-	RETURNS BOOLEAN
-BEGIN
-	DECLARE cf, piva BOOLEAN;
-	SELECT check_cf(stringa) INTO cf;
-	SELECT check_piva(stringa) INTO piva;
-	RETURN cf XOR piva;
-END;;
-
-/*
- * Funzione per il controllo del CAP
- */
-CREATE FUNCTION check_cap(cap Varchar(5))
-	RETURNS BOOLEAN
-BEGIN
-	DECLARE result BOOLEAN;
-	SELECT cap REGEXP '^[0-9]{5}$' INTO result;
-	RETURN result;
-END;; 
-
-/**********************************************
  * 
  * Definizione delle tabelle
  *
@@ -191,7 +134,7 @@ CREATE TABLE Occupazione (
 CREATE TABLE Ordine (
 	Codice Integer AUTO_INCREMENT PRIMARY KEY,
 	DataEmissione Date NOT NULL,
-	DataConsegna Date NOT NULL,
+	DataConsegna Date,
 	Imponibile Decimal(9,2) NOT NULL,
 	Fornitore Varchar(11) NOT NULL,
 	Versamento Integer NOT NULL,
@@ -264,31 +207,221 @@ CREATE TABLE Stipendio (
 );
 
 CREATE TABLE Recapito (
-	Recapito Varchar(200) PRIMARY KEY,
+	Codice Integer AUTO_INCREMENT PRIMARY KEY,
+	Recapito Varchar(200) NOT NULL,
 	Tipo ENUM('telefono',
 		'fax', 
 		'tel_fax',
 		'sito_web',
-		'email') NOT NULL
+		'email') NOT NULL,
+	UNIQUE(Recapito)
 );
 
 CREATE TABLE RubricaCliente (
-	Recapito Varchar(200) NOT NULL,
+	Recapito Integer NOT NULL,
 	Cliente Varchar(16) NOT NULL,
 	PRIMARY KEY(Recapito, Cliente),
-	FOREIGN KEY (Cliente) REFERENCES Cliente(CF_PIVA)
+	FOREIGN KEY (Cliente) REFERENCES Cliente(CF_PIVA),
+	FOREIGN KEY (Recapito) REFERENCES Recapito(Codice)
 );
 
 CREATE TABLE RubricaFornitore (
-	Recapito Varchar(200) NOT NULL,
+	Recapito Integer NOT NULL,
 	Fornitore Varchar(11) NOT NULL,
 	PRIMARY KEY(Recapito, Fornitore),
-	FOREIGN KEY (Fornitore) REFERENCES Fornitore(PIVA)
+	FOREIGN KEY (Fornitore) REFERENCES Fornitore(PIVA),
+	FOREIGN KEY (Recapito) REFERENCES Recapito(Codice)
 );
 
 CREATE TABLE RubricaOperatore (
-	Recapito Varchar(200) NOT NULL,
+	Recapito Integer NOT NULL,
 	Operatore Varchar(16) NOT NULL,
 	PRIMARY KEY(Recapito, Operatore),
-	FOREIGN KEY (Operatore) REFERENCES Operatore(CF)
+	FOREIGN KEY (Operatore) REFERENCES Operatore(CF),
+	FOREIGN KEY (Recapito) REFERENCES Recapito(Codice)
 );
+
+
+/**********************************************
+ *
+ * Funzioni custom
+ *
+ **********************************************
+ */
+
+DELIMITER ;;
+/*
+ * Funzione per il controllo del codice fiscale
+ * (RV1)
+ */
+CREATE FUNCTION check_cf(cf Varchar(16)) 
+	RETURNS BOOLEAN
+BEGIN
+	DECLARE result BOOLEAN;
+	SELECT cf REGEXP '^[A-Z]{6}[0-9]{2}[A-Z]{1}[0-9]{2}[A-Z]{1}[0-9]{3}[A-Z]{1}$' INTO result;
+	RETURN result;
+END;;
+
+/*
+ * Funzione per il controllo della partita iva
+ * (RV1)
+ */
+CREATE FUNCTION check_piva(piva Varchar(11))
+	RETURNS BOOLEAN
+BEGIN
+	DECLARE result BOOLEAN;
+	SELECT piva REGEXP '^[0-9]{11}$' INTO result;
+	RETURN result;
+END;;
+
+/*
+ * Funzione per il controllo del codice fiscale 
+ * o della partita iva
+ * (RV1)
+ */
+CREATE FUNCTION check_cf_piva(stringa Varchar(16)) 
+	RETURNS BOOLEAN
+BEGIN
+	DECLARE cf, piva BOOLEAN;
+	SELECT check_cf(stringa) INTO cf;
+	SELECT check_piva(stringa) INTO piva;
+	RETURN cf XOR piva;
+END;;
+
+/*
+ * Funzione per il controllo del CAP
+ * (RV2)
+ */
+CREATE FUNCTION check_cap(cap Varchar(5))
+	RETURNS BOOLEAN
+BEGIN
+	DECLARE result BOOLEAN;
+	SELECT cap REGEXP '^[0-9]{5}$' INTO result;
+	RETURN result;
+END;;
+
+/*
+ * Funzione per il controllo per il
+ * numero del documento d'identità
+ * (RV4)
+ */
+CREATE FUNCTION check_ndocid(ndocid Varchar(9))
+	RETURNS BOOLEAN
+BEGIN
+	DECLARE result BOOLEAN;
+	SELECT ndocid REGEXP '^[A-Z]{2}[0-9]{7}$' INTO result;
+	RETURN result;
+END;;
+
+/*
+ * Funzione di controllo per la sigla della
+ * provincia
+ * (RV5)
+ */
+CREATE FUNCTION check_provincia(provincia Varchar(2)) 
+	RETURNS BOOLEAN
+BEGIN
+	DECLARE result BOOLEAN;
+	SELECT provincia REGEXP '^[A-Z]{2}$' INTO result;
+	RETURN result;
+END;;
+
+/*
+ * Funzione di controllo per gli IBAN
+ * (RV10)
+ */
+CREATE FUNCTION check_iban(iban Varchar(27))
+	RETURNS BOOLEAN
+BEGIN
+	DECLARE result BOOLEAN;
+	SELECT iban REGEXP '^[A-Z]{2}[0-9]{2}[A-Z]{1}[0-9]{10}[0-9A-Z]{12}$' INTO result;
+	RETURN result;
+END;;
+
+
+/*****************************************
+ *
+ * Aggiunta dei trigger che implementano i
+ * vincoli d'integrità
+ *
+ *****************************************
+ */
+DELIMITER ;;
+
+/*
+ * Implmentazione dei vincoli su Cliente
+ */
+CREATE TRIGGER Cliente_before_insert
+	BEFORE INSERT ON Cliente FOR EACH ROW
+BEGIN
+	IF check_cf_piva(NEW.CF_PIVA) = FALSE THEN
+		SIGNAL SQLSTATE '45000'
+		SET MESSAGE_TEXT = 'Codice fiscale o Partita IVA non valido';
+	ELSEIF check_cap(NEW.CAP) = FALSE THEN
+		SIGNAL SQLSTATE '45000'
+		SET MESSAGE_TEXT = 'CAP non valido';
+	ELSEIF check_ndocid(NEW.NDocId) = FALSE THEN
+		SIGNAL SQLSTATE '45000'
+		SET MESSAGE_TEXT = 'Numero del documento d\'identità non valido';
+	ELSEIF check_cf(NEW.CF_PIVA) AND 
+		(NEW.Nome IS NULL OR 
+			NEW.Cognome IS NULL OR 
+			NEW.RagioneSociale IS NOT NULL) THEN
+		SIGNAL SQLSTATE '45000'
+		SET MESSAGE_TEXT = 'Codice Fiscale rilevato: inserire solamente Nome e Cognome';
+	ELSEIF check_piva(NEW.CF_PIVA) AND (NEW.RagioneSociale IS NULL) THEN
+		SIGNAL SQLSTATE '45000'
+		SET MESSAGE_TEXT = 'Partita IVA rilevata: inserire RagioneSociale';
+	END IF;
+END;;
+
+/*
+ * Implementazione dei vincoli su Fornitore
+ */
+CREATE TRIGGER Fornitore_before_insert
+	BEFORE INSERT ON Fornitore FOR EACH ROW
+BEGIN
+	IF check_piva(NEW.PIVA) = FALSE THEN
+		SIGNAL SQLSTATE '45000'
+		SET MESSAGE_TEXT = 'Partita IVA non valida';
+	ELSEIF check_cap(NEW.CAP) = FALSE THEN
+		SIGNAL SQLSTATE '45000'
+		SET MESSAGE_TEXT = 'CAP non valido';
+	ELSEIF check_iban(NEW.IBAN) = FALSE THEN
+		SIGNAL SQLSTATE '45000'
+		SET MESSAGE_TEXT = 'IBAN non valido';
+	ELSEIF NEW.ModPagamento = 'bonifico' AND NEW.IBAN IS NULL THEN
+		SIGNAL SQLSTATE '45000'
+		SET MESSAGE_TEXT = 'Il pagamento tramite bonifico richiede l\'IBAN';
+	END IF;
+END;;
+
+/*
+ * Implementazione vincoli su Operatore
+ */
+CREATE TRIGGER Operatore_before_insert
+	BEFORE INSERT ON Operatore FOR EACH ROW
+BEGIN
+	IF check_cf_piva(NEW.CF) = FALSE THEN
+		SIGNAL SQLSTATE '45000'
+		SET MESSAGE_TEXT = 'Codice fiscale non valido';
+	ELSEIF check_cap(NEW.CAP) = FALSE THEN
+		SIGNAL SQLSTATE '45000'
+		SET MESSAGE_TEXT = 'CAP non valido';
+	ELSEIF check_provincia(NEW.ProvinciaNasc) = FALSE THEN
+		SIGNAL SQLSTATE '45000'
+		SET MESSAGE_TEXT = 'ProvinciaNasc non valida';
+	ELSEIF NOT (NEW.Stipendio IS NULL XOR NEW.RetribuzioneH IS NULL) THEN
+		SIGNAL SQLSTATE '45000'
+		SET MESSAGE_TEXT = 'Specificare uno solo tra Stipendio e RetribuzioneH';
+	ELSEIF NEW.ModRiscossione = 'bonifico' AND NEW.IBAN IS NULL THEN
+		SIGNAL SQLSTATE '45000'
+		SET MESSAGE_TEXT = 'La riscossione tramite bonifico richiede l\'IBAN';
+	ELSEIF check_iban(NEW.IBAN) = FALSE THEN
+		SIGNAL SQLSTATE '45000'
+		SET MESSAGE_TEXT = 'IBAN non valido';
+	END IF;
+END;;
+
+/* Delimiter di default */
+DELIMITER ;
