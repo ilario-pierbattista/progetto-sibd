@@ -1,0 +1,291 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="dataSourceStorage">
+  <data-source name="MySQL - Officina@localhost" uuid="ce0c5239-ee59-42b9-b957-bd114e5743b2">
+    <database-info product="MySQL" version="5.5.43-0+deb8u1" jdbc-version="4.0" driver-name="MySQL Connector Java" driver-version="mysql-connector-java-5.1.35 ( Revision: 5fb9c5849535c13917c2cf9baaece6ef9693ef27 )">
+      <extra-name-characters>#@</extra-name-characters>
+      <identifier-quote-string>`</identifier-quote-string>
+    </database-info>
+    <case-sensitivity plain-identifiers="exact" quoted-identifiers="exact"/>
+    <schema name="" catalog="Officina"/>
+    <table name="Autovettura" schema="" catalog="Officina" type="TABLE">
+      <column name="Targa" sqlType="VARCHAR" precision="8" scale="0" nullable="false" jdbcType="12"/>
+      <column name="Telaio" sqlType="VARCHAR" precision="17" scale="0" nullable="true" jdbcType="12"/>
+      <column name="Marca" sqlType="VARCHAR" precision="50" scale="0" nullable="false" jdbcType="12"/>
+      <column name="Modello" sqlType="VARCHAR" precision="100" scale="0" nullable="false" jdbcType="12"/>
+      <column name="Cilindrata" sqlType="INT" precision="10" scale="0" nullable="true" jdbcType="4"/>
+      <column name="AnnoImmatricolazione" sqlType="INT" precision="10" scale="0" nullable="false" jdbcType="4"/>
+      <column name="UltimoCollaudo" sqlType="DATE" precision="10" scale="0" nullable="true" jdbcType="91"/>
+      <column name="UltimaRevisione" sqlType="DATE" precision="10" scale="0" nullable="true" jdbcType="91"/>
+      <column name="Cliente" sqlType="VARCHAR" precision="16" scale="0" nullable="false" jdbcType="12"/>
+      <primary-key name="PRIMARY" columns="Targa"/>
+      <foreign-key name="Autovettura_ibfk_1" columns="Cliente" ref-table="Cliente" ref-schema="" ref-catalog="Officina" ref-columns="CF_PIVA" update-rule="3" delete-rule="3" deferrability="2"/>
+      <exported-key name="Preventivo_ibfk_1" table="Preventivo" schema="" catalog="Officina" columns="Autovettura"/>
+    </table>
+    <table name="Cliente" schema="" catalog="Officina" type="TABLE">
+      <column name="CF_PIVA" sqlType="VARCHAR" precision="16" scale="0" nullable="false" jdbcType="12"/>
+      <column name="Nome" sqlType="VARCHAR" precision="80" scale="0" nullable="true" jdbcType="12"/>
+      <column name="Cognome" sqlType="VARCHAR" precision="80" scale="0" nullable="true" jdbcType="12"/>
+      <column name="RagioneSociale" sqlType="VARCHAR" precision="80" scale="0" nullable="true" jdbcType="12"/>
+      <column name="Citta" sqlType="VARCHAR" precision="50" scale="0" nullable="false" jdbcType="12"/>
+      <column name="Via" sqlType="VARCHAR" precision="50" scale="0" nullable="false" jdbcType="12"/>
+      <column name="Civico" sqlType="VARCHAR" precision="10" scale="0" nullable="false" jdbcType="12"/>
+      <column name="CAP" sqlType="VARCHAR" precision="5" scale="0" nullable="false" jdbcType="12"/>
+      <column name="NDocId" sqlType="VARCHAR" precision="9" scale="0" nullable="true" jdbcType="12"/>
+      <primary-key name="PRIMARY" columns="CF_PIVA"/>
+      <exported-key name="Autovettura_ibfk_1" table="Autovettura" schema="" catalog="Officina" columns="Cliente"/>
+      <exported-key name="RubricaCliente_ibfk_1" table="RubricaCliente" schema="" catalog="Officina" columns="Cliente"/>
+    </table>
+    <table name="Componente" schema="" catalog="Officina" type="TABLE">
+      <column name="Codice" sqlType="INT" precision="10" scale="0" nullable="false" jdbcType="4" autoIncrement="true"/>
+      <column name="Nome" sqlType="VARCHAR" precision="150" scale="0" nullable="false" jdbcType="12"/>
+      <column name="QuantitaMin" sqlType="INT" precision="10" scale="0" nullable="true" jdbcType="4" def="MA=="/>
+      <column name="Validita" sqlType="INT" precision="10" scale="0" nullable="true" jdbcType="4" def="MA=="/>
+      <column name="PrezzoVendita" sqlType="DECIMAL" precision="6" scale="2" nullable="false" jdbcType="3"/>
+      <primary-key name="PRIMARY" columns="Codice"/>
+      <exported-key name="Fornitura_ibfk_1" table="Fornitura" schema="" catalog="Officina" columns="Componente"/>
+      <exported-key name="Magazzino_ibfk_1" table="Magazzino" schema="" catalog="Officina" columns="Componente"/>
+      <exported-key name="Previsione_ibfk_1" table="Previsione" schema="" catalog="Officina" columns="Componente"/>
+    </table>
+    <table name="Fattura" schema="" catalog="Officina" type="TABLE">
+      <column name="Numero" sqlType="INT" precision="10" scale="0" nullable="false" jdbcType="4"/>
+      <column name="Anno" sqlType="INT" precision="10" scale="0" nullable="false" jdbcType="4"/>
+      <column name="Imponibile" sqlType="DECIMAL" precision="10" scale="2" nullable="false" jdbcType="3"/>
+      <column name="Sconto" sqlType="DECIMAL" precision="4" scale="2" nullable="false" jdbcType="3" def="MC4wMA=="/>
+      <column name="Incentivi" sqlType="DECIMAL" precision="8" scale="2" nullable="false" jdbcType="3" def="MC4wMA=="/>
+      <column name="DataEmissione" sqlType="DATE" precision="10" scale="0" nullable="false" jdbcType="91"/>
+      <column name="DataScadenza" sqlType="DATE" precision="10" scale="0" nullable="false" jdbcType="91"/>
+      <column name="TipoPag" sqlType="ENUM" precision="9" scale="0" nullable="false" jdbcType="1"/>
+      <column name="StatoPag" sqlType="TINYINT" precision="3" scale="0" nullable="false" jdbcType="-6" def="MA=="/>
+      <column name="SisPag" sqlType="ENUM" precision="17" scale="0" nullable="false" jdbcType="1" def="J3JpbWVzc2FfZGlyZXR0YSc="/>
+      <column name="Prestazione" sqlType="INT" precision="10" scale="0" nullable="false" jdbcType="4"/>
+      <column name="Transazione" sqlType="INT" precision="10" scale="0" nullable="true" jdbcType="4"/>
+      <primary-key name="PRIMARY" columns="Numero,Anno"/>
+      <foreign-key name="Fattura_ibfk_1" columns="Prestazione" ref-table="Prestazione" ref-schema="" ref-catalog="Officina" ref-columns="Preventivo" update-rule="3" delete-rule="3" deferrability="2"/>
+      <foreign-key name="Fattura_ibfk_2" columns="Transazione" ref-table="Transazione" ref-schema="" ref-catalog="Officina" ref-columns="Codice" update-rule="3" delete-rule="3" deferrability="2"/>
+    </table>
+    <table name="Fornitore" schema="" catalog="Officina" type="TABLE">
+      <column name="PIVA" sqlType="VARCHAR" precision="11" scale="0" nullable="false" jdbcType="12"/>
+      <column name="RagioneSociale" sqlType="VARCHAR" precision="80" scale="0" nullable="false" jdbcType="12"/>
+      <column name="TempiConsegna" sqlType="INT" precision="10" scale="0" nullable="true" jdbcType="4"/>
+      <column name="ModPagamento" sqlType="ENUM" precision="9" scale="0" nullable="false" jdbcType="1"/>
+      <column name="IBAN" sqlType="VARCHAR" precision="27" scale="0" nullable="true" jdbcType="12"/>
+      <column name="Citta" sqlType="VARCHAR" precision="50" scale="0" nullable="false" jdbcType="12"/>
+      <column name="Via" sqlType="VARCHAR" precision="50" scale="0" nullable="false" jdbcType="12"/>
+      <column name="Civico" sqlType="VARCHAR" precision="10" scale="0" nullable="false" jdbcType="12"/>
+      <column name="CAP" sqlType="VARCHAR" precision="5" scale="0" nullable="false" jdbcType="12"/>
+      <primary-key name="PRIMARY" columns="PIVA"/>
+      <exported-key name="Ordine_ibfk_1" table="Ordine" schema="" catalog="Officina" columns="Fornitore"/>
+      <exported-key name="RubricaFornitore_ibfk_1" table="RubricaFornitore" schema="" catalog="Officina" columns="Fornitore"/>
+    </table>
+    <table name="Fornitura" schema="" catalog="Officina" type="TABLE">
+      <column name="Codice" sqlType="INT" precision="10" scale="0" nullable="false" jdbcType="4" autoIncrement="true"/>
+      <column name="Quantita" sqlType="INT" precision="10" scale="0" nullable="false" jdbcType="4"/>
+      <column name="PrezzoUnitario" sqlType="DECIMAL" precision="8" scale="2" nullable="false" jdbcType="3"/>
+      <column name="Componente" sqlType="INT" precision="10" scale="0" nullable="false" jdbcType="4"/>
+      <column name="Ordine" sqlType="INT" precision="10" scale="0" nullable="false" jdbcType="4"/>
+      <primary-key name="PRIMARY" columns="Codice"/>
+      <foreign-key name="Fornitura_ibfk_1" columns="Componente" ref-table="Componente" ref-schema="" ref-catalog="Officina" ref-columns="Codice" update-rule="3" delete-rule="3" deferrability="2"/>
+      <foreign-key name="Fornitura_ibfk_2" columns="Ordine" ref-table="Ordine" ref-schema="" ref-catalog="Officina" ref-columns="Codice" update-rule="3" delete-rule="3" deferrability="2"/>
+      <exported-key name="Magazzino_ibfk_2" table="Magazzino" schema="" catalog="Officina" columns="Fornitura"/>
+      <exported-key name="Utilizzo_ibfk_2" table="Utilizzo" schema="" catalog="Officina" columns="Fornitura"/>
+    </table>
+    <table name="Magazzino" schema="" catalog="Officina" type="TABLE">
+      <column name="Componente" sqlType="INT" precision="10" scale="0" nullable="false" jdbcType="4"/>
+      <column name="Fornitura" sqlType="INT" precision="10" scale="0" nullable="false" jdbcType="4"/>
+      <column name="Quantita" sqlType="INT" precision="10" scale="0" nullable="false" jdbcType="4"/>
+      <primary-key name="PRIMARY" columns="Componente,Fornitura"/>
+      <foreign-key name="Magazzino_ibfk_1" columns="Componente" ref-table="Componente" ref-schema="" ref-catalog="Officina" ref-columns="Codice" update-rule="3" delete-rule="3" deferrability="2"/>
+      <foreign-key name="Magazzino_ibfk_2" columns="Fornitura" ref-table="Fornitura" ref-schema="" ref-catalog="Officina" ref-columns="Codice" update-rule="3" delete-rule="3" deferrability="2"/>
+    </table>
+    <table name="Occupazione" schema="" catalog="Officina" type="TABLE">
+      <column name="Prestazione" sqlType="INT" precision="10" scale="0" nullable="false" jdbcType="4"/>
+      <column name="Operatore" sqlType="VARCHAR" precision="16" scale="0" nullable="false" jdbcType="12"/>
+      <primary-key name="PRIMARY" columns="Prestazione,Operatore"/>
+      <foreign-key name="Occupazione_ibfk_1" columns="Prestazione" ref-table="Prestazione" ref-schema="" ref-catalog="Officina" ref-columns="Preventivo" update-rule="3" delete-rule="3" deferrability="2"/>
+      <foreign-key name="Occupazione_ibfk_2" columns="Operatore" ref-table="Operatore" ref-schema="" ref-catalog="Officina" ref-columns="CF" update-rule="3" delete-rule="3" deferrability="2"/>
+    </table>
+    <table name="Operatore" schema="" catalog="Officina" type="TABLE">
+      <column name="CF" sqlType="VARCHAR" precision="16" scale="0" nullable="false" jdbcType="12"/>
+      <column name="Nome" sqlType="VARCHAR" precision="80" scale="0" nullable="false" jdbcType="12"/>
+      <column name="Cognome" sqlType="VARCHAR" precision="80" scale="0" nullable="false" jdbcType="12"/>
+      <column name="Citta" sqlType="VARCHAR" precision="50" scale="0" nullable="false" jdbcType="12"/>
+      <column name="Via" sqlType="VARCHAR" precision="50" scale="0" nullable="false" jdbcType="12"/>
+      <column name="Civico" sqlType="VARCHAR" precision="10" scale="0" nullable="false" jdbcType="12"/>
+      <column name="CAP" sqlType="VARCHAR" precision="5" scale="0" nullable="false" jdbcType="12"/>
+      <column name="DataNasc" sqlType="DATE" precision="10" scale="0" nullable="false" jdbcType="91"/>
+      <column name="ComuneNasc" sqlType="VARCHAR" precision="50" scale="0" nullable="false" jdbcType="12"/>
+      <column name="ProvinciaNasc" sqlType="VARCHAR" precision="2" scale="0" nullable="false" jdbcType="12"/>
+      <column name="Stipendio" sqlType="DECIMAL" precision="6" scale="2" nullable="true" jdbcType="3"/>
+      <column name="RetribuzioneH" sqlType="DECIMAL" precision="4" scale="2" nullable="true" jdbcType="3"/>
+      <column name="ModRiscossione" sqlType="ENUM" precision="9" scale="0" nullable="false" jdbcType="1"/>
+      <column name="IBAN" sqlType="VARCHAR" precision="27" scale="0" nullable="true" jdbcType="12"/>
+      <primary-key name="PRIMARY" columns="CF"/>
+      <exported-key name="Occupazione_ibfk_2" table="Occupazione" schema="" catalog="Officina" columns="Operatore"/>
+      <exported-key name="RubricaOperatore_ibfk_1" table="RubricaOperatore" schema="" catalog="Officina" columns="Operatore"/>
+      <exported-key name="Stipendio_ibfk_2" table="Stipendio" schema="" catalog="Officina" columns="Operatore"/>
+      <exported-key name="Turno_ibfk_1" table="Turno" schema="" catalog="Officina" columns="Operatore"/>
+    </table>
+    <table name="Ordine" schema="" catalog="Officina" type="TABLE">
+      <column name="Codice" sqlType="INT" precision="10" scale="0" nullable="false" jdbcType="4" autoIncrement="true"/>
+      <column name="DataEmissione" sqlType="DATE" precision="10" scale="0" nullable="false" jdbcType="91"/>
+      <column name="DataConsegna" sqlType="DATE" precision="10" scale="0" nullable="true" jdbcType="91"/>
+      <column name="Imponibile" sqlType="DECIMAL" precision="9" scale="2" nullable="false" jdbcType="3"/>
+      <column name="Fornitore" sqlType="VARCHAR" precision="11" scale="0" nullable="false" jdbcType="12"/>
+      <column name="Versamento" sqlType="INT" precision="10" scale="0" nullable="false" jdbcType="4"/>
+      <primary-key name="PRIMARY" columns="Codice"/>
+      <foreign-key name="Ordine_ibfk_1" columns="Fornitore" ref-table="Fornitore" ref-schema="" ref-catalog="Officina" ref-columns="PIVA" update-rule="3" delete-rule="3" deferrability="2"/>
+      <foreign-key name="Ordine_ibfk_2" columns="Versamento" ref-table="Transazione" ref-schema="" ref-catalog="Officina" ref-columns="Codice" update-rule="3" delete-rule="3" deferrability="2"/>
+      <exported-key name="Fornitura_ibfk_2" table="Fornitura" schema="" catalog="Officina" columns="Ordine"/>
+    </table>
+    <table name="Prestazione" schema="" catalog="Officina" type="TABLE">
+      <column name="Preventivo" sqlType="INT" precision="10" scale="0" nullable="false" jdbcType="4"/>
+      <column name="TempiEsecuzione" sqlType="INT" precision="10" scale="0" nullable="false" jdbcType="4"/>
+      <column name="Procedimento" sqlType="TEXT" precision="65535" scale="0" nullable="true" jdbcType="-1"/>
+      <column name="DataFine" sqlType="DATE" precision="10" scale="0" nullable="false" jdbcType="91"/>
+      <column name="Malfunzionamento" sqlType="VARCHAR" precision="300" scale="0" nullable="true" jdbcType="12"/>
+      <column name="Manodopera" sqlType="DECIMAL" precision="7" scale="2" nullable="true" jdbcType="3" def="MC4wMA=="/>
+      <column name="ServAggiuntivi" sqlType="DECIMAL" precision="7" scale="2" nullable="true" jdbcType="3" def="MC4wMA=="/>
+      <primary-key name="PRIMARY" columns="Preventivo"/>
+      <foreign-key name="Prestazione_ibfk_1" columns="Preventivo" ref-table="Preventivo" ref-schema="" ref-catalog="Officina" ref-columns="Codice" update-rule="3" delete-rule="3" deferrability="2"/>
+      <exported-key name="Fattura_ibfk_1" table="Fattura" schema="" catalog="Officina" columns="Prestazione"/>
+      <exported-key name="Occupazione_ibfk_1" table="Occupazione" schema="" catalog="Officina" columns="Prestazione"/>
+      <exported-key name="Utilizzo_ibfk_1" table="Utilizzo" schema="" catalog="Officina" columns="Prestazione"/>
+    </table>
+    <table name="Preventivo" schema="" catalog="Officina" type="TABLE">
+      <column name="Codice" sqlType="INT" precision="10" scale="0" nullable="false" jdbcType="4" autoIncrement="true"/>
+      <column name="DataEmissione" sqlType="DATE" precision="10" scale="0" nullable="false" jdbcType="91"/>
+      <column name="DataInizio" sqlType="DATE" precision="10" scale="0" nullable="false" jdbcType="91"/>
+      <column name="Categoria" sqlType="ENUM" precision="29" scale="0" nullable="false" jdbcType="1"/>
+      <column name="Sintomi" sqlType="VARCHAR" precision="300" scale="0" nullable="true" jdbcType="12"/>
+      <column name="SisAlimentazione" sqlType="ENUM" precision="12" scale="0" nullable="true" jdbcType="1"/>
+      <column name="TempoStimato" sqlType="INT" precision="10" scale="0" nullable="true" jdbcType="4"/>
+      <column name="CostoComponenti" sqlType="DECIMAL" precision="8" scale="2" nullable="true" jdbcType="3" def="MC4wMA=="/>
+      <column name="Manodopera" sqlType="DECIMAL" precision="7" scale="2" nullable="true" jdbcType="3" def="MC4wMA=="/>
+      <column name="ServAggiuntivi" sqlType="DECIMAL" precision="7" scale="2" nullable="true" jdbcType="3" def="MC4wMA=="/>
+      <column name="Autovettura" sqlType="VARCHAR" precision="8" scale="0" nullable="false" jdbcType="12"/>
+      <column name="Acconto" sqlType="INT" precision="10" scale="0" nullable="true" jdbcType="4"/>
+      <primary-key name="PRIMARY" columns="Codice"/>
+      <foreign-key name="Preventivo_ibfk_1" columns="Autovettura" ref-table="Autovettura" ref-schema="" ref-catalog="Officina" ref-columns="Targa" update-rule="3" delete-rule="3" deferrability="2"/>
+      <foreign-key name="Preventivo_ibfk_2" columns="Acconto" ref-table="Transazione" ref-schema="" ref-catalog="Officina" ref-columns="Codice" update-rule="3" delete-rule="3" deferrability="2"/>
+      <exported-key name="Prestazione_ibfk_1" table="Prestazione" schema="" catalog="Officina" columns="Preventivo"/>
+      <exported-key name="Previsione_ibfk_2" table="Previsione" schema="" catalog="Officina" columns="Preventivo"/>
+    </table>
+    <table name="Previsione" schema="" catalog="Officina" type="TABLE">
+      <column name="Componente" sqlType="INT" precision="10" scale="0" nullable="false" jdbcType="4"/>
+      <column name="Preventivo" sqlType="INT" precision="10" scale="0" nullable="false" jdbcType="4"/>
+      <column name="Ubicazione" sqlType="ENUM" precision="10" scale="0" nullable="true" jdbcType="1"/>
+      <column name="Quantita" sqlType="INT" precision="10" scale="0" nullable="false" jdbcType="4"/>
+      <column name="PrezzoUnitario" sqlType="DECIMAL" precision="6" scale="2" nullable="false" jdbcType="3"/>
+      <primary-key name="PRIMARY" columns="Componente,Preventivo"/>
+      <foreign-key name="Previsione_ibfk_1" columns="Componente" ref-table="Componente" ref-schema="" ref-catalog="Officina" ref-columns="Codice" update-rule="3" delete-rule="3" deferrability="2"/>
+      <foreign-key name="Previsione_ibfk_2" columns="Preventivo" ref-table="Preventivo" ref-schema="" ref-catalog="Officina" ref-columns="Codice" update-rule="3" delete-rule="3" deferrability="2"/>
+    </table>
+    <table name="Recapito" schema="" catalog="Officina" type="TABLE">
+      <column name="Codice" sqlType="INT" precision="10" scale="0" nullable="false" jdbcType="4" autoIncrement="true"/>
+      <column name="Recapito" sqlType="VARCHAR" precision="200" scale="0" nullable="false" jdbcType="12"/>
+      <column name="Tipo" sqlType="ENUM" precision="9" scale="0" nullable="false" jdbcType="1"/>
+      <primary-key name="PRIMARY" columns="Codice"/>
+      <exported-key name="RubricaCliente_ibfk_2" table="RubricaCliente" schema="" catalog="Officina" columns="Recapito"/>
+      <exported-key name="RubricaFornitore_ibfk_2" table="RubricaFornitore" schema="" catalog="Officina" columns="Recapito"/>
+      <exported-key name="RubricaOperatore_ibfk_2" table="RubricaOperatore" schema="" catalog="Officina" columns="Recapito"/>
+      <index name="Recapito" unique="true" columns="Recapito"/>
+    </table>
+    <table name="RubricaCliente" schema="" catalog="Officina" type="TABLE">
+      <column name="Recapito" sqlType="INT" precision="10" scale="0" nullable="false" jdbcType="4"/>
+      <column name="Cliente" sqlType="VARCHAR" precision="16" scale="0" nullable="false" jdbcType="12"/>
+      <primary-key name="PRIMARY" columns="Recapito,Cliente"/>
+      <foreign-key name="RubricaCliente_ibfk_1" columns="Cliente" ref-table="Cliente" ref-schema="" ref-catalog="Officina" ref-columns="CF_PIVA" update-rule="3" delete-rule="3" deferrability="2"/>
+      <foreign-key name="RubricaCliente_ibfk_2" columns="Recapito" ref-table="Recapito" ref-schema="" ref-catalog="Officina" ref-columns="Codice" update-rule="3" delete-rule="3" deferrability="2"/>
+    </table>
+    <table name="RubricaFornitore" schema="" catalog="Officina" type="TABLE">
+      <column name="Recapito" sqlType="INT" precision="10" scale="0" nullable="false" jdbcType="4"/>
+      <column name="Fornitore" sqlType="VARCHAR" precision="11" scale="0" nullable="false" jdbcType="12"/>
+      <primary-key name="PRIMARY" columns="Recapito,Fornitore"/>
+      <foreign-key name="RubricaFornitore_ibfk_1" columns="Fornitore" ref-table="Fornitore" ref-schema="" ref-catalog="Officina" ref-columns="PIVA" update-rule="3" delete-rule="3" deferrability="2"/>
+      <foreign-key name="RubricaFornitore_ibfk_2" columns="Recapito" ref-table="Recapito" ref-schema="" ref-catalog="Officina" ref-columns="Codice" update-rule="3" delete-rule="3" deferrability="2"/>
+    </table>
+    <table name="RubricaOperatore" schema="" catalog="Officina" type="TABLE">
+      <column name="Recapito" sqlType="INT" precision="10" scale="0" nullable="false" jdbcType="4"/>
+      <column name="Operatore" sqlType="VARCHAR" precision="16" scale="0" nullable="false" jdbcType="12"/>
+      <primary-key name="PRIMARY" columns="Recapito,Operatore"/>
+      <foreign-key name="RubricaOperatore_ibfk_1" columns="Operatore" ref-table="Operatore" ref-schema="" ref-catalog="Officina" ref-columns="CF" update-rule="3" delete-rule="3" deferrability="2"/>
+      <foreign-key name="RubricaOperatore_ibfk_2" columns="Recapito" ref-table="Recapito" ref-schema="" ref-catalog="Officina" ref-columns="Codice" update-rule="3" delete-rule="3" deferrability="2"/>
+    </table>
+    <table name="Stipendio" schema="" catalog="Officina" type="TABLE">
+      <column name="Transazione" sqlType="INT" precision="10" scale="0" nullable="false" jdbcType="4"/>
+      <column name="Operatore" sqlType="VARCHAR" precision="16" scale="0" nullable="false" jdbcType="12"/>
+      <primary-key name="PRIMARY" columns="Transazione"/>
+      <foreign-key name="Stipendio_ibfk_1" columns="Transazione" ref-table="Transazione" ref-schema="" ref-catalog="Officina" ref-columns="Codice" update-rule="3" delete-rule="3" deferrability="2"/>
+      <foreign-key name="Stipendio_ibfk_2" columns="Operatore" ref-table="Operatore" ref-schema="" ref-catalog="Officina" ref-columns="CF" update-rule="3" delete-rule="3" deferrability="2"/>
+    </table>
+    <table name="Transazione" schema="" catalog="Officina" type="TABLE">
+      <column name="Codice" sqlType="INT" precision="10" scale="0" nullable="false" jdbcType="4" autoIncrement="true"/>
+      <column name="Quota" sqlType="DECIMAL" precision="10" scale="2" nullable="false" jdbcType="3"/>
+      <column name="Data" sqlType="DATE" precision="10" scale="0" nullable="false" jdbcType="91"/>
+      <primary-key name="PRIMARY" columns="Codice"/>
+      <exported-key name="Fattura_ibfk_2" table="Fattura" schema="" catalog="Officina" columns="Transazione"/>
+      <exported-key name="Ordine_ibfk_2" table="Ordine" schema="" catalog="Officina" columns="Versamento"/>
+      <exported-key name="Preventivo_ibfk_2" table="Preventivo" schema="" catalog="Officina" columns="Acconto"/>
+      <exported-key name="Stipendio_ibfk_1" table="Stipendio" schema="" catalog="Officina" columns="Transazione"/>
+    </table>
+    <table name="Turno" schema="" catalog="Officina" type="TABLE">
+      <column name="Operatore" sqlType="VARCHAR" precision="16" scale="0" nullable="false" jdbcType="12"/>
+      <column name="Data" sqlType="DATE" precision="10" scale="0" nullable="false" jdbcType="91"/>
+      <column name="OraInizio" sqlType="TIME" precision="8" scale="0" nullable="false" jdbcType="92"/>
+      <column name="OraFine" sqlType="TIME" precision="8" scale="0" nullable="false" jdbcType="92"/>
+      <primary-key name="PRIMARY" columns="Operatore,Data,OraInizio"/>
+      <foreign-key name="Turno_ibfk_1" columns="Operatore" ref-table="Operatore" ref-schema="" ref-catalog="Officina" ref-columns="CF" update-rule="3" delete-rule="3" deferrability="2"/>
+    </table>
+    <table name="Utilizzo" schema="" catalog="Officina" type="TABLE">
+      <column name="Prestazione" sqlType="INT" precision="10" scale="0" nullable="false" jdbcType="4"/>
+      <column name="Fornitura" sqlType="INT" precision="10" scale="0" nullable="false" jdbcType="4"/>
+      <column name="PrezzoUnitario" sqlType="DECIMAL" precision="8" scale="2" nullable="false" jdbcType="3"/>
+      <column name="Quantita" sqlType="INT" precision="10" scale="0" nullable="false" jdbcType="4"/>
+      <primary-key name="PRIMARY" columns="Prestazione,Fornitura"/>
+      <foreign-key name="Utilizzo_ibfk_1" columns="Prestazione" ref-table="Prestazione" ref-schema="" ref-catalog="Officina" ref-columns="Preventivo" update-rule="3" delete-rule="3" deferrability="2"/>
+      <foreign-key name="Utilizzo_ibfk_2" columns="Fornitura" ref-table="Fornitura" ref-schema="" ref-catalog="Officina" ref-columns="Codice" update-rule="3" delete-rule="3" deferrability="2"/>
+    </table>
+    <procedure name="check_cap" schema="" catalog="Officina" type="2">
+      <prototype>
+        <parameter name="cap" sqlType="VARCHAR" precision="5" scale="0" nullable="true" jdbcType="12" type="1" index="1"/>
+        <parameter name="" sqlType="TINYINT" precision="3" scale="0" nullable="true" jdbcType="-6" type="5" index="0"/>
+      </prototype>
+    </procedure>
+    <procedure name="check_cf" schema="" catalog="Officina" type="2">
+      <prototype>
+        <parameter name="cf" sqlType="VARCHAR" precision="16" scale="0" nullable="true" jdbcType="12" type="1" index="1"/>
+        <parameter name="" sqlType="TINYINT" precision="3" scale="0" nullable="true" jdbcType="-6" type="5" index="0"/>
+      </prototype>
+    </procedure>
+    <procedure name="check_cf_piva" schema="" catalog="Officina" type="2">
+      <prototype>
+        <parameter name="stringa" sqlType="VARCHAR" precision="16" scale="0" nullable="true" jdbcType="12" type="1" index="1"/>
+        <parameter name="" sqlType="TINYINT" precision="3" scale="0" nullable="true" jdbcType="-6" type="5" index="0"/>
+      </prototype>
+    </procedure>
+    <procedure name="check_iban" schema="" catalog="Officina" type="2">
+      <prototype>
+        <parameter name="iban" sqlType="VARCHAR" precision="27" scale="0" nullable="true" jdbcType="12" type="1" index="1"/>
+        <parameter name="" sqlType="TINYINT" precision="3" scale="0" nullable="true" jdbcType="-6" type="5" index="0"/>
+      </prototype>
+    </procedure>
+    <procedure name="check_ndocid" schema="" catalog="Officina" type="2">
+      <prototype>
+        <parameter name="ndocid" sqlType="VARCHAR" precision="9" scale="0" nullable="true" jdbcType="12" type="1" index="1"/>
+        <parameter name="" sqlType="TINYINT" precision="3" scale="0" nullable="true" jdbcType="-6" type="5" index="0"/>
+      </prototype>
+    </procedure>
+    <procedure name="check_piva" schema="" catalog="Officina" type="2">
+      <prototype>
+        <parameter name="piva" sqlType="VARCHAR" precision="11" scale="0" nullable="true" jdbcType="12" type="1" index="1"/>
+        <parameter name="" sqlType="TINYINT" precision="3" scale="0" nullable="true" jdbcType="-6" type="5" index="0"/>
+      </prototype>
+    </procedure>
+    <procedure name="check_provincia" schema="" catalog="Officina" type="2">
+      <prototype>
+        <parameter name="provincia" sqlType="VARCHAR" precision="2" scale="0" nullable="true" jdbcType="12" type="1" index="1"/>
+        <parameter name="" sqlType="TINYINT" precision="3" scale="0" nullable="true" jdbcType="-6" type="5" index="0"/>
+      </prototype>
+    </procedure>
+  </data-source>
+</component>
