@@ -1,5 +1,5 @@
 /**
- * Contenuto
+ * TOC
  * 0) Creazione dello schema
  * 1) Tabelle
  * 2) Funzioni
@@ -142,12 +142,12 @@ CREATE TABLE Occupazione (
 );
 
 CREATE TABLE Ordine (
-  Codice        INTEGER AUTO_INCREMENT PRIMARY KEY,
-  DataEmissione DATE                    NOT NULL,
+  Codice        INTEGER       AUTO_INCREMENT PRIMARY KEY,
+  DataEmissione DATE        NOT NULL,
   DataConsegna  DATE,
   Imponibile    DECIMAL(9, 2) DEFAULT 0,
-  Fornitore     VARCHAR(11)             NOT NULL,
-  Versamento    INTEGER                 NOT NULL,
+  Fornitore     VARCHAR(11) NOT NULL,
+  Versamento    INTEGER     NOT NULL,
   FOREIGN KEY (Fornitore) REFERENCES Fornitore (PIVA),
   FOREIGN KEY (Versamento) REFERENCES Transazione (Codice)
 );
@@ -260,6 +260,25 @@ CREATE TABLE RubricaOperatore (
  */
 
 DELIMITER ;;
+/* @TODO Commentare */
+CREATE FUNCTION PERCENTAGE_IVA()
+  RETURNS INTEGER
+  BEGIN
+    RETURN 22;
+  END;;
+
+CREATE FUNCTION IVA()
+  RETURNS REAL
+  BEGIN
+    RETURN 0.22;
+  END;;
+
+CREATE FUNCTION MAX_CONTANTI()
+  RETURNS REAL
+  BEGIN
+    RETURN 1000.00;
+  END;;
+
 /*
  * Funzione per il controllo del codice fiscale
  * (RV1)
@@ -450,7 +469,7 @@ CREATE FUNCTION calc_transazione_ordine(ordine INTEGER)
   RETURNS DECIMAL(10, 2)
   BEGIN
     DECLARE result DECIMAL(10, 2);
-    SELECT Imponibile * (- 1.22)
+    SELECT Imponibile * (-(1 + IVA()))
     FROM Ordine
     WHERE Codice = ordine
     INTO result;
@@ -512,7 +531,7 @@ CREATE FUNCTION calc_imposte(imponibile DECIMAL(10, 2))
   RETURNS DECIMAL(10, 2)
   BEGIN
     DECLARE imposte DECIMAL(10, 2);
-    SET imposte = imponibile * 22 / 100;
+    SET imposte = imponibile * IVA();
     RETURN imposte;
   END;;
 
@@ -558,7 +577,7 @@ DELIMITER ;;
 /*
  * Implmentazione dei vincoli su Cliente
  */
-CREATE TRIGGER Cliente_before_insert
+CREATE TRIGGER Cliente_Check
 BEFORE INSERT ON Cliente FOR EACH ROW
   BEGIN
     IF check_cf_piva(NEW.CF_PIVA) = FALSE
@@ -585,7 +604,7 @@ BEFORE INSERT ON Cliente FOR EACH ROW
 /*
  * Implementazione dei vincoli su Fornitore
  */
-CREATE TRIGGER Fornitore_before_insert
+CREATE TRIGGER Fornitore_Check
 BEFORE INSERT ON Fornitore FOR EACH ROW
   BEGIN
     IF NOT check_piva(NEW.PIVA)
@@ -606,7 +625,7 @@ BEFORE INSERT ON Fornitore FOR EACH ROW
 /*
  * Implementazione vincoli su Operatore
  */
-CREATE TRIGGER Operatore_before_insert
+CREATE TRIGGER Operatore_Check
 BEFORE INSERT ON Operatore FOR EACH ROW
   BEGIN
     IF check_cf_piva(NEW.CF) = FALSE
@@ -624,6 +643,9 @@ BEFORE INSERT ON Operatore FOR EACH ROW
     ELSEIF NEW.ModRiscossione = 'bonifico' AND NEW.IBAN IS NULL
       THEN
         CALL throw_error('La riscossione tramite bonifico richiede l\'IBAN');
+    ELSEIF NEW.ModRiscossione = 'contanti' AND NEW.Stipendio > MAX_CONTANTI()
+      THEN
+        CALL throw_error('La modalità di riscossione non può essere ''contanti'' per questo importo');
     ELSEIF check_iban(NEW.IBAN) = FALSE
       THEN
         CALL throw_error('IBAN non valido');
@@ -633,7 +655,7 @@ BEFORE INSERT ON Operatore FOR EACH ROW
 /*
  * Implementazione dei vincoli su Autovettura
  */
-CREATE TRIGGER Autovettura_before_insert
+CREATE TRIGGER Autovettura_Check
 BEFORE INSERT ON Autovettura FOR EACH ROW
   BEGIN
     IF check_targa(NEW.Targa, NEW.AnnoImmatricolazione) = FALSE
@@ -648,12 +670,146 @@ BEFORE INSERT ON Autovettura FOR EACH ROW
 /*
  * Implementazione dei vincoli su Turno
  */
-CREATE TRIGGER Turno_before_insert
+CREATE TRIGGER Turno_Check
 BEFORE INSERT ON Turno FOR EACH ROW
   BEGIN
     IF NOT check_turno(NEW.OraInizio, NEW.OraFine)
     THEN
       CALL throw_error('L\'ora di fine del turno non può essere antecedente a quella d\'inizio');
+    END IF;
+  END;;
+
+/*
+ * Implementazione dei vincoli su Preventivo
+ */
+CREATE TRIGGER Preventivo_Check
+BEFORE INSERT ON Preventivo FOR EACH ROW
+  BEGIN
+    IF NEW.SisAlimentazione IS NULL AND NEW.Categoria IN (
+      'installazione_impianto_gpl', 'installazione_impianto_metano')
+    THEN
+      CALL throw_error('SisAlimentazione è un attributo necessario per un preventivo d''installazione');
+    ELSEIF NEW.SisAlimentazione IS NOT NULL AND NEW.Categoria NOT IN (
+      'installazione_impianto_gpl', 'installazione_impianto_metano')
+      THEN
+        CALL throw_error('SisAlimentazione deve essere null per i preventivi che non siano d''installazione');
+    END IF;
+  END;;
+
+/*
+ * Implementazione dei vincoli su Prestazione
+ */
+CREATE TRIGGER Prestazione_Check
+BEFORE INSERT ON Prestazione FOR EACH ROW
+  BEGIN
+    DECLARE data_emissione DATE;
+    SELECT Preventivo.DataEmissione
+    INTO data_emissione
+    FROM Preventivo
+    WHERE Preventivo.Codice = NEW.Preventivo;
+    IF NOT check_date_chronical_order(data_emissione, NEW.DataFine)
+    THEN
+      CALL throw_error('La data di fine non può essere antecedente a quella di emissione del preventivo');
+    END IF;
+  END;;
+
+/*
+ * Implementazione dei vincoli su Componente
+ */
+CREATE TRIGGER Componente_Check
+BEFORE INSERT ON Componente FOR EACH ROW
+  BEGIN
+    IF NEW.Validita < 0
+    THEN
+      CALL throw_error('Validità di Componente non può essere un numero minore di zero');
+    ELSEIF NEW.QuantitaMin < 0
+      THEN
+        CALL throw_error('QuantitàMin di Componente non può essere un numero minore di zero');
+    END IF;
+  END;;
+
+/*
+ * Implementazione dei vincoli su Fornitura
+ */
+CREATE TRIGGER Fornitura_Check
+BEFORE INSERT ON Fornitura FOR EACH ROW
+  BEGIN
+    IF NOT (NEW.Quantita > 0 AND NEW.PrezzoUnitario > 0)
+    THEN
+      CALL throw_error('Quantità e PrezzoUnitario di Fornitura devono essere maggiori di zero');
+    END IF;
+  END;;
+
+/*
+ * Implementazione dei vincoli su Ordine
+ */
+CREATE TRIGGER Ordine_Check
+BEFORE INSERT ON Ordine FOR EACH ROW
+  BEGIN
+    IF NOT check_date_chronical_order(NEW.DataEmissione, NEW.DataConsegna)
+    THEN
+      CALL throw_error('La data di consegna dell''ordine non può antecedere quella di emissione');
+    END IF;
+  END;;
+
+/*
+ * Implementazione dei vincoli su Fattura
+ */
+CREATE TRIGGER Fattura_Check
+BEFORE INSERT ON Fattura FOR EACH ROW
+  BEGIN
+    IF NOT check_date_chronical_order(NEW.DataEmissione, NEW.DataScadenza)
+    THEN
+      CALL throw_error('La data di scadenza di una fattura non può essere antecedente a quella di emissione');
+    ELSEIF NEW.SisPag = 'rimessa_diretta' AND
+           NEW.DataEmissione != NEW.DataScadenza
+      THEN
+        IF NEW.DataScadenza IS NULL
+        THEN
+          SET NEW.DataScadenza = NEW.DataEmissione;
+        ELSE
+          CALL throw_error('Nel pagamento a rimessa diretta la data di scadenza non può '
+                           'essere diversa da quella di emissione');
+        END IF;
+    ELSEIF NEW.Sconto < 0 OR NEW.Sconto >= 100
+      THEN
+        CALL throw_error('Sconto di Fattura non può assumere questo valore');
+    END IF;
+  END;;
+
+/*
+ * Implementazione dei vincoli su Utilizzo
+ */
+CREATE TRIGGER Utilizzo_Check
+BEFORE INSERT ON Utilizzo FOR EACH ROW
+  BEGIN
+    IF NEW.Quantita < 0
+    THEN
+      CALL throw_error('La Quantità di Utilizzo non può essere minore di zero');
+    END IF;
+  END;;
+
+/*
+ * Implementazione dei vincoli su Previsione
+ */
+CREATE TRIGGER Previsione_Check
+BEFORE INSERT ON Previsione FOR EACH ROW
+  BEGIN
+    DECLARE categoria VARCHAR(30);
+    DECLARE ubicazione_required BOOLEAN;
+    SELECT Preventivo.Categoria
+    INTO categoria
+    FROM Preventivo
+    WHERE Preventivo.Codice = NEW.Preventivo;
+    SET ubicazione_required = (categoria = 'installazione_impianto_metano' OR
+                               categoria = 'installazione_impianto_gpl');
+    IF NEW.Quantita < 0
+    THEN
+      CALL throw_error('La Quantità di Previsione non può essere minore di zero');
+    ELSEIF NEW.Ubicazione IS NOT NULL XOR ubicazione_required
+      THEN
+        CALL throw_error('Ubicazione deve essere NULL solo se non si tratta '
+                         'della previsione di un''installazione');
     END IF;
   END;;
 
@@ -691,5 +847,10 @@ AS
   SELECT
     Fattura.*,
     calc_imposte(Fattura.Imponibile)                                          AS Imposte,
-    Fattura.Imponibile + calc_imposte(Fattura.Imponibile) - Fattura.Incentivi AS Totale
-  FROM Fattura;
+    Fattura.Imponibile + calc_imposte(Fattura.Imponibile) - Fattura.Incentivi AS Totale,
+    CONCAT(Componente.Nome)                                                   AS Componenti
+  FROM Fattura
+    LEFT JOIN Prestazione ON Prestazione.Preventivo = Fattura.Prestazione
+    LEFT JOIN Utilizzo ON Prestazione.Preventivo = Utilizzo.Prestazione
+    LEFT JOIN Fornitura ON Fornitura.Codice = Utilizzo.Fornitura
+    LEFT JOIN Componente ON Componente.Codice = Fornitura.Componente;

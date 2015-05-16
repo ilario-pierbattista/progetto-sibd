@@ -63,6 +63,23 @@
       <foreign-key name="Fattura_ibfk_1" columns="Prestazione" ref-table="Prestazione" ref-schema="" ref-catalog="Officina" ref-columns="Preventivo" update-rule="3" delete-rule="3" deferrability="2"/>
       <foreign-key name="Fattura_ibfk_2" columns="Transazione" ref-table="Transazione" ref-schema="" ref-catalog="Officina" ref-columns="Codice" update-rule="3" delete-rule="3" deferrability="2"/>
     </table>
+    <table name="FatturaView" schema="" catalog="Officina" type="VIEW">
+      <column name="Numero" sqlType="INT" precision="10" scale="0" nullable="false" jdbcType="4"/>
+      <column name="Anno" sqlType="INT" precision="10" scale="0" nullable="false" jdbcType="4"/>
+      <column name="Imponibile" sqlType="DECIMAL" precision="10" scale="2" nullable="false" jdbcType="3"/>
+      <column name="Sconto" sqlType="DECIMAL" precision="4" scale="2" nullable="false" jdbcType="3" def="MC4wMA=="/>
+      <column name="Incentivi" sqlType="DECIMAL" precision="8" scale="2" nullable="false" jdbcType="3" def="MC4wMA=="/>
+      <column name="DataEmissione" sqlType="DATE" precision="10" scale="0" nullable="false" jdbcType="91"/>
+      <column name="DataScadenza" sqlType="DATE" precision="10" scale="0" nullable="false" jdbcType="91"/>
+      <column name="TipoPag" sqlType="ENUM" precision="9" scale="0" nullable="false" jdbcType="1"/>
+      <column name="StatoPag" sqlType="TINYINT" precision="3" scale="0" nullable="false" jdbcType="-6" def="MA=="/>
+      <column name="SisPag" sqlType="ENUM" precision="17" scale="0" nullable="false" jdbcType="1" def="J3JpbWVzc2FfZGlyZXR0YSc="/>
+      <column name="Prestazione" sqlType="INT" precision="10" scale="0" nullable="false" jdbcType="4"/>
+      <column name="Transazione" sqlType="INT" precision="10" scale="0" nullable="true" jdbcType="4"/>
+      <column name="Imposte" sqlType="DECIMAL" precision="10" scale="2" nullable="true" jdbcType="3"/>
+      <column name="Totale" sqlType="DECIMAL" precision="12" scale="2" nullable="true" jdbcType="3"/>
+      <column name="Componenti" sqlType="VARCHAR" precision="150" scale="0" nullable="true" jdbcType="12"/>
+    </table>
     <table name="Fornitore" schema="" catalog="Officina" type="TABLE">
       <column name="PIVA" sqlType="VARCHAR" precision="11" scale="0" nullable="false" jdbcType="12"/>
       <column name="RagioneSociale" sqlType="VARCHAR" precision="80" scale="0" nullable="false" jdbcType="12"/>
@@ -129,7 +146,7 @@
       <column name="Codice" sqlType="INT" precision="10" scale="0" nullable="false" jdbcType="4" autoIncrement="true"/>
       <column name="DataEmissione" sqlType="DATE" precision="10" scale="0" nullable="false" jdbcType="91"/>
       <column name="DataConsegna" sqlType="DATE" precision="10" scale="0" nullable="true" jdbcType="91"/>
-      <column name="Imponibile" sqlType="DECIMAL" precision="9" scale="2" nullable="false" jdbcType="3"/>
+      <column name="Imponibile" sqlType="DECIMAL" precision="9" scale="2" nullable="true" jdbcType="3" def="MC4wMA=="/>
       <column name="Fornitore" sqlType="VARCHAR" precision="11" scale="0" nullable="false" jdbcType="12"/>
       <column name="Versamento" sqlType="INT" precision="10" scale="0" nullable="false" jdbcType="4"/>
       <primary-key name="PRIMARY" columns="Codice"/>
@@ -245,6 +262,58 @@
       <foreign-key name="Utilizzo_ibfk_1" columns="Prestazione" ref-table="Prestazione" ref-schema="" ref-catalog="Officina" ref-columns="Preventivo" update-rule="3" delete-rule="3" deferrability="2"/>
       <foreign-key name="Utilizzo_ibfk_2" columns="Fornitura" ref-table="Fornitura" ref-schema="" ref-catalog="Officina" ref-columns="Codice" update-rule="3" delete-rule="3" deferrability="2"/>
     </table>
+    <procedure name="IVA" schema="" catalog="Officina" type="2">
+      <prototype>
+        <parameter name="" sqlType="DOUBLE" precision="22" scale="0" nullable="true" jdbcType="8" type="5" index="0"/>
+      </prototype>
+    </procedure>
+    <procedure name="MAX_CONTANTI" schema="" catalog="Officina" type="2">
+      <prototype>
+        <parameter name="" sqlType="DOUBLE" precision="22" scale="0" nullable="true" jdbcType="8" type="5" index="0"/>
+      </prototype>
+    </procedure>
+    <procedure name="PERCENTAGE_IVA" schema="" catalog="Officina" type="2">
+      <prototype>
+        <parameter name="" sqlType="INT" precision="10" scale="0" nullable="true" jdbcType="4" type="5" index="0"/>
+      </prototype>
+    </procedure>
+    <procedure name="calc_costo_componenti" schema="" catalog="Officina" type="2">
+      <prototype>
+        <parameter name="prestazione" sqlType="INTEGER" precision="10" scale="0" nullable="true" jdbcType="4" type="1" index="1"/>
+        <parameter name="" sqlType="DECIMAL" precision="10" scale="2" nullable="true" jdbcType="3" type="5" index="0"/>
+      </prototype>
+    </procedure>
+    <procedure name="calc_costo_totale" schema="" catalog="Officina" type="2">
+      <prototype>
+        <parameter name="prestazione" sqlType="INTEGER" precision="10" scale="0" nullable="true" jdbcType="4" type="1" index="1"/>
+        <parameter name="" sqlType="DECIMAL" precision="10" scale="2" nullable="true" jdbcType="3" type="5" index="0"/>
+      </prototype>
+    </procedure>
+    <procedure name="calc_imponibile" schema="" catalog="Officina" type="2">
+      <prototype>
+        <parameter name="prestazione" sqlType="INTEGER" precision="10" scale="0" nullable="true" jdbcType="4" type="1" index="1"/>
+        <parameter name="sconto" sqlType="DECIMAL" precision="4" scale="2" nullable="true" jdbcType="3" type="1" index="2"/>
+        <parameter name="" sqlType="DECIMAL" precision="10" scale="2" nullable="true" jdbcType="3" type="5" index="0"/>
+      </prototype>
+    </procedure>
+    <procedure name="calc_imponibile_ordine" schema="" catalog="Officina" type="2">
+      <prototype>
+        <parameter name="ordine" sqlType="INTEGER" precision="10" scale="0" nullable="true" jdbcType="4" type="1" index="1"/>
+        <parameter name="" sqlType="DECIMAL" precision="10" scale="2" nullable="true" jdbcType="3" type="5" index="0"/>
+      </prototype>
+    </procedure>
+    <procedure name="calc_imposte" schema="" catalog="Officina" type="2">
+      <prototype>
+        <parameter name="imponibile" sqlType="DECIMAL" precision="10" scale="2" nullable="true" jdbcType="3" type="1" index="1"/>
+        <parameter name="" sqlType="DECIMAL" precision="10" scale="2" nullable="true" jdbcType="3" type="5" index="0"/>
+      </prototype>
+    </procedure>
+    <procedure name="calc_transazione_ordine" schema="" catalog="Officina" type="2">
+      <prototype>
+        <parameter name="ordine" sqlType="INTEGER" precision="10" scale="0" nullable="true" jdbcType="4" type="1" index="1"/>
+        <parameter name="" sqlType="DECIMAL" precision="10" scale="2" nullable="true" jdbcType="3" type="5" index="0"/>
+      </prototype>
+    </procedure>
     <procedure name="check_cap" schema="" catalog="Officina" type="2">
       <prototype>
         <parameter name="cap" sqlType="VARCHAR" precision="5" scale="0" nullable="true" jdbcType="12" type="1" index="1"/>
@@ -263,6 +332,13 @@
         <parameter name="" sqlType="TINYINT" precision="3" scale="0" nullable="true" jdbcType="-6" type="5" index="0"/>
       </prototype>
     </procedure>
+    <procedure name="check_date_chronical_order" schema="" catalog="Officina" type="2">
+      <prototype>
+        <parameter name="inizio" sqlType="DATE" precision="10" scale="0" nullable="true" jdbcType="91" type="1" index="1"/>
+        <parameter name="fine" sqlType="DATE" precision="10" scale="0" nullable="true" jdbcType="91" type="1" index="2"/>
+        <parameter name="" sqlType="TINYINT" precision="3" scale="0" nullable="true" jdbcType="-6" type="5" index="0"/>
+      </prototype>
+    </procedure>
     <procedure name="check_iban" schema="" catalog="Officina" type="2">
       <prototype>
         <parameter name="iban" sqlType="VARCHAR" precision="27" scale="0" nullable="true" jdbcType="12" type="1" index="1"/>
@@ -277,7 +353,7 @@
     </procedure>
     <procedure name="check_piva" schema="" catalog="Officina" type="2">
       <prototype>
-        <parameter name="piva" sqlType="VARCHAR" precision="11" scale="0" nullable="true" jdbcType="12" type="1" index="1"/>
+        <parameter name="piva" sqlType="VARCHAR" precision="16" scale="0" nullable="true" jdbcType="12" type="1" index="1"/>
         <parameter name="" sqlType="TINYINT" precision="3" scale="0" nullable="true" jdbcType="-6" type="5" index="0"/>
       </prototype>
     </procedure>
@@ -285,6 +361,36 @@
       <prototype>
         <parameter name="provincia" sqlType="VARCHAR" precision="2" scale="0" nullable="true" jdbcType="12" type="1" index="1"/>
         <parameter name="" sqlType="TINYINT" precision="3" scale="0" nullable="true" jdbcType="-6" type="5" index="0"/>
+      </prototype>
+    </procedure>
+    <procedure name="check_targa" schema="" catalog="Officina" type="2">
+      <prototype>
+        <parameter name="targa" sqlType="VARCHAR" precision="8" scale="0" nullable="true" jdbcType="12" type="1" index="1"/>
+        <parameter name="annoImm" sqlType="INTEGER" precision="10" scale="0" nullable="true" jdbcType="4" type="1" index="2"/>
+        <parameter name="" sqlType="TINYINT" precision="3" scale="0" nullable="true" jdbcType="-6" type="5" index="0"/>
+      </prototype>
+    </procedure>
+    <procedure name="check_telaio" schema="" catalog="Officina" type="2">
+      <prototype>
+        <parameter name="telaio" sqlType="VARCHAR" precision="17" scale="0" nullable="true" jdbcType="12" type="1" index="1"/>
+        <parameter name="" sqlType="TINYINT" precision="3" scale="0" nullable="true" jdbcType="-6" type="5" index="0"/>
+      </prototype>
+    </procedure>
+    <procedure name="check_turno" schema="" catalog="Officina" type="2">
+      <prototype>
+        <parameter name="inizio" sqlType="TIME" precision="8" scale="0" nullable="true" jdbcType="92" type="1" index="1"/>
+        <parameter name="fine" sqlType="TIME" precision="8" scale="0" nullable="true" jdbcType="92" type="1" index="2"/>
+        <parameter name="" sqlType="TINYINT" precision="3" scale="0" nullable="true" jdbcType="-6" type="5" index="0"/>
+      </prototype>
+    </procedure>
+    <procedure name="ordine_update_imponibile" schema="" catalog="Officina" type="1">
+      <prototype>
+        <parameter name="ordine" sqlType="INTEGER" precision="10" scale="0" nullable="true" jdbcType="4" type="1" index="1"/>
+      </prototype>
+    </procedure>
+    <procedure name="throw_error" schema="" catalog="Officina" type="1">
+      <prototype>
+        <parameter name="msg" sqlType="VARCHAR" precision="300" scale="0" nullable="true" jdbcType="12" type="1" index="1"/>
       </prototype>
     </procedure>
   </data-source>

@@ -12,7 +12,5 @@ SELECT UltimaRevisione FROM Autovettura WHERE Targa = 'BX692TE';
  * OP27: Consultazione dei dati per stilare una ricevuta fiscale
  * o una fattura
  */
-SELECT Fattura.* FROM Fattura
-LEFT JOIN Prestazione ON Prestazione.Preventivo = Fattura.Prestazione
-LEFT JOIN Preventivo ON Preventivo.Codice = Prestazione.Preventivo
-WHERE Preventivo = 1;
+SELECT * FROM FatturaView
+WHERE Prestazione = 1;
