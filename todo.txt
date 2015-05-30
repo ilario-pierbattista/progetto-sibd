@@ -1,6 +1,5 @@
 OPERAZIONI
 
-
 Inserimento di un nuovo cliente (3 volte a settimana)
 Inserimento di un nuovo cliente non dotato di partita iva (2 volte a settimana)
 Inserimento di un nuovo cliente dotato di partita iva (1 volta a settimana)
@@ -51,12 +50,3 @@ Consultazione della lista dei lavori da eseguire (2 volta al giorno)
 Calcolo dello stipendio per un dipendente (1 volta al mese)
 Consultazione delle statistiche riguardanti lo scostamento tra i costi preventivati e i costi effettivi delle prestazioni, con la possibilità di scomporre le voci dei costi tra costi dei componenti, costi della manodopera e costi dei servizi aggiuntivi (1 volta a settimana).
 Consultazione delle statistiche riguardanti la variazione dei costi di un componente (1 volta a settimana)
-
-===========
-VINCOLI
-
-% Transazione
-\\emph{Quota} relativa all'entità \emph{Transazione}, relativamente ad un'istanza dell'entità stessa associata ad un'istanza di \emph{Fattura}, è un numero pari alla somma dei valori degli attributi (relativi a \emph{Fattura}) \emph{Imponibile} ed \emph{Imposte}, meno il valore di \emph{Incentivi}.
-\\emph{Quota} relativa all'entità \emph{Transazione}, relativamente ad un'istanza dell'entità stessa associata ad un'istanza di \emph{Preventivo}, se attributo di un'istanza associata ad un'istanza di \emph{Preventivo}, è un numero maggiore di zero e minore del 70\% del Costo Stimato del Preventivo.
-\\emph{Quota} relativa all'entità \emph{Transazione}, relativamente ad un'istanza dell'entità stessa associata ad un'istanza di \emph{Operatore}, è un numero pari all'attributo \emph{Stipendio} di \emph{Operatore}, oppure è pari al numero delle ore di lavoro effettuate, moltiplicate per \emph{Retribuzione Oraria} di \emph{Operatore}.
-\\emph{Quota} relativa all'entità \emph{Transazione}, relativamente ad un'istanza dell'entità stessa associata ad un'istanza di \emph{Ordine}, è un numero pari alla somma dei valori ottenuti moltiplicando \emph{Prezzo Unitario} e \emph{Quantità} relativi alle istanze di \emph{Fornitura} associate all'istanza interessata di \emph{Ordine}.

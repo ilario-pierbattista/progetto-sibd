@@ -143,28 +143,23 @@ VALUES
   (7, 6, 1);
 
 /** Inserimento Fattura */
-INSERT INTO Fattura (Numero, Anno, Imponibile, Sconto, Incentivi, DataEmissione, DataScadenza, TipoPag, StatoPag, SisPag, Prestazione, Transazione)
-VALUES (1, 2015, 1100, 5, 0, '2015-04-24', '2015-05-24', 'assegno', 0, 'rimessa_differita', 1, NULL);
-
-INSERT INTO Fattura (Numero, Anno, Imponibile, Sconto, Incentivi, DataEmissione, DataScadenza, TipoPag, StatoPag, SisPag, Prestazione, Transazione)
-VALUES (2, 2015, 200, 0, 0, '2015-02-15', '2015-02-15', 'contanti', 1, 'rimessa_diretta', 2, 5);
+INSERT INTO Fattura (Numero, Anno, Imponibile, Sconto, Incentivi,
+                     DataEmissione, DataScadenza, TipoPag, StatoPag,
+                     SisPag, Prestazione, Transazione)
+VALUES
+  (1, 2015, 1100, 5, 0, '2015-04-24', '2015-05-24', 'assegno', 0,
+   'rimessa_differita', 1, NULL),
+  (2, 2015, 200, 0, 0, '2015-02-15', '2015-02-15', 'contanti', 1,
+   'rimessa_diretta', 2, 5);
 
 /** Inserimento Turno */
 
 INSERT INTO Turno (Operatore, Data, OraInizio, OraFine)
-VALUES ('STFDRN60A02E783V', '2015-04-09', '08:00:00', '18:30:00');
-
-INSERT INTO Turno (Operatore, Data, OraInizio, OraFine)
-VALUES ('STFDRN60A02E783V', '2015-04-08', '08:00:00', '18:30:00');
-
-INSERT INTO Turno (Operatore, Data, OraInizio, OraFine)
-VALUES ('VNCNDR84T24I156L', '2015-04-09', '08:30:00', '16:30:00');
-
-INSERT INTO Turno (Operatore, Data, OraInizio, OraFine)
-VALUES ('VRDLCU90D15E783S', '2015-04-09', '08:30:00', '12:30:00');
-
-INSERT INTO Turno (Operatore, Data, OraInizio, OraFine)
-VALUES ('VRDLCU90D15E783S', '2015-04-09', '14:30:00', '18:30:00');
+VALUES ('STFDRN60A02E783V', '2015-04-09', '08:00:00', '18:30:00'),
+  ('STFDRN60A02E783V', '2015-04-08', '08:00:00', '18:30:00'),
+  ('VNCNDR84T24I156L', '2015-04-09', '08:30:00', '16:30:00'),
+  ('VRDLCU90D15E783S', '2015-04-09', '08:30:00', '12:30:00'),
+  ('VRDLCU90D15E783S', '2015-04-09', '14:30:00', '18:30:00');
 
 /** Inserimento Stipendio */
 

@@ -1,7 +1,247 @@
 %!TEX root = Progetto.tex
 \section{Codifica Sql e Testing} % (fold)
 \label{sec:codifica_sql_e_testing}
-	
-	\begin{lstlisting}
-		Listato di prova
-	\end{lstlisting}
+
+Di seguito è riportata la definizione dello schema in linguaggio sql così come è implementato nel dump. Si allegano, per ogni tabella, degli screenshot dal terminale.
+
+Il DBMS utilizzato (MySQL 5) nativamente non supporta la definizione di vincoli d'integrità personalizzabili. Per ovviare a questa limitazione, nell'implementazione completa dello schema (riportata nel dump) si è fatto un larghissimo uso di trigger che implementano la logica dei vincoli.
+
+	\subsection{Definizione dello schema e screenshot successivi all'inserimento di dati}
+		% Cliente
+		\begin{lstlisting}
+CREATE TABLE Cliente (
+  CF_PIVA        VARCHAR(16) PRIMARY KEY,
+  Nome           VARCHAR(80),
+  Cognome        VARCHAR(80),
+  RagioneSociale VARCHAR(80),
+  Citta          VARCHAR(50) NOT NULL,
+  Via            VARCHAR(50) NOT NULL,
+  Civico         VARCHAR(10) NOT NULL,
+  CAP            VARCHAR(5)  NOT NULL,
+  NDocId         VARCHAR(9)
+);
+		\end{lstlisting}
+
+		\begin{lstlisting}
+CREATE TABLE Fornitore (
+  PIVA           VARCHAR(11) PRIMARY KEY,
+  RagioneSociale VARCHAR(80)                 NOT NULL,
+  TempiConsegna  INTEGER,
+  ModPagamento   ENUM('bonifico', 'assegno') NOT NULL,
+  IBAN           VARCHAR(27),
+  Citta          VARCHAR(50)                 NOT NULL,
+  Via            VARCHAR(50)                 NOT NULL,
+  Civico         VARCHAR(10)                 NOT NULL,
+  CAP            VARCHAR(5)                  NOT NULL
+);
+
+CREATE TABLE Operatore (
+  CF             VARCHAR(16) PRIMARY KEY,
+  Nome           VARCHAR(80)                             NOT NULL,
+  Cognome        VARCHAR(80)                             NOT NULL,
+  Citta          VARCHAR(50)                             NOT NULL,
+  Via            VARCHAR(50)                             NOT NULL,
+  Civico         VARCHAR(10)                             NOT NULL,
+  CAP            VARCHAR(5)                              NOT NULL,
+  DataNasc       DATE                                    NOT NULL,
+  ComuneNasc     VARCHAR(50)                             NOT NULL,
+  ProvinciaNasc  VARCHAR(2)                              NOT NULL,
+  Stipendio      DECIMAL(6, 2),
+  RetribuzioneH  DECIMAL(4, 2),
+  ModRiscossione ENUM('bonifico', 'assegno', 'contanti') NOT NULL,
+  IBAN           VARCHAR(27)
+);
+
+CREATE TABLE Transazione (
+  Codice INTEGER AUTO_INCREMENT PRIMARY KEY,
+  Quota  DECIMAL(10, 2) NOT NULL,
+  Data   DATE           NOT NULL
+);
+
+CREATE TABLE Autovettura (
+  Targa                VARCHAR(8) PRIMARY KEY,
+  Telaio               VARCHAR(17),
+  Marca                VARCHAR(50)  NOT NULL,
+  Modello              VARCHAR(100) NOT NULL,
+  Cilindrata           INTEGER,
+  AnnoImmatricolazione INTEGER      NOT NULL,
+  UltimoCollaudo       DATE,
+  UltimaRevisione      DATE,
+  Cliente              VARCHAR(16)  NOT NULL,
+  FOREIGN KEY (Cliente) REFERENCES Cliente (CF_PIVA)
+);
+
+CREATE TABLE Preventivo (
+  Codice           INTEGER       AUTO_INCREMENT PRIMARY KEY,
+  DataEmissione    DATE       NOT NULL,
+  DataInizio       DATE       NOT NULL,
+  Categoria        ENUM('riparazione',
+                        'installazione_impianto_metano',
+                        'installazione_impianto_gpl',
+                        'collaudo',
+                        'revisione'
+  )                           NOT NULL,
+  Sintomi          VARCHAR(300),
+  SisAlimentazione ENUM('aspirazione', 'iniezione'),
+  TempoStimato     INTEGER,
+  CostoComponenti  DECIMAL(8, 2) DEFAULT 0,
+  Manodopera       DECIMAL(7, 2) DEFAULT 0,
+  ServAggiuntivi   DECIMAL(7, 2) DEFAULT 0,
+  Autovettura      VARCHAR(8) NOT NULL,
+  Acconto          INTEGER,
+  FOREIGN KEY (Autovettura) REFERENCES Autovettura (Targa),
+  FOREIGN KEY (Acconto) REFERENCES Transazione (Codice)
+);
+
+CREATE TABLE Componente (
+  Codice        INTEGER AUTO_INCREMENT PRIMARY KEY,
+  Nome          VARCHAR(150)  NOT NULL,
+  QuantitaMin   INTEGER DEFAULT 0,
+  Validita      INTEGER DEFAULT 0,
+  PrezzoVendita DECIMAL(6, 2) NOT NULL
+);
+
+CREATE TABLE Previsione (
+  Componente     INTEGER       NOT NULL,
+  Preventivo     INTEGER       NOT NULL,
+  Ubicazione     ENUM('motore', 'bagagliaio'),
+  Quantita       INTEGER       NOT NULL,
+  PrezzoUnitario DECIMAL(6, 2) NOT NULL,
+  PRIMARY KEY (Componente, Preventivo),
+  FOREIGN KEY (Componente) REFERENCES Componente (Codice),
+  FOREIGN KEY (Preventivo) REFERENCES Preventivo (Codice)
+);
+
+CREATE TABLE Prestazione (
+  Preventivo       INTEGER PRIMARY KEY,
+  TempiEsecuzione  INTEGER NOT NULL,
+  Procedimento     TEXT,
+  DataFine         DATE    NOT NULL,
+  Malfunzionamento VARCHAR(300),
+  Manodopera       DECIMAL(7, 2) DEFAULT 0,
+  ServAggiuntivi   DECIMAL(7, 2) DEFAULT 0,
+  FOREIGN KEY (Preventivo) REFERENCES Preventivo (Codice)
+);
+
+CREATE TABLE Occupazione (
+  Prestazione INTEGER     NOT NULL,
+  Operatore   VARCHAR(16) NOT NULL,
+  PRIMARY KEY (Prestazione, Operatore),
+  FOREIGN KEY (Prestazione) REFERENCES Prestazione (Preventivo),
+  FOREIGN KEY (Operatore) REFERENCES Operatore (CF)
+);
+
+CREATE TABLE Ordine (
+  Codice        INTEGER       AUTO_INCREMENT PRIMARY KEY,
+  DataEmissione DATE        NOT NULL,
+  DataConsegna  DATE,
+  Imponibile    DECIMAL(9, 2) DEFAULT 0,
+  Fornitore     VARCHAR(11) NOT NULL,
+  Versamento    INTEGER     NOT NULL,
+  FOREIGN KEY (Fornitore) REFERENCES Fornitore (PIVA),
+  FOREIGN KEY (Versamento) REFERENCES Transazione (Codice)
+);
+
+CREATE TABLE Fornitura (
+  Codice         INTEGER AUTO_INCREMENT PRIMARY KEY,
+  Quantita       INTEGER       NOT NULL,
+  PrezzoUnitario DECIMAL(8, 2) NOT NULL,
+  Componente     INTEGER       NOT NULL,
+  Ordine         INTEGER       NOT NULL,
+  FOREIGN KEY (Componente) REFERENCES Componente (Codice),
+  FOREIGN KEY (Ordine) REFERENCES Ordine (Codice)
+);
+
+CREATE TABLE Utilizzo (
+  Prestazione    INTEGER       NOT NULL,
+  Fornitura      INTEGER       NOT NULL,
+  PrezzoUnitario DECIMAL(8, 2) NOT NULL,
+  Quantita       INTEGER       NOT NULL,
+  PRIMARY KEY (Prestazione, Fornitura),
+  FOREIGN KEY (Prestazione) REFERENCES Prestazione (Preventivo),
+  FOREIGN KEY (Fornitura) REFERENCES Fornitura (Codice)
+);
+
+CREATE TABLE Magazzino (
+  Componente INTEGER NOT NULL,
+  Fornitura  INTEGER NOT NULL,
+  Quantita   INTEGER NOT NULL,
+  PRIMARY KEY (Componente, Fornitura),
+  FOREIGN KEY (Componente) REFERENCES Componente (Codice),
+  FOREIGN KEY (Fornitura) REFERENCES Fornitura (Codice)
+);
+
+CREATE TABLE Fattura (
+  Numero        INTEGER                                 NOT NULL,
+  Anno          INTEGER                                 NOT NULL,
+  Imponibile    DECIMAL(10, 2)                          NOT NULL,
+  Sconto        DECIMAL(4, 2) DEFAULT 0                 NOT NULL,
+  Incentivi     DECIMAL(8, 2) DEFAULT 0                 NOT NULL,
+  DataEmissione DATE                                    NOT NULL,
+  DataScadenza  DATE                                    NOT NULL,
+  TipoPag       ENUM('bonifico', 'assegno', 'contanti') NOT NULL,
+  StatoPag      BOOLEAN DEFAULT FALSE                   NOT NULL,
+  SisPag        ENUM('rimessa_diretta', 'rimessa_differita')
+    DEFAULT 'rimessa_diretta'                           NOT NULL,
+  Prestazione   INTEGER                                 NOT NULL,
+  Transazione   INTEGER,
+  PRIMARY KEY (Numero, Anno),
+  FOREIGN KEY (Prestazione) REFERENCES Prestazione (Preventivo),
+  FOREIGN KEY (Transazione) REFERENCES Transazione (Codice)
+);
+
+CREATE TABLE Turno (
+  Operatore VARCHAR(16) NOT NULL,
+  Data      DATE        NOT NULL,
+  OraInizio TIME        NOT NULL,
+  OraFine   TIME        NOT NULL,
+  PRIMARY KEY (Operatore, Data, OraInizio),
+  FOREIGN KEY (Operatore) REFERENCES Operatore (CF)
+);
+
+CREATE TABLE Stipendio (
+  Transazione INTEGER PRIMARY KEY,
+  Operatore   VARCHAR(16) NOT NULL,
+  FOREIGN KEY (Transazione) REFERENCES Transazione (Codice),
+  FOREIGN KEY (Operatore) REFERENCES Operatore (CF)
+);
+
+CREATE TABLE Recapito (
+  Codice   INTEGER AUTO_INCREMENT PRIMARY KEY,
+  Recapito VARCHAR(200)  NOT NULL,
+  Tipo     ENUM('telefono',
+                'fax',
+                'tel_fax',
+                'sito_web',
+                'email') NOT NULL,
+  UNIQUE (Recapito)
+);
+
+CREATE TABLE RubricaCliente (
+  Recapito INTEGER     NOT NULL,
+  Cliente  VARCHAR(16) NOT NULL,
+  PRIMARY KEY (Recapito, Cliente),
+  FOREIGN KEY (Cliente) REFERENCES Cliente (CF_PIVA),
+  FOREIGN KEY (Recapito) REFERENCES Recapito (Codice)
+);
+
+CREATE TABLE RubricaFornitore (
+  Recapito  INTEGER     NOT NULL,
+  Fornitore VARCHAR(11) NOT NULL,
+  PRIMARY KEY (Recapito, Fornitore),
+  FOREIGN KEY (Fornitore) REFERENCES Fornitore (PIVA),
+  FOREIGN KEY (Recapito) REFERENCES Recapito (Codice)
+);
+
+CREATE TABLE RubricaOperatore (
+  Recapito  INTEGER     NOT NULL,
+  Operatore VARCHAR(16) NOT NULL,
+  PRIMARY KEY (Recapito, Operatore),
+  FOREIGN KEY (Operatore) REFERENCES Operatore (CF),
+  FOREIGN KEY (Recapito) REFERENCES Recapito (Codice)
+);
+		\end{lstlisting}
+
+
+	\subsection{Codifica delle operazioni}
+		Vengono riportate di seguito tutte le operazioni previste nelle fasi progettuali precedenti (sorvolando quelle banali).

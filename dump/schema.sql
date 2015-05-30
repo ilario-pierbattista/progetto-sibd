@@ -1,5 +1,5 @@
 /**
- * TOC
+ * Tabella dei contenuti
  * 0) Creazione dello schema
  * 1) Tabelle
  * 2) Funzioni
@@ -258,21 +258,27 @@ CREATE TABLE RubricaOperatore (
  *
  **********************************************
  */
-
 DELIMITER ;;
-/* @TODO Commentare */
+
+/**
+ * Costanti:
+ * Non essendovi, in mysql, il supporto alle costanti
+ * definite dall'utente, la definizione di funzioni che
+ * restituiscono letterali simulano tale comportamento.
+ */
+/* Valore percentuale dell'iva */
 CREATE FUNCTION PERCENTAGE_IVA()
   RETURNS INTEGER
   BEGIN
     RETURN 22;
   END;;
-
+/* Valore reale dell'iva */
 CREATE FUNCTION IVA()
   RETURNS REAL
   BEGIN
     RETURN 0.22;
   END;;
-
+/* Ammontare massimo delle transazioni monetarie in contanti */
 CREATE FUNCTION MAX_CONTANTI()
   RETURNS REAL
   BEGIN
@@ -570,6 +576,9 @@ CREATE PROCEDURE ordine_update_imponibile(IN ordine INTEGER)
  * Aggiunta dei trigger che implementano i
  * vincoli d'integrità
  *
+ * Purtroppo i trigger vanno duplicati, uno per
+ * l'inserimento ed uno per l'aggiornamento
+ *
  *****************************************
  */
 DELIMITER ;;
@@ -577,8 +586,31 @@ DELIMITER ;;
 /*
  * Implmentazione dei vincoli su Cliente
  */
-CREATE TRIGGER Cliente_Check
+CREATE TRIGGER Cliente_before_insert
 BEFORE INSERT ON Cliente FOR EACH ROW
+  BEGIN
+    IF check_cf_piva(NEW.CF_PIVA) = FALSE
+    THEN
+      CALL throw_error('Codice fiscale o Partita IVA non valido');
+    ELSEIF check_cap(NEW.CAP) = FALSE
+      THEN
+        CALL throw_error('CAP non valido');
+    ELSEIF check_ndocid(NEW.NDocId) = FALSE
+      THEN
+        CALL throw_error('Numero del documento d\'identità non valido');
+    ELSEIF check_cf(NEW.CF_PIVA) AND
+           (NEW.Nome IS NULL OR
+            NEW.Cognome IS NULL OR
+            NEW.RagioneSociale IS NOT NULL)
+      THEN
+        CALL throw_error('Codice Fiscale rilevato: inserire solamente Nome e Cognome');
+    ELSEIF check_piva(NEW.CF_PIVA) AND (NEW.RagioneSociale IS NULL)
+      THEN
+        CALL throw_error('Partita IVA rilevata: inserire RagioneSociale');
+    END IF;
+  END;;
+CREATE TRIGGER Cliente_before_update
+BEFORE UPDATE ON Cliente FOR EACH ROW
   BEGIN
     IF check_cf_piva(NEW.CF_PIVA) = FALSE
     THEN
@@ -604,8 +636,25 @@ BEFORE INSERT ON Cliente FOR EACH ROW
 /*
  * Implementazione dei vincoli su Fornitore
  */
-CREATE TRIGGER Fornitore_Check
+CREATE TRIGGER Fornitore_before_insert
 BEFORE INSERT ON Fornitore FOR EACH ROW
+  BEGIN
+    IF NOT check_piva(NEW.PIVA)
+    THEN
+      CALL throw_error('Partita IVA non valida');
+    ELSEIF NOT check_cap(NEW.CAP)
+      THEN
+        CALL throw_error('CAP non valido');
+    ELSEIF NOT check_iban(NEW.IBAN)
+      THEN
+        CALL throw_error('IBAN non valido');
+    ELSEIF NEW.ModPagamento = 'bonifico' AND NEW.IBAN IS NULL
+      THEN
+        CALL throw_error('Il pagamento tramite bonifico richiede l\'IBAN');
+    END IF;
+  END;;
+CREATE TRIGGER Fornitore_before_update
+BEFORE UPDATE ON Fornitore FOR EACH ROW
   BEGIN
     IF NOT check_piva(NEW.PIVA)
     THEN
@@ -625,8 +674,34 @@ BEFORE INSERT ON Fornitore FOR EACH ROW
 /*
  * Implementazione vincoli su Operatore
  */
-CREATE TRIGGER Operatore_Check
+CREATE TRIGGER Operatore_before_insert
 BEFORE INSERT ON Operatore FOR EACH ROW
+  BEGIN
+    IF check_cf_piva(NEW.CF) = FALSE
+    THEN
+      CALL throw_error('Codice fiscale non valido');
+    ELSEIF check_cap(NEW.CAP) = FALSE
+      THEN
+        CALL throw_error('CAP non valido');
+    ELSEIF check_provincia(NEW.ProvinciaNasc) = FALSE
+      THEN
+        CALL throw_error('ProvinciaNasc non valida');
+    ELSEIF NOT (NEW.Stipendio IS NULL XOR NEW.RetribuzioneH IS NULL)
+      THEN
+        CALL throw_error('Specificare uno solo tra Stipendio e RetribuzioneH');
+    ELSEIF NEW.ModRiscossione = 'bonifico' AND NEW.IBAN IS NULL
+      THEN
+        CALL throw_error('La riscossione tramite bonifico richiede l\'IBAN');
+    ELSEIF NEW.ModRiscossione = 'contanti' AND NEW.Stipendio > MAX_CONTANTI()
+      THEN
+        CALL throw_error('La modalità di riscossione non può essere ''contanti'' per questo importo');
+    ELSEIF check_iban(NEW.IBAN) = FALSE
+      THEN
+        CALL throw_error('IBAN non valido');
+    END IF;
+  END;;
+CREATE TRIGGER Operatore_before_update
+BEFORE UPDATE ON Operatore FOR EACH ROW
   BEGIN
     IF check_cf_piva(NEW.CF) = FALSE
     THEN
@@ -655,8 +730,19 @@ BEFORE INSERT ON Operatore FOR EACH ROW
 /*
  * Implementazione dei vincoli su Autovettura
  */
-CREATE TRIGGER Autovettura_Check
+CREATE TRIGGER Autovettura_before_insert
 BEFORE INSERT ON Autovettura FOR EACH ROW
+  BEGIN
+    IF check_targa(NEW.Targa, NEW.AnnoImmatricolazione) = FALSE
+    THEN
+      CALL throw_error('Targa non valida');
+    ELSEIF (New.Telaio IS NOT NULL AND NOT check_telaio(New.Telaio))
+      THEN
+        CALL throw_error('Telaio non valido');
+    END IF;
+  END;;
+CREATE TRIGGER Autovettura_before_update
+BEFORE UPDATE ON Autovettura FOR EACH ROW
   BEGIN
     IF check_targa(NEW.Targa, NEW.AnnoImmatricolazione) = FALSE
     THEN
@@ -670,8 +756,16 @@ BEFORE INSERT ON Autovettura FOR EACH ROW
 /*
  * Implementazione dei vincoli su Turno
  */
-CREATE TRIGGER Turno_Check
+CREATE TRIGGER Turno_before_insert
 BEFORE INSERT ON Turno FOR EACH ROW
+  BEGIN
+    IF NOT check_turno(NEW.OraInizio, NEW.OraFine)
+    THEN
+      CALL throw_error('L\'ora di fine del turno non può essere antecedente a quella d\'inizio');
+    END IF;
+  END;;
+CREATE TRIGGER Turno_before_update
+BEFORE UPDATE ON Turno FOR EACH ROW
   BEGIN
     IF NOT check_turno(NEW.OraInizio, NEW.OraFine)
     THEN
@@ -682,8 +776,21 @@ BEFORE INSERT ON Turno FOR EACH ROW
 /*
  * Implementazione dei vincoli su Preventivo
  */
-CREATE TRIGGER Preventivo_Check
+CREATE TRIGGER Preventivo_before_insert
 BEFORE INSERT ON Preventivo FOR EACH ROW
+  BEGIN
+    IF NEW.SisAlimentazione IS NULL AND NEW.Categoria IN (
+      'installazione_impianto_gpl', 'installazione_impianto_metano')
+    THEN
+      CALL throw_error('SisAlimentazione è un attributo necessario per un preventivo d''installazione');
+    ELSEIF NEW.SisAlimentazione IS NOT NULL AND NEW.Categoria NOT IN (
+      'installazione_impianto_gpl', 'installazione_impianto_metano')
+      THEN
+        CALL throw_error('SisAlimentazione deve essere null per i preventivi che non siano d''installazione');
+    END IF;
+  END;;
+CREATE TRIGGER Preventivo_before_update
+BEFORE UPDATE ON Preventivo FOR EACH ROW
   BEGIN
     IF NEW.SisAlimentazione IS NULL AND NEW.Categoria IN (
       'installazione_impianto_gpl', 'installazione_impianto_metano')
@@ -699,8 +806,21 @@ BEFORE INSERT ON Preventivo FOR EACH ROW
 /*
  * Implementazione dei vincoli su Prestazione
  */
-CREATE TRIGGER Prestazione_Check
+CREATE TRIGGER Prestazione_before_insert
 BEFORE INSERT ON Prestazione FOR EACH ROW
+  BEGIN
+    DECLARE data_emissione DATE;
+    SELECT Preventivo.DataEmissione
+    INTO data_emissione
+    FROM Preventivo
+    WHERE Preventivo.Codice = NEW.Preventivo;
+    IF NOT check_date_chronical_order(data_emissione, NEW.DataFine)
+    THEN
+      CALL throw_error('La data di fine non può essere antecedente a quella di emissione del preventivo');
+    END IF;
+  END;;
+CREATE TRIGGER Prestazione_before_update
+BEFORE UPDATE ON Prestazione FOR EACH ROW
   BEGIN
     DECLARE data_emissione DATE;
     SELECT Preventivo.DataEmissione
@@ -716,8 +836,19 @@ BEFORE INSERT ON Prestazione FOR EACH ROW
 /*
  * Implementazione dei vincoli su Componente
  */
-CREATE TRIGGER Componente_Check
+CREATE TRIGGER Componente_before_insert
 BEFORE INSERT ON Componente FOR EACH ROW
+  BEGIN
+    IF NEW.Validita < 0
+    THEN
+      CALL throw_error('Validità di Componente non può essere un numero minore di zero');
+    ELSEIF NEW.QuantitaMin < 0
+      THEN
+        CALL throw_error('QuantitàMin di Componente non può essere un numero minore di zero');
+    END IF;
+  END;;
+CREATE TRIGGER Componente_before_update
+BEFORE UPDATE ON Componente FOR EACH ROW
   BEGIN
     IF NEW.Validita < 0
     THEN
@@ -731,7 +862,7 @@ BEFORE INSERT ON Componente FOR EACH ROW
 /*
  * Implementazione dei vincoli su Fornitura
  */
-CREATE TRIGGER Fornitura_Check
+CREATE TRIGGER Fornitura_before_insert
 BEFORE INSERT ON Fornitura FOR EACH ROW
   BEGIN
     IF NOT (NEW.Quantita > 0 AND NEW.PrezzoUnitario > 0)
@@ -739,12 +870,29 @@ BEFORE INSERT ON Fornitura FOR EACH ROW
       CALL throw_error('Quantità e PrezzoUnitario di Fornitura devono essere maggiori di zero');
     END IF;
   END;;
+CREATE TRIGGER Fornitura_before_update
+BEFORE UPDATE ON Fornitura FOR EACH ROW
+  BEGIN
+    IF NOT (NEW.Quantita > 0 AND NEW.PrezzoUnitario > 0)
+    THEN
+      CALL throw_error('Quantità e PrezzoUnitario di Fornitura devono essere maggiori di zero');
+    END IF;
+  END;;
+
 
 /*
  * Implementazione dei vincoli su Ordine
  */
-CREATE TRIGGER Ordine_Check
+CREATE TRIGGER Ordine_before_insert
 BEFORE INSERT ON Ordine FOR EACH ROW
+  BEGIN
+    IF NOT check_date_chronical_order(NEW.DataEmissione, NEW.DataConsegna)
+    THEN
+      CALL throw_error('La data di consegna dell''ordine non può antecedere quella di emissione');
+    END IF;
+  END;;
+CREATE TRIGGER Ordine_before_update
+BEFORE UPDATE ON Ordine FOR EACH ROW
   BEGIN
     IF NOT check_date_chronical_order(NEW.DataEmissione, NEW.DataConsegna)
     THEN
@@ -755,8 +903,29 @@ BEFORE INSERT ON Ordine FOR EACH ROW
 /*
  * Implementazione dei vincoli su Fattura
  */
-CREATE TRIGGER Fattura_Check
+CREATE TRIGGER Fattura_before_insert
 BEFORE INSERT ON Fattura FOR EACH ROW
+  BEGIN
+    IF NOT check_date_chronical_order(NEW.DataEmissione, NEW.DataScadenza)
+    THEN
+      CALL throw_error('La data di scadenza di una fattura non può essere antecedente a quella di emissione');
+    ELSEIF NEW.SisPag = 'rimessa_diretta' AND
+           NEW.DataEmissione != NEW.DataScadenza
+      THEN
+        IF NEW.DataScadenza IS NULL
+        THEN
+          SET NEW.DataScadenza = NEW.DataEmissione;
+        ELSE
+          CALL throw_error('Nel pagamento a rimessa diretta la data di scadenza non può '
+                           'essere diversa da quella di emissione');
+        END IF;
+    ELSEIF NEW.Sconto < 0 OR NEW.Sconto >= 100
+      THEN
+        CALL throw_error('Sconto di Fattura non può assumere questo valore');
+    END IF;
+  END;;
+CREATE TRIGGER Fattura_before_update
+BEFORE UPDATE ON Fattura FOR EACH ROW
   BEGIN
     IF NOT check_date_chronical_order(NEW.DataEmissione, NEW.DataScadenza)
     THEN
@@ -780,8 +949,16 @@ BEFORE INSERT ON Fattura FOR EACH ROW
 /*
  * Implementazione dei vincoli su Utilizzo
  */
-CREATE TRIGGER Utilizzo_Check
+CREATE TRIGGER Utilizzo_before_insert
 BEFORE INSERT ON Utilizzo FOR EACH ROW
+  BEGIN
+    IF NEW.Quantita < 0
+    THEN
+      CALL throw_error('La Quantità di Utilizzo non può essere minore di zero');
+    END IF;
+  END;;
+CREATE TRIGGER Utilizzo_before_update
+BEFORE UPDATE ON Utilizzo FOR EACH ROW
   BEGIN
     IF NEW.Quantita < 0
     THEN
@@ -792,8 +969,28 @@ BEFORE INSERT ON Utilizzo FOR EACH ROW
 /*
  * Implementazione dei vincoli su Previsione
  */
-CREATE TRIGGER Previsione_Check
+CREATE TRIGGER Previsione_before_insert
 BEFORE INSERT ON Previsione FOR EACH ROW
+  BEGIN
+    DECLARE categoria VARCHAR(30);
+    DECLARE ubicazione_required BOOLEAN;
+    SELECT Preventivo.Categoria
+    INTO categoria
+    FROM Preventivo
+    WHERE Preventivo.Codice = NEW.Preventivo;
+    SET ubicazione_required = (categoria = 'installazione_impianto_metano' OR
+                               categoria = 'installazione_impianto_gpl');
+    IF NEW.Quantita < 0
+    THEN
+      CALL throw_error('La Quantità di Previsione non può essere minore di zero');
+    ELSEIF NEW.Ubicazione IS NOT NULL XOR ubicazione_required
+      THEN
+        CALL throw_error('Ubicazione deve essere NULL solo se non si tratta '
+                         'della previsione di un''installazione');
+    END IF;
+  END;;
+CREATE TRIGGER Previsione_before_update
+BEFORE UPDATE ON Previsione FOR EACH ROW
   BEGIN
     DECLARE categoria VARCHAR(30);
     DECLARE ubicazione_required BOOLEAN;

@@ -8,18 +8,10 @@
 	"buffers":
 	[
 		{
-			"file": "Progetto.tex",
+			"file": "todo.txt",
 			"settings":
 			{
-				"buffer_size": 2849,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "codifica.tex",
-			"settings":
-			{
-				"buffer_size": 161,
+				"buffer_size": 3567,
 				"line_ending": "Unix"
 			}
 		}
@@ -65,11 +57,13 @@
 	},
 	"expanded_folders":
 	[
-		"/home/ilario/Documenti/Basi di Dati/Progetto",
-		"/home/ilario/Documenti/Basi di Dati/Progetto/dump"
+		"/home/ilario/Documenti/Basi di Dati/Progetto"
 	],
 	"file_history":
 	[
+		"/home/ilario/Documenti/Basi di Dati/Progetto/concettuale.tex",
+		"/home/ilario/Documenti/Basi di Dati/Progetto/analisi_requisiti.tex",
+		"/home/ilario/Documenti/Basi di Dati/Progetto/codifica.tex",
 		"/home/ilario/Documenti/Basi di Dati/Progetto/Progetto.tex",
 		"/home/ilario/.config/sublime-text-3/Packages/LaTeXTools/README.markdown",
 		"/home/ilario/.config/sublime-text-3/Packages/User/Preferences.sublime-settings"
@@ -90,13 +84,17 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"\\item ",
+			"\\\\label\\{op.+\\}",
+			"\\item "
 		],
 		"highlight": true,
 		"in_selection": false,
 		"preserve_case": false,
-		"regex": false,
+		"regex": true,
 		"replace_history":
 		[
+			""
 		],
 		"reverse": false,
 		"show_context": true,
@@ -112,59 +110,31 @@
 			[
 				{
 					"buffer": 0,
-					"file": "Progetto.tex",
+					"file": "todo.txt",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 2849,
+						"buffer_size": 3567,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								779,
-								779
+								3567,
+								3567
 							]
 						],
 						"settings":
 						{
-							"syntax": "Packages/LaTeX/LaTeX.tmLanguage",
+							"syntax": "Packages/Text/Plain text.tmLanguage",
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 0.0,
+						"translation.y": 285.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 0,
-					"type": "text"
-				},
-				{
-					"buffer": 1,
-					"file": "codifica.tex",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 161,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								143,
-								143
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/LaTeX/LaTeX.tmLanguage"
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 1,
 					"type": "text"
 				}
 			]
@@ -213,7 +183,7 @@
 	"project": "sibd.sublime-project",
 	"replace":
 	{
-		"height": 42.0
+		"height": 70.0
 	},
 	"save_all_on_build": true,
 	"select_file":
@@ -250,7 +220,7 @@
 	"show_minimap": true,
 	"show_open_files": false,
 	"show_tabs": true,
-	"side_bar_visible": true,
+	"side_bar_visible": false,
 	"side_bar_width": 240.0,
 	"status_bar_visible": true,
 	"template_settings":
