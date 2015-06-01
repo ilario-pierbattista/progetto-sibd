@@ -8,10 +8,10 @@
 	"buffers":
 	[
 		{
-			"file": "todo.txt",
+			"file": "codifica.tex",
 			"settings":
 			{
-				"buffer_size": 3567,
+				"buffer_size": 9056,
 				"line_ending": "Unix"
 			}
 		}
@@ -23,10 +23,14 @@
 	"build_varint": "",
 	"command_palette":
 	{
-		"height": 398.0,
-		"last_filter": "Inst",
+		"height": 140.0,
+		"last_filter": "insta",
 		"selected_items":
 		[
+			[
+				"insta",
+				"Package Control: Install Package"
+			],
 			[
 				"Inst",
 				"Package Control: Install Package"
@@ -61,6 +65,7 @@
 	],
 	"file_history":
 	[
+		"/home/ilario/Documenti/Basi di Dati/Progetto/todo.txt",
 		"/home/ilario/Documenti/Basi di Dati/Progetto/concettuale.tex",
 		"/home/ilario/Documenti/Basi di Dati/Progetto/analisi_requisiti.tex",
 		"/home/ilario/Documenti/Basi di Dati/Progetto/codifica.tex",
@@ -110,28 +115,27 @@
 			[
 				{
 					"buffer": 0,
-					"file": "todo.txt",
+					"file": "codifica.tex",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 3567,
+						"buffer_size": 9056,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								3567,
-								3567
+								9056,
+								9056
 							]
 						],
 						"settings":
 						{
-							"syntax": "Packages/Text/Plain text.tmLanguage",
-							"translate_tabs_to_spaces": false
+							"syntax": "Packages/LaTeX/LaTeX.tmLanguage"
 						},
 						"translation.x": 0.0,
-						"translation.y": 285.0,
+						"translation.y": 3412.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 0,
@@ -220,7 +224,7 @@
 	"show_minimap": true,
 	"show_open_files": false,
 	"show_tabs": true,
-	"side_bar_visible": false,
+	"side_bar_visible": true,
 	"side_bar_width": 240.0,
 	"status_bar_visible": true,
 	"template_settings":

@@ -19,6 +19,21 @@
 \usepackage{footnote}
 \usepackage{setspace}
 \usepackage{listings} % Code listings support
+\usepackage[scaled]{beramono} % Monospace font
+
+% Listings setup
+\lstset{literate=%
+{à}{{\`{a}}}1
+{è}{{\`{e}}}1
+{é}{{\'{e}}}1
+{ì}{{\`{i}}}1
+{ò}{{\`{o}}}1
+{ù}{{\`{u}}}1
+}
+\lstset{extendedchars=\true}
+\lstset{inputencoding=ansinew}
+\lstset{language=SQL}
+\lstset{basicstyle=\sffamily}
 
 % Setup Hyperef
 \hypersetup{

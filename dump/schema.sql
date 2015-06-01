@@ -65,7 +65,7 @@ CREATE TABLE Operatore (
 CREATE TABLE Transazione (
   Codice INTEGER AUTO_INCREMENT PRIMARY KEY,
   Quota  DECIMAL(10, 2) NOT NULL,
-  Data   DATE           NOT NULL
+  Data   DATE
 );
 
 CREATE TABLE Autovettura (
@@ -112,11 +112,11 @@ CREATE TABLE Componente (
 );
 
 CREATE TABLE Previsione (
-  Componente     INTEGER       NOT NULL,
-  Preventivo     INTEGER       NOT NULL,
+  Componente     INTEGER NOT NULL,
+  Preventivo     INTEGER NOT NULL,
   Ubicazione     ENUM('motore', 'bagagliaio'),
-  Quantita       INTEGER       NOT NULL,
-  PrezzoUnitario DECIMAL(6, 2) NOT NULL,
+  Quantita       INTEGER NOT NULL,
+  PrezzoUnitario DECIMAL(6, 2),
   PRIMARY KEY (Componente, Preventivo),
   FOREIGN KEY (Componente) REFERENCES Componente (Codice),
   FOREIGN KEY (Preventivo) REFERENCES Preventivo (Codice)
@@ -147,17 +147,17 @@ CREATE TABLE Ordine (
   DataConsegna  DATE,
   Imponibile    DECIMAL(9, 2) DEFAULT 0,
   Fornitore     VARCHAR(11) NOT NULL,
-  Versamento    INTEGER     NOT NULL,
+  Versamento    INTEGER,
   FOREIGN KEY (Fornitore) REFERENCES Fornitore (PIVA),
   FOREIGN KEY (Versamento) REFERENCES Transazione (Codice)
 );
 
 CREATE TABLE Fornitura (
   Codice         INTEGER AUTO_INCREMENT PRIMARY KEY,
-  Quantita       INTEGER       NOT NULL,
-  PrezzoUnitario DECIMAL(8, 2) NOT NULL,
-  Componente     INTEGER       NOT NULL,
-  Ordine         INTEGER       NOT NULL,
+  Quantita       INTEGER NOT NULL,
+  PrezzoUnitario DECIMAL(8, 2),
+  Componente     INTEGER NOT NULL,
+  Ordine         INTEGER NOT NULL,
   FOREIGN KEY (Componente) REFERENCES Componente (Codice),
   FOREIGN KEY (Ordine) REFERENCES Ordine (Codice)
 );
@@ -468,10 +468,11 @@ CREATE FUNCTION calc_imponibile_ordine(ordine INTEGER)
 
 /*
  * Calcolo della quota di una transazione per saldare la fattura
- * di un ordine
- * @TODO Pensare se aggiungere un parametro opzionale per specificare un'aggiunta
+ * di un ordine.
+ * Il primo parametro è il codice dell'ordine, il secondo è una
+ * quantità reale che si può aggiungere per esprimere costi aggiuntivi.
  */
-CREATE FUNCTION calc_transazione_ordine(ordine INTEGER)
+CREATE FUNCTION calc_transazione_ordine(ordine INTEGER, plus REAL)
   RETURNS DECIMAL(10, 2)
   BEGIN
     DECLARE result DECIMAL(10, 2);
@@ -479,13 +480,14 @@ CREATE FUNCTION calc_transazione_ordine(ordine INTEGER)
     FROM Ordine
     WHERE Codice = ordine
     INTO result;
-    RETURN result;
+    RETURN result + plus;
   END;;
 
 /*
- * Funzione per il calcolo del costo dei componenti
+ * Funzione per il calcolo del costo dei componenti utilizzati in una
+ * prestazione
  */
-CREATE FUNCTION calc_costo_componenti(prestazione INTEGER)
+CREATE FUNCTION calc_costo_componenti_prestazione(prestazione INTEGER)
   RETURNS DECIMAL(10, 2)
   BEGIN
     DECLARE result DECIMAL(10, 2);
@@ -495,6 +497,22 @@ CREATE FUNCTION calc_costo_componenti(prestazione INTEGER)
       LEFT JOIN Utilizzo ON Prestazione.Preventivo = Utilizzo.Prestazione
       LEFT JOIN Fornitura ON Fornitura.Codice = Utilizzo.Fornitura
     WHERE Prestazione.Preventivo = prestazione
+    INTO result;
+    RETURN result;
+  END;;
+
+/*
+ * Funzione per il calcolo del costo dei componenti previsti in un
+ * preventivo
+ */
+CREATE FUNCTION calc_costo_componenti_preventivo(preventivo INTEGER)
+  RETURNS DECIMAL(10, 2)
+  BEGIN
+    DECLARE result DECIMAL(10, 2);
+    SELECT SUM(Previsione.PrezzoUnitario * Previsione.Quantita)
+    FROM Preventivo
+      LEFT JOIN Previsione ON Preventivo.Codice = Previsione.Preventivo
+    WHERE Preventivo.Codice = preventivo
     INTO result;
     RETURN result;
   END;;
@@ -511,7 +529,7 @@ CREATE FUNCTION calc_costo_totale(prestazione INTEGER)
     FROM Prestazione
     WHERE Prestazione.Preventivo = prestazione
     INTO result;
-    SET result = result + calc_costo_componenti(prestazione);
+    SET result = result + calc_costo_componenti_prestazione(prestazione);
     RETURN result;
   END;;
 
@@ -554,22 +572,126 @@ DELIMITER ;;
 /*
  * Procedura per la generazione di errori
  */
-CREATE PROCEDURE throw_error(IN msg VARCHAR(300))
+CREATE PROCEDURE throw_error(IN msg VARCHAR(128))
   BEGIN
     SIGNAL SQLSTATE '45000'
     SET MESSAGE_TEXT = msg;
   END;;
 
 /*
- * Procedura di aggiornamento di imponibile in Ordine
+ * Procedura di aggunta automatica di un recapito ad un cliente
  */
-CREATE PROCEDURE ordine_update_imponibile(IN ordine INTEGER)
+CREATE PROCEDURE add_recapito_cliente(
+  IN cf_piva  VARCHAR(16),
+     recapito VARCHAR(200),
+     tipo     ENUM('telefono',
+                   'fax',
+                   'tel_fax',
+                   'sito_web',
+                   'email')
+)
   BEGIN
-    UPDATE Ordine
-    SET Imponibile = calc_imponibile_ordine(ordine)
-    WHERE Codice = ordine;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+      ROLLBACK;
+      CALL throw_error('Recapito già registrato');
+    END;
+    START TRANSACTION;
+    INSERT INTO Recapito (Recapito, Tipo) VALUES (recapito, tipo);
+    SELECT LAST_INSERT_ID()
+    INTO @last_id;
+    INSERT INTO RubricaCliente (Recapito, Cliente) VALUES (@last_id, cf_piva);
+    COMMIT;
   END;;
 
+/**
+ * Procedura di aggiunta di un recapito ad un fornitore
+ */
+CREATE PROCEDURE add_recapito_fornitore(
+  IN piva     VARCHAR(16),
+     recapito VARCHAR(200),
+     tipo     ENUM('telefono',
+                   'fax',
+                   'tel_fax',
+                   'sito_web',
+                   'email')
+)
+  BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+      ROLLBACK;
+      CALL throw_error('Recapito già registrato');
+    END;
+    START TRANSACTION;
+    INSERT INTO Recapito (Recapito, Tipo) VALUES (recapito, tipo);
+    SELECT LAST_INSERT_ID()
+    INTO @last_id;
+    INSERT INTO RubricaFornitore (Recapito, Fornitore) VALUES (@last_id, piva);
+    COMMIT;
+  END;;
+
+/**
+ * Procedura di aggiunta di un recapito ad un operatore
+ */
+CREATE PROCEDURE add_recapito_operatore(
+  IN cf       VARCHAR(16),
+     recapito VARCHAR(200),
+     tipo     ENUM('telefono',
+                   'fax',
+                   'tel_fax',
+                   'sito_web',
+                   'email')
+)
+  BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+      ROLLBACK;
+      CALL throw_error('Recapito già registrato');
+    END;
+    START TRANSACTION;
+    INSERT INTO Recapito (Recapito, Tipo) VALUES (recapito, tipo);
+    SELECT LAST_INSERT_ID()
+    INTO @last_id;
+    INSERT INTO RubricaOperatore (Recapito, Operatore) VALUES (@last_id, cf);
+    COMMIT;
+  END;;
+
+/**
+ * Procedura per la registrazione di un nuovo ordine in magazzino
+ */
+CREATE PROCEDURE registra_ordine_magazzino(IN ordine INTEGER)
+  BEGIN
+    DECLARE done BOOLEAN DEFAULT FALSE;
+    DECLARE componente_id INT;
+    DECLARE fornitura_id INT;
+    DECLARE quantita INT;
+    DECLARE cur CURSOR FOR
+      SELECT
+        Fornitura.Codice,
+        Fornitura.Componente,
+        Fornitura.Quantita
+      FROM Fornitura
+      WHERE Fornitura.Ordine = ordine;
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = 1;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+      ROLLBACK;
+      CALL throw_error('Errore nell''inserimento dell''ordine in magazzino');
+    END;
+    START TRANSACTION;
+    OPEN cur;
+    REPEAT
+      FETCH cur
+      INTO fornitura_id, componente_id, quantita;
+      IF NOT done
+      THEN
+        INSERT INTO Magazzino (Componente, Fornitura, Quantita)
+        VALUES (componente_id, fornitura_id, quantita);
+      END IF;
+    UNTIL done END REPEAT;
+    CLOSE cur;
+    COMMIT;
+  END;;
 
 /*****************************************
  *
@@ -974,7 +1096,8 @@ BEFORE INSERT ON Previsione FOR EACH ROW
   BEGIN
     DECLARE categoria VARCHAR(30);
     DECLARE ubicazione_required BOOLEAN;
-    SELECT Preventivo.Categoria
+    DECLARE prezzo REAL;
+    SELECT Preventivo.Categoria /* Estrazione della categoria del preventivo */
     INTO categoria
     FROM Preventivo
     WHERE Preventivo.Codice = NEW.Preventivo;
@@ -987,6 +1110,14 @@ BEFORE INSERT ON Previsione FOR EACH ROW
       THEN
         CALL throw_error('Ubicazione deve essere NULL solo se non si tratta '
                          'della previsione di un''installazione');
+    END IF;
+    IF NEw.PrezzoUnitario IS NULL
+    THEN
+      SELECT Componente.PrezzoVendita /* Estrazione del prezzo del componente */
+      INTO prezzo
+      FROM Componente
+      WHERE Componente.Codice = NEW.Componente;
+      SET NEW.PrezzoUnitario = prezzo;
     END IF;
   END;;
 CREATE TRIGGER Previsione_before_update
@@ -1011,21 +1142,17 @@ BEFORE UPDATE ON Previsione FOR EACH ROW
   END;;
 
 /*
- * Trigger su Fornitura
+ * Trigger su Transazione
  */
-CREATE TRIGGER Fornitura_after_insert
-AFTER INSERT ON Fornitura FOR EACH ROW
+CREATE TRIGGER Transazione_before_update
+BEFORE UPDATE ON Transazione FOR EACH ROW
   BEGIN
-    CALL ordine_update_imponibile(NEW.Ordine);
+    IF NEW.Data IS NULL
+    THEN
+      SET NEW.Data = CURRENT_DATE;
+    END IF;
   END;;
 
-CREATE TRIGGER Fornitura_after_update
-AFTER UPDATE ON Fornitura FOR EACH ROW
-  BEGIN
-    CALL ordine_update_imponibile(New.Ordine);
-  END;;
-
-/* Delimiter di default */
 DELIMITER ;
 
 
