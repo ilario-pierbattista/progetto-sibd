@@ -79,6 +79,7 @@ CREATE TABLE Autovettura (
   UltimaRevisione      DATE,
   Cliente              VARCHAR(16)  NOT NULL,
   FOREIGN KEY (Cliente) REFERENCES Cliente (CF_PIVA)
+    ON UPDATE CASCADE
 );
 
 CREATE TABLE Preventivo (
@@ -99,7 +100,8 @@ CREATE TABLE Preventivo (
   ServAggiuntivi   DECIMAL(7, 2) DEFAULT 0,
   Autovettura      VARCHAR(8) NOT NULL,
   Acconto          INTEGER,
-  FOREIGN KEY (Autovettura) REFERENCES Autovettura (Targa),
+  FOREIGN KEY (Autovettura) REFERENCES Autovettura (Targa)
+    ON UPDATE CASCADE,
   FOREIGN KEY (Acconto) REFERENCES Transazione (Codice)
 );
 
@@ -139,6 +141,7 @@ CREATE TABLE Occupazione (
   PRIMARY KEY (Prestazione, Operatore),
   FOREIGN KEY (Prestazione) REFERENCES Prestazione (Preventivo),
   FOREIGN KEY (Operatore) REFERENCES Operatore (CF)
+    ON UPDATE CASCADE
 );
 
 CREATE TABLE Ordine (
@@ -148,7 +151,8 @@ CREATE TABLE Ordine (
   Imponibile    DECIMAL(9, 2) DEFAULT 0,
   Fornitore     VARCHAR(11) NOT NULL,
   Versamento    INTEGER,
-  FOREIGN KEY (Fornitore) REFERENCES Fornitore (PIVA),
+  FOREIGN KEY (Fornitore) REFERENCES Fornitore (PIVA)
+    ON UPDATE CASCADE,
   FOREIGN KEY (Versamento) REFERENCES Transazione (Codice)
 );
 
@@ -207,6 +211,7 @@ CREATE TABLE Turno (
   OraFine   TIME        NOT NULL,
   PRIMARY KEY (Operatore, Data, OraInizio),
   FOREIGN KEY (Operatore) REFERENCES Operatore (CF)
+    ON UPDATE CASCADE
 );
 
 CREATE TABLE Stipendio (
@@ -214,6 +219,7 @@ CREATE TABLE Stipendio (
   Operatore   VARCHAR(16) NOT NULL,
   FOREIGN KEY (Transazione) REFERENCES Transazione (Codice),
   FOREIGN KEY (Operatore) REFERENCES Operatore (CF)
+    ON UPDATE CASCADE
 );
 
 CREATE TABLE Recapito (
@@ -1257,13 +1263,18 @@ DELIMITER ;
  * Fatture
  * Riepilogo di una fattura
  */
-CREATE VIEW RiepilogoFattura
+CREATE VIEW FatturaView
 AS
   SELECT
     Fattura.*,
+    Cliente.*,
     calc_imposte_fattura(Fattura.Imponibile)                                          AS Imposte,
     Fattura.Imponibile + calc_imposte_fattura(Fattura.Imponibile) - Fattura.Incentivi AS Totale
-  FROM Fattura;
+  FROM Fattura
+    JOIN Preventivo ON Preventivo.Codice = Fattura.Prestazione
+    LEFT JOIN Transazione ON Transazione.Codice = Preventivo.Acconto
+    JOIN Autovettura ON Autovettura.Targa = Preventivo.Autovettura
+    JOIN Cliente ON Cliente.CF_PIVA = Autovettura.Cliente;
 
 /*
  * Fatture

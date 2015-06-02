@@ -446,3 +446,231 @@ CREATE PROCEDURE update_quantita_magazzino(IN prestazione INTEGER)
     COMMIT;
   END;;
         \end{lstlisting}
+
+        \subsubsection{Implementazione delle altre operazioni}
+          Le altre operazioni possono essere presentate in maniera molto più lineare, non essendo, come le precedenti, fortemente legate tra loro.
+
+          \begin{description}
+            
+            \item[\ref{op:edit_cliente}] Modifica dei dati di un cliente. Ovviamente 
+              \begin{lstlisting}
+/** Modifica di un cliente senza partita iva */
+UPDATE Cliente
+SET CF_PIVA      = <Nuovo codice fiscale>,
+  Nome           = <Nuovo nome>,
+  Cognome        = <Nuovo cognome>,
+  Citta          = <Nuova città>,
+  Via            = <Nuova via>,
+  Civico         = <Nuovo civico>,
+  CAP            = <Nuovo CAP>,
+  NDocId         = <Nuovo numero del documento d'identità>
+WHERE Cliente.CF_PIVA = <Codice fiscale del cliente da modificare>;
+
+/** Modifica di un cliente con partita iva */
+UPDATE Cliente
+SET CF_PIVA      = <Nuova partita iva>,
+  RagioneSociale = <Nuova ragione sociale>,
+  Citta          = <Nuova città>,
+  Via            = <Nuova via>,
+  Civico         = <Nuovo civico>,
+  CAP            = <Nuovo CAP>,
+WHERE Cliente.CF_PIVA = <Partita iva del cliente da modificare>;
+              \end{lstlisting}
+            
+            \item[\ref{op:edit_fornitore}] Modifica dei dati di un fornitore.
+              \begin{lstlisting}
+UPDATE Fornitore
+SET PIVA         = <Nuova partita iva del fornitore>,
+  RagioneSociale = <Nuova ragione sociale>,
+  TempiConsegna  = <Nuovi tempi di consegna>,
+  ModPagamento   = <Nuova modalità di pagamento>,
+  IBAN           = <Nuovo iban>,
+  Citta          = <Nuova città>,
+  Via            = <Nuova via>,
+  Civico         = <Nuovo civico>,
+  CAP            = <Nuovo CAP>
+WHERE Fornitore.PIVA = <Partita iva del fornitore da modificare>;
+              \end{lstlisting}
+
+            \item[\ref{op:edit_operatore}] Modifica dei dati di un operatore.
+              \begin{lstlisting}
+/** Modifica dei dati di un generico operatore */
+UPDATE Operatore
+SET CF           = <Nuovo codice fiscale>,
+  Nome           = <Nuovo nome>,
+  Cognome        = <Nuovo cognome>,
+  Citta          = <Nuova città>,
+  Via            = <Nuova via>,
+  Civico         = <Nuovo civico>,
+  CAP            = <Nuovo CAP>,
+  DataNasc       = <Nuova data di nascita>,
+  ComuneNasc     = <Nuovo comune di nascita>,
+  ProvinciaNasc  = <Nuova provincia di nascita>,
+  Stipendio      = <Nuovo stipendio>,
+  RetribuzioneH  = <Nuova retribuzione oraria>,
+  ModRiscossione = <Nuova modalità di riscossione>,
+  IBAN           = <Nuovo IBAN>
+WHERE Operatore.CF = <Codice fiscale dell'operatore da modificare>;
+              \end{lstlisting}
+
+            \item[\ref{op:edit_componente}] Modifica del prezzo di vendita di un componente.
+              \begin{lstlisting}
+UPDATE Componente
+SET PrezzoVendita = <Nuovo prezzo di vendita>
+WHERE Componente.Codice = <Codice del componente>;
+              \end{lstlisting}
+
+            \item[\ref{op:show_collaudo}] Consultazione della data di ultimo collaudo per un'autovettura.
+              \begin{lstlisting}
+SELECT UltimoCollaudo
+FROM Autovettura
+WHERE Targa = <Targa dell'auto>;
+              \end{lstlisting}
+              
+              Inoltre, può essere utile avere una lista di tutte le auto registrate che in tempi brevi necessiteranno nuovamente del collaudo, in modo da poter facilmente repererne i proprietari.
+
+              \begin{lstlisting}
+/** Lista delle autovetture (con relativi proprietari)
+ *  che necessitano di un nuovo collaudo entro 14 giorni.
+ */
+SELECT
+  Autovettura.Targa,
+  Autovettura.UltimoCollaudo,
+  Cliente.Nome,
+  Cliente.Cognome,
+  Cliente.CF_PIVA
+FROM Autovettura
+  JOIN (
+         SELECT
+           Autovettura.Targa,
+           DATEDIFF(
+               CURRENT_DATE(),
+               DATE_ADD(Autovettura.UltimoCollaudo, INTERVAL 5 YEAR)
+           ) AS date_difference
+         FROM Autovettura
+       ) AS a ON a.Targa = Autovettura.Targa
+  JOIN Cliente ON Cliente.CF_PIVA = Autovettura.Cliente
+WHERE a.date_difference > - 14;
+              \end{lstlisting}
+
+              \begin{figure}[H]
+                \centering
+                \includegraphics[width=9cm]{images/screenshots/list_collaudo_scadenza.png}
+              \end{figure}
+
+
+            \item[\ref{op:show_revisione}] Consultazione della data di ultima revisione per un'autovettura.
+              \begin{lstlisting}
+SELECT UltimaRevisione
+FROM Autovettura
+WHERE Targa = <Targa dell'autovettura>;
+              \end{lstlisting}
+
+              Analogamente al caso precedente è utile avere una lista delle autovetture la cui scadenza della revisione è prossima. Vista la forte analogia con il caso precedente, non riportiamo alcuno screenshot.
+              \begin{lstlisting}
+/** Lista delle autovetture (con relativi proprietari)
+ *  che necessitano di una nuova revisione entro 14 giorni.
+ */
+SELECT
+  Autovettura.Targa,
+  Autovettura.UltimaRevisione,
+  Cliente.Nome,
+  Cliente.Cognome,
+  Cliente.CF_PIVA
+FROM Autovettura
+  JOIN (
+         SELECT
+           Autovettura.Targa,
+           DATEDIFF(
+               CURRENT_DATE(),
+               DATE_ADD(Autovettura.UltimaRevisione, INTERVAL 5 YEAR)
+           ) AS date_difference
+         FROM Autovettura
+       ) AS a ON a.Targa = Autovettura.Targa
+  JOIN Cliente ON Cliente.CF_PIVA = Autovettura.Cliente
+WHERE a.date_difference > -14;
+              \end{lstlisting}
+
+            \item[\ref{op:show_fattura}] La visualizzazione dei dati di una fattura si articola in due fasi. La prima fase prevedere l'estrazione dei dati per stilare l'intestazione della fattura e la parte relativa agli importi.
+
+            Ogni fattura nella sezione dedicata agli importi dovrà contenere l'\emph{imponibile Lordo}, lo \emph{sconto} in percentuale, l'\emph{Importo dello sconto}, l'\emph{imponibile netto}, l'ammontare delle \emph{imposte}, il valore di eventuali \emph{incentivi}, il \emph{totale}, il valore di un eventuale \emph{acconto} e il \emph{totale al netto dell'acconto}.
+
+            Disponiamo solamente dell'\emph{imponibile netto} (attributo \emph{Imponibile} di \emph{Fattura}), del valore percentuale dello \emph{sconto} (attributo \emph{Sconto} di \emph{Fattura}), del valore degli \emph{incentivi} (attributo \emph{Incentivi} di \emph{Fattura}) e del valore dell'\emph{acconto} (attributo \emph{Quota} di \emph{Transazione}).
+
+            Siano $i$, $s$, $A$, $D$, rispettivamente l'\emph{imponibile netto}, lo \emph{sconto percetuale}, l'\emph{acconto}, gli \emph{incentivi}. Sia inoltre $IVA$ l'ammontare in percentuale dell'iva.
+
+            Sia $I$ l'\emph{imponibile lordo}, l'equazione \ref{eq:imponibile_lordo} fornisce la relazione con i parametri conosciuti.
+            \begin{equation}
+              \label{eq:imponibile_lordo}
+              i = (1 - \frac{s}{100})\cdot I \Rightarrow I = \frac{i}{1 - \frac{s}{100}} \\
+              \Rightarrow I = \frac{100 \cdot i}{100 - s} 
+            \end{equation}
+
+            Sia $S$ l'\emph{importo dello sconto}:
+            \begin{equation}
+              \label{eq:importo_sconto}
+              I = i + S \Rightarrow S = i\cdot \left( \frac{100}{100 - s} - 1 \right) \\
+              \Rightarrow S = i \cdot \left( \frac{s}{100 - s} \right)
+            \end{equation}
+
+            Sia $T$ il valore delle imposte:
+            \begin{equation}
+              \label{eq:imposte}
+              T = i \cdot \frac{IVA}{100}
+            \end{equation}
+
+            Sia $TOT$ il \emph{totale lordo}:
+            \begin{equation}
+              \label{eq:totale_lordo}
+              TOT = i + T - D
+            \end{equation}
+
+            Sia $tot$ il \emph{totale netto}:
+            \begin{equation}
+              \label{eq:totale_netto}
+              tot = TOT - A
+            \end{equation}
+
+            Si assume che l'iva sia al $22\%$.
+
+              \begin{lstlisting}
+SELECT
+  Fattura.Numero,
+  Fattura.Anno,
+  Fattura.DataEmissione,
+  Fattura.SisPag,
+  Cliente.Nome,
+  Cliente.Cognome,
+  Cliente.Citta,
+  Cliente.Via,
+  Cliente.Civico,
+  Cliente.CAP,
+  Autovettura.Targa,
+  f.ImponibileLordo,
+  Fattura.Sconto,
+  f.ImportoSconto,
+  Fattura.Imponibile                                    AS ImponibileNetto,
+  f.Imposte,
+  Fattura.Incentivi,
+  Fattura.Imponibile + f.Imposte - Fattura.Incentivi    AS Totale,
+  IFNULL(Transazione.Quota, 0)                          AS RitenutaAcconto,
+  Fattura.Imponibile + f.Imposte - 
+      Fattura.Incentivi - IFNULL(Transazione.Quota, 0)  AS TotaleNetto
+FROM Fattura
+  JOIN Preventivo ON Preventivo.Codice = Fattura.Prestazione
+  LEFT JOIN Transazione ON Transazione.Codice = Preventivo.Acconto
+  JOIN Autovettura ON Autovettura.Targa = Preventivo.Autovettura
+  JOIN Cliente ON Cliente.CF_PIVA = Autovettura.Cliente
+  JOIN (SELECT
+          Fattura.Numero,
+          Fattura.Anno,
+          ROUND(Fattura.Imponibile * (100 / (100 - Fattura.Sconto)), 2)
+            AS ImponibileLordo,
+          ROUND(Fattura.Imponibile * 0.22, 2)                                      
+            AS Imposte,
+          ROUND(Fattura.Imponibile * (Fattura.Sconto / (100 - Fattura.Sconto)), 2) 
+            AS ImportoSconto
+        FROM Fattura) AS f ON Fattura.Numero = f.Numero AND Fattura.Anno = f.Anno;
+              \end{lstlisting}
+
+          \end{description}

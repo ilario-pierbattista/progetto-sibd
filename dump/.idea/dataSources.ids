@@ -18,7 +18,7 @@
       <column name="UltimaRevisione" sqlType="DATE" precision="10" scale="0" nullable="true" jdbcType="91"/>
       <column name="Cliente" sqlType="VARCHAR" precision="16" scale="0" nullable="false" jdbcType="12"/>
       <primary-key name="PRIMARY" columns="Targa"/>
-      <foreign-key name="Autovettura_ibfk_1" columns="Cliente" ref-table="Cliente" ref-schema="" ref-catalog="Officina" ref-columns="CF_PIVA" update-rule="3" delete-rule="3" deferrability="2"/>
+      <foreign-key name="Autovettura_ibfk_1" columns="Cliente" ref-table="Cliente" ref-schema="" ref-catalog="Officina" ref-columns="CF_PIVA" update-rule="0" delete-rule="3" deferrability="2"/>
       <exported-key name="Preventivo_ibfk_1" table="Preventivo" schema="" catalog="Officina" columns="Autovettura"/>
     </table>
     <table name="Cliente" schema="" catalog="Officina" type="TABLE">
@@ -69,6 +69,22 @@
       <foreign-key name="Fattura_ibfk_1" columns="Prestazione" ref-table="Prestazione" ref-schema="" ref-catalog="Officina" ref-columns="Preventivo" update-rule="3" delete-rule="3" deferrability="2"/>
       <foreign-key name="Fattura_ibfk_2" columns="Transazione" ref-table="Transazione" ref-schema="" ref-catalog="Officina" ref-columns="Codice" update-rule="3" delete-rule="3" deferrability="2"/>
     </table>
+    <table name="FatturaView" schema="" catalog="Officina" type="VIEW">
+      <column name="Numero" sqlType="INT" precision="10" scale="0" nullable="false" jdbcType="4"/>
+      <column name="Anno" sqlType="INT" precision="10" scale="0" nullable="false" jdbcType="4"/>
+      <column name="Imponibile" sqlType="DECIMAL" precision="10" scale="2" nullable="false" jdbcType="3"/>
+      <column name="Sconto" sqlType="DECIMAL" precision="4" scale="2" nullable="false" jdbcType="3" def="MC4wMA=="/>
+      <column name="Incentivi" sqlType="DECIMAL" precision="8" scale="2" nullable="false" jdbcType="3" def="MC4wMA=="/>
+      <column name="DataEmissione" sqlType="DATE" precision="10" scale="0" nullable="false" jdbcType="91"/>
+      <column name="DataScadenza" sqlType="DATE" precision="10" scale="0" nullable="false" jdbcType="91"/>
+      <column name="TipoPag" sqlType="ENUM" precision="9" scale="0" nullable="false" jdbcType="1"/>
+      <column name="StatoPag" sqlType="TINYINT" precision="3" scale="0" nullable="false" jdbcType="-6" def="MA=="/>
+      <column name="SisPag" sqlType="ENUM" precision="17" scale="0" nullable="false" jdbcType="1" def="J3JpbWVzc2FfZGlyZXR0YSc="/>
+      <column name="Prestazione" sqlType="INT" precision="10" scale="0" nullable="false" jdbcType="4"/>
+      <column name="Transazione" sqlType="INT" precision="10" scale="0" nullable="true" jdbcType="4"/>
+      <column name="Imposte" sqlType="DECIMAL" precision="10" scale="2" nullable="true" jdbcType="3"/>
+      <column name="Totale" sqlType="DECIMAL" precision="12" scale="2" nullable="true" jdbcType="3"/>
+    </table>
     <table name="Fornitore" schema="" catalog="Officina" type="TABLE">
       <column name="PIVA" sqlType="VARCHAR" precision="11" scale="0" nullable="false" jdbcType="12"/>
       <column name="RagioneSociale" sqlType="VARCHAR" precision="80" scale="0" nullable="false" jdbcType="12"/>
@@ -108,7 +124,7 @@
       <column name="Operatore" sqlType="VARCHAR" precision="16" scale="0" nullable="false" jdbcType="12"/>
       <primary-key name="PRIMARY" columns="Prestazione,Operatore"/>
       <foreign-key name="Occupazione_ibfk_1" columns="Prestazione" ref-table="Prestazione" ref-schema="" ref-catalog="Officina" ref-columns="Preventivo" update-rule="3" delete-rule="3" deferrability="2"/>
-      <foreign-key name="Occupazione_ibfk_2" columns="Operatore" ref-table="Operatore" ref-schema="" ref-catalog="Officina" ref-columns="CF" update-rule="3" delete-rule="3" deferrability="2"/>
+      <foreign-key name="Occupazione_ibfk_2" columns="Operatore" ref-table="Operatore" ref-schema="" ref-catalog="Officina" ref-columns="CF" update-rule="0" delete-rule="3" deferrability="2"/>
     </table>
     <table name="Operatore" schema="" catalog="Officina" type="TABLE">
       <column name="CF" sqlType="VARCHAR" precision="16" scale="0" nullable="false" jdbcType="12"/>
@@ -139,7 +155,7 @@
       <column name="Fornitore" sqlType="VARCHAR" precision="11" scale="0" nullable="false" jdbcType="12"/>
       <column name="Versamento" sqlType="INT" precision="10" scale="0" nullable="true" jdbcType="4"/>
       <primary-key name="PRIMARY" columns="Codice"/>
-      <foreign-key name="Ordine_ibfk_1" columns="Fornitore" ref-table="Fornitore" ref-schema="" ref-catalog="Officina" ref-columns="PIVA" update-rule="3" delete-rule="3" deferrability="2"/>
+      <foreign-key name="Ordine_ibfk_1" columns="Fornitore" ref-table="Fornitore" ref-schema="" ref-catalog="Officina" ref-columns="PIVA" update-rule="0" delete-rule="3" deferrability="2"/>
       <foreign-key name="Ordine_ibfk_2" columns="Versamento" ref-table="Transazione" ref-schema="" ref-catalog="Officina" ref-columns="Codice" update-rule="3" delete-rule="3" deferrability="2"/>
       <exported-key name="Fornitura_ibfk_2" table="Fornitura" schema="" catalog="Officina" columns="Ordine"/>
     </table>
@@ -171,7 +187,7 @@
       <column name="Autovettura" sqlType="VARCHAR" precision="8" scale="0" nullable="false" jdbcType="12"/>
       <column name="Acconto" sqlType="INT" precision="10" scale="0" nullable="true" jdbcType="4"/>
       <primary-key name="PRIMARY" columns="Codice"/>
-      <foreign-key name="Preventivo_ibfk_1" columns="Autovettura" ref-table="Autovettura" ref-schema="" ref-catalog="Officina" ref-columns="Targa" update-rule="3" delete-rule="3" deferrability="2"/>
+      <foreign-key name="Preventivo_ibfk_1" columns="Autovettura" ref-table="Autovettura" ref-schema="" ref-catalog="Officina" ref-columns="Targa" update-rule="0" delete-rule="3" deferrability="2"/>
       <foreign-key name="Preventivo_ibfk_2" columns="Acconto" ref-table="Transazione" ref-schema="" ref-catalog="Officina" ref-columns="Codice" update-rule="3" delete-rule="3" deferrability="2"/>
       <exported-key name="Prestazione_ibfk_1" table="Prestazione" schema="" catalog="Officina" columns="Preventivo"/>
       <exported-key name="Previsione_ibfk_2" table="Previsione" schema="" catalog="Officina" columns="Preventivo"/>
@@ -195,22 +211,6 @@
       <exported-key name="RubricaFornitore_ibfk_2" table="RubricaFornitore" schema="" catalog="Officina" columns="Recapito"/>
       <exported-key name="RubricaOperatore_ibfk_2" table="RubricaOperatore" schema="" catalog="Officina" columns="Recapito"/>
       <index name="Recapito" unique="true" columns="Recapito"/>
-    </table>
-    <table name="RiepilogoFattura" schema="" catalog="Officina" type="VIEW">
-      <column name="Numero" sqlType="INT" precision="10" scale="0" nullable="false" jdbcType="4"/>
-      <column name="Anno" sqlType="INT" precision="10" scale="0" nullable="false" jdbcType="4"/>
-      <column name="Imponibile" sqlType="DECIMAL" precision="10" scale="2" nullable="false" jdbcType="3"/>
-      <column name="Sconto" sqlType="DECIMAL" precision="4" scale="2" nullable="false" jdbcType="3" def="MC4wMA=="/>
-      <column name="Incentivi" sqlType="DECIMAL" precision="8" scale="2" nullable="false" jdbcType="3" def="MC4wMA=="/>
-      <column name="DataEmissione" sqlType="DATE" precision="10" scale="0" nullable="false" jdbcType="91"/>
-      <column name="DataScadenza" sqlType="DATE" precision="10" scale="0" nullable="false" jdbcType="91"/>
-      <column name="TipoPag" sqlType="ENUM" precision="9" scale="0" nullable="false" jdbcType="1"/>
-      <column name="StatoPag" sqlType="TINYINT" precision="3" scale="0" nullable="false" jdbcType="-6" def="MA=="/>
-      <column name="SisPag" sqlType="ENUM" precision="17" scale="0" nullable="false" jdbcType="1" def="J3JpbWVzc2FfZGlyZXR0YSc="/>
-      <column name="Prestazione" sqlType="INT" precision="10" scale="0" nullable="false" jdbcType="4"/>
-      <column name="Transazione" sqlType="INT" precision="10" scale="0" nullable="true" jdbcType="4"/>
-      <column name="Imposte" sqlType="DECIMAL" precision="10" scale="2" nullable="true" jdbcType="3"/>
-      <column name="Totale" sqlType="DECIMAL" precision="12" scale="2" nullable="true" jdbcType="3"/>
     </table>
     <table name="RubricaCliente" schema="" catalog="Officina" type="TABLE">
       <column name="Recapito" sqlType="INT" precision="10" scale="0" nullable="false" jdbcType="4"/>
@@ -238,7 +238,7 @@
       <column name="Operatore" sqlType="VARCHAR" precision="16" scale="0" nullable="false" jdbcType="12"/>
       <primary-key name="PRIMARY" columns="Transazione"/>
       <foreign-key name="Stipendio_ibfk_1" columns="Transazione" ref-table="Transazione" ref-schema="" ref-catalog="Officina" ref-columns="Codice" update-rule="3" delete-rule="3" deferrability="2"/>
-      <foreign-key name="Stipendio_ibfk_2" columns="Operatore" ref-table="Operatore" ref-schema="" ref-catalog="Officina" ref-columns="CF" update-rule="3" delete-rule="3" deferrability="2"/>
+      <foreign-key name="Stipendio_ibfk_2" columns="Operatore" ref-table="Operatore" ref-schema="" ref-catalog="Officina" ref-columns="CF" update-rule="0" delete-rule="3" deferrability="2"/>
     </table>
     <table name="Transazione" schema="" catalog="Officina" type="TABLE">
       <column name="Codice" sqlType="INT" precision="10" scale="0" nullable="false" jdbcType="4" autoIncrement="true"/>
@@ -256,7 +256,7 @@
       <column name="OraInizio" sqlType="TIME" precision="8" scale="0" nullable="false" jdbcType="92"/>
       <column name="OraFine" sqlType="TIME" precision="8" scale="0" nullable="false" jdbcType="92"/>
       <primary-key name="PRIMARY" columns="Operatore,Data,OraInizio"/>
-      <foreign-key name="Turno_ibfk_1" columns="Operatore" ref-table="Operatore" ref-schema="" ref-catalog="Officina" ref-columns="CF" update-rule="3" delete-rule="3" deferrability="2"/>
+      <foreign-key name="Turno_ibfk_1" columns="Operatore" ref-table="Operatore" ref-schema="" ref-catalog="Officina" ref-columns="CF" update-rule="0" delete-rule="3" deferrability="2"/>
     </table>
     <table name="Utilizzo" schema="" catalog="Officina" type="TABLE">
       <column name="Prestazione" sqlType="INT" precision="10" scale="0" nullable="false" jdbcType="4"/>

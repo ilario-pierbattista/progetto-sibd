@@ -18,8 +18,8 @@ VALUES
 INSERT INTO Autovettura (Targa, Telaio, Marca, Modello, Cilindrata, AnnoImmatricolazione, UltimoCollaudo, UltimaRevisione, Cliente)
 VALUES ('BX692TE', 'ZFA17600002123456', 'Fiat', 'Punto', 1200, 2001, '2014-05-15', '2012-08-02', 'STFLSN93A08E783E'),
   ('BN548BL', 'WVW18500002123874', 'Volkswagen', 'Golf', 1600, 2013, '2013-08-23', '2013-04-14', 'RSSMRA78L13L366E'),
-  ('EZ874LO', 'VF7SA5FR8AW654321', 'Citroen', 'C3', 1400, 2010, '2011-10-10', '2010-01-31', 'PRBLRI93R05I324O'),
-  ('RT435CM', 'ZAF47800002743656', 'Alfa Romeo', '147', 1800, 2008, '2014-06-15', '2013-11-15', 'STFLSN93A08E783E'),
+  ('EZ874LO', 'VF7SA5FR8AW654321', 'Citroen', 'C3', 1400, 2010, '2010-06-10', '2010-01-31', 'PRBLRI93R05I324O'),
+  ('RT435CM', 'ZAF47800002743656', 'Alfa Romeo', '147', 1800, 2008, '2014-06-15', '2010-11-15', 'STFLSN93A08E783E'),
   ('AB123OR', 'BAF47800002243656', 'Fiat', 'Panda', 1200, 2009, '2014-06-10', '2014-06-10', 'PRBLRI93R05I324O');
 
 /* Inserimento ed associazione dei recapiti */
