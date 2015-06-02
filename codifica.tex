@@ -13,10 +13,9 @@ Il DBMS utilizzato (MySQL 5) nativamente non supporta la definizione di vincoli 
 	\subsection{Codifica delle operazioni}
 		Di seguito vengono riportate le implementazioni delle operazioni effettuabili sulla base di dati. La loro organizzazione non è lineare come l'elenco presentato in fase progettuale, ma rispecchia quelli che sono i reali casi d'uso.
 
-		\begin{enumerate}
-
-			\item Inserimento di un nuovo cliente. A tale inserimento corrisponde sempre l'inserimento e l'associazione di una nuova autovettura e di almeno un recapito.
-			\begin{lstlisting}
+		\subsubsection{Inserimento di un nuovo cliente}
+			A tale inserimento corrisponde sempre l'inserimento e l'associazione di una nuova autovettura e di almeno un recapito.
+				\begin{lstlisting}
 /** Cliente non dotato di partita iva */
 INSERT INTO Cliente (CF_PIVA, Nome, Cognome, Citta, 
 	Via, Civico, CAP, NDocId) 
@@ -41,6 +40,16 @@ VALUES (...);
 INSERT INTO RubricaCliente (Recapito, Cliente)
 VALUES (<Codice del recapito>, <CF_PIVA del cliente>);
 				\end{lstlisting}
+
+        \begin{figure}[H]
+          \centering
+          \includegraphics[width=15cm]{images/screenshots/nuovo_cliente.png}
+        \end{figure}
+
+        \begin{figure}[H]
+          \centering
+          \includegraphics[width=9cm]{images/screenshots/show_cliente_autovettura.png}
+        \end{figure}
 
 			L'aggiunta di un recapito ad un cliente è un'operazione molto frequente. Per questo è stata creata una procedura che si occupa dell'inserimento e dell'associazione dello stesso:
 				\begin{lstlisting}
@@ -72,8 +81,15 @@ CREATE PROCEDURE add_recapito_cliente(
   END;;
 				\end{lstlisting}
 
-			\item Inserimento di un nuovo fornitore. All'inserimento di un nuovo fornitore corrisponde l'inserimento dei relativi recapiti.
-			\begin{lstlisting}
+        \begin{figure}[H]
+          \centering
+          \includegraphics[width=9cm]{images/screenshots/show_cliente_rubrica.png}
+        \end{figure}
+
+
+			\subsubsection{Inserimento di un nuovo fornitore}
+				All'inserimento di un nuovo fornitore corrisponde l'inserimento dei relativi recapiti.
+				\begin{lstlisting}
 /** Inserimento del fornitore */
 INSERT INTO Fornitore (PIVA, RagioneSociale, TempiConsegna,
 	ModPagamento, IBAN, Citta, Via, Civico, CAP) 
@@ -85,17 +101,22 @@ VALUES (...);
 	precedente) */
 INSERT INTO RubricaFornitore (Recapito, Fornitore)
 VALUES (<Codice del recapito>, <PIVA del fornitore>);
-			\end{lstlisting}
+				\end{lstlisting}
 
-			Come nel caso precedente, anche per il fornitore esiste una procedura per l'aggiunta e l'associazione di un recapito.
-			Gli inserimenti diventano molto più compatti:
-			\begin{lstlisting}
-CALL add_recapito_fornitor(<PIV del fornitore>,
+				Come nel caso precedente, anche per il fornitore esiste una procedura per l'aggiunta e l'associazione di un recapito.
+				Gli inserimenti diventano molto più compatti:
+
+				\begin{lstlisting}
+CALL add_recapito_fornitore(<PIV del fornitore>,
 	<recapito>, <tipo del recapito>);
-			\end{lstlisting}
+				\end{lstlisting}
 
-			\item Inserimento di un nuovo operatore. Anche in questo caso bisognerà aggiungere uno o più recapiti a quest'ultimo. Presentiamo inoltre anche l'istruzione per inserire un nuovo turno di lavoro.
-			\begin{lstlisting}
+        Vista la semplicità di queste operazioni, non crediamo sia necessario allegare degli screenshot che ne testimonino la corretta esecuzione.
+
+
+			\subsubsection{Inserimento di un nuovo operatore}
+				Anche in questo caso bisognerà aggiungere uno o più recapiti a quest'ultimo. Presentiamo inoltre anche l'istruzione per inserire un nuovo turno di lavoro.
+				\begin{lstlisting}
 /** Inserimento di un operatore con stipendio fisso */
 INSERT INTO Operatore (CF, Nome, Cognome, Citta, Via, 
 	Civico, CAP, DataNasc, ComuneNasc, ProvinciaNasc, 
@@ -112,19 +133,316 @@ VALUES (...);
 /** Inserimento di un nuovo turno di lavoro */
 INSERT INTO Turno (Operatore, Data, OraInizio, OraFine)
 VALUES (<CF dell'operatore>, ...);
-			\end{lstlisting}
 
-			\item Registrazione di un nuovo componente.
-			\begin{lstlisting}
+/** Aggiunta di un recapito */
+CALL add_recapito_operatore(<CF dell'operatore>, <recapito>, 
+	<tipo di recapito>)
+				\end{lstlisting}
+
+        Considerata la semplicità e l'analogia con i casi precedenti, non crediamo sia necessario allegare degli screenshot.
+
+
+			\subsubsection{Inserimento di un nuovo componente}
+				\begin{lstlisting}
 INSERT INTO Componente (Nome, QuantitaMin, Validita, 
 	PrezzoVendita) 
 VALUES (...);
-			\end{lstlisting}
+				\end{lstlisting}
 
-			\item Inserimento di un nuovo ordine. Questa operazione si articola in più parti: innanzi tutto bisogna creare una nuova istanza nella relazione \emph{Ordine}, quindi creare le istanze relative alle forniture dell'ordeine, aggiornare il magazzino ed inserire una nuova transazione a pagamento avvenuto dell'ordine.
 
-			\begin{lstlisting}
+			\subsubsection{Inserimento di un nuovo ordine}
+				Questa operazione si articola in più parti: innanzi tutto bisogna creare una nuova istanza nella relazione \emph{Ordine}, quindi creare le istanze relative alle forniture dell'ordine.
 
-			\end{lstlisting}
+				\begin{lstlisting}
+/** Creazione del nuovo ordine */
+INSERT INTO Ordine (DataEmissione, Fornitore, Imponibile) 
+VALUES (...);
 
-		\end{enumerate}
+/** Creazione delle nuove forniture */
+INSERT INTO Fornitura (Quantita, Componente, 
+	Ordine, PrezzoUnitario)
+VALUES (...), ..., (...);
+				\end{lstlisting}
+
+				In fase di creazione dell'ordine, inoltre, non è strettamente necessario inserirne l'imponibile. Lo si può calcolare in un secondo momento in base alle forniture associategli:
+
+				\begin{lstlisting}
+/** Aggiornamento dell'imponibile dell'ordine in base
+ *  alle forniture associate allo stesso.
+ *  Utilizzo della funzione calc_imponibile_ordine
+ */
+UPDATE Ordine
+SET Imponibile = calc_imponibile_ordine(<Codice ordine>)
+WHERE Ordine.Codice = <Codice ordine>;
+				\end{lstlisting}
+
+				Di seguito il corpo della funzione che automatizza il calcolo dell'attributo imponibile.
+
+				\begin{lstlisting}
+/** Implementazione di calc_imponibile_ordine
+ *  Il primo parametro è il codice dell'ordine 
+ */
+CREATE FUNCTION calc_imponibile_ordine(ordine INTEGER)
+  RETURNS DECIMAL(10, 2)
+  BEGIN
+    DECLARE result DECIMAL(10, 2);
+    SELECT SUM(Fornitura.PrezzoUnitario * Fornitura.Quantita)
+    FROM Ordine
+      JOIN Fornitura ON Ordine.Codice = Fornitura.Ordine
+    WHERE Ordine.Codice = ordine
+    INTO result;
+    RETURN result;
+  END;;
+				\end{lstlisting}
+
+				Al pagamento dell'ordine, sarà necessario inserire una nuova transazione per registrare il pagamento al fornitore;
+
+				\begin{lstlisting}
+INSERT INTO Transazione (Quota, Data) VALUES (...);
+UPDATE Ordine
+SET Ordine.Versamento = <Codice della transazione>,
+WHERE Ordine.Codice = <Codice dell'ordine>;
+				\end{lstlisting}
+
+				Ricordiamo che l'ammontare di tale transazione corrisponde all'imponibile dell'ordine cui vengono sommate le imposte ed altre somme eventuali. Per calcolare tale valore velocemente, si può utilizzare la funzione \emph{calc\_transazione\_ordine}:
+
+				\begin{lstlisting}
+/** Inserimento di una nuova transazione
+ *  calcolando in modo automatico la quota 
+ */
+INSERT INTO Transazione (Quota, Data)
+VALUES (calc_transazione_ordine(<Codice ordine>, 0), <Data>);
+
+/**
+ * Corpo della funzione calc_transazione_ordine
+ * ordine: Codice dell'ordine di cui calcolare
+ * 		il totale
+ * plus: Somma aggiuntiva da aggiungere eventualmente
+ * 		al risultato finale.
+ */
+CREATE FUNCTION calc_transazione_ordine(ordine INTEGER, plus REAL)
+  RETURNS DECIMAL(10, 2)
+  BEGIN
+    DECLARE result DECIMAL(10, 2);
+    SELECT Imponibile * (-(1 + IVA()))
+    FROM Ordine
+    WHERE Codice = ordine
+    INTO result;
+    RETURN result + plus;
+  END;;
+				\end{lstlisting}
+
+				Infine, alla consegna dell'ordine da parte del fornitore, bisogna registrare la data di consegna ed inserire le nuove forniture nel magazzino.
+
+				\begin{lstlisting}
+/** Per ogni fornitura dell'ordine */
+INSERT INTO Magazzino (Componente, Fornitura, Quantita)
+VALUES (...);
+
+/** Registrazione della data di consegna */
+UPDATE Ordine
+SET Ordine.DataConsegna = <Data di Consegna>
+WHERE Ordine.Codice = <Codice dell'ordine>;
+				\end{lstlisting}
+
+				Infine anche per l'inserimento delle nuove forniture in magazzino abbiamo preparato una procedura che automatizza tale processo.
+
+				\begin{lstlisting}
+CALL registra_ordine_magazzino(<Codice dell'ordine>);
+
+/** Corpo della funzione registra_ordine_magazzino
+ * ordine: Codice dell'ordine di cui inserire le
+ * 		forniture in magazzino 
+ */
+CREATE PROCEDURE registra_ordine_magazzino(IN ordine INTEGER)
+  BEGIN
+    DECLARE done BOOLEAN DEFAULT FALSE;
+    DECLARE componente_id INT;
+    DECLARE fornitura_id INT;
+    DECLARE quantita INT;
+    DECLARE cur CURSOR FOR
+      SELECT
+        Fornitura.Codice,
+        Fornitura.Componente,
+        Fornitura.Quantita
+      FROM Fornitura
+      WHERE Fornitura.Ordine = ordine;
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = 1;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+      ROLLBACK;
+      CALL throw_error('Errore nell''inserimento dell''ordine in magazzino');
+    END;
+    START TRANSACTION;
+    OPEN cur;
+    REPEAT
+      FETCH cur
+      INTO fornitura_id, componente_id, quantita;
+      IF NOT done
+      THEN
+        INSERT INTO Magazzino (Componente, Fornitura, Quantita)
+        VALUES (componente_id, fornitura_id, quantita);
+      END IF;
+    UNTIL done END REPEAT;
+    CLOSE cur;
+    COMMIT;
+  END;;
+				\end{lstlisting}
+
+
+			\subsubsection{Inserimento di un nuovo preventivo}
+
+				\begin{lstlisting}
+/** Inserimento di un nuovo preventivo */
+INSERT INTO Preventivo (DataEmissione, DataInizio, Categoria,
+	Sintomi, SisAlimentazione, TempoStimato, CostoComponenti, 
+	Manodopera, ServAggiuntivi, Autovettura)
+VALUES (...);
+
+/** Inserimento dei componenti previsti */
+INSERT INTO Previsione (Componente, Preventivo, 
+	Ubicazione, Quantita)
+VALUES (...), ..., (...);
+				\end{lstlisting}
+
+				Il costo dei componenti previsti dal preventivo può essere calcolato automaticamente alla fine dell'inserimento dei componenti previsti nella tabella \emph{Previsione}. Per far ciò abbiamo implementato una funzione chiamata \emph{calc\_costo\_componenti\_preventivo}.
+				Inoltre, alla stipulazione di un preventivo, si può lasciare un acconto che viene regolarmente registrato.
+
+				\begin{lstlisting}
+/** Calcolo automatico del costo dei componenti */
+UPDATE Preventivo 
+SET CostoComponenti = calc_costo_componenti_preventivo(<Codice preventivo>)
+WHERE Preventivo.Codice = <Codice preventivo>;
+
+/** Inserimento di un acconto */
+INSERT INTO Transazione (Quota, Data)
+VALUES (...);
+UPDATE Preventivo
+SET Acconto       = <Codice della Transazione>,
+WHERE Preventivo.Codice = <Codice del preventivo>;
+
+/** Corpo della funzione calc_costo_componenti_preventivo
+ *  preventivo: Codice del preventivo di cui calcolare il 
+ * 			costo dei componenti
+ */
+CREATE FUNCTION calc_costo_componenti_preventivo(preventivo INTEGER)
+  RETURNS DECIMAL(10, 2)
+  BEGIN
+    DECLARE result DECIMAL(10, 2);
+    SELECT SUM(Previsione.PrezzoUnitario * Previsione.Quantita)
+    FROM Preventivo
+      LEFT JOIN Previsione ON Preventivo.Codice = Previsione.Preventivo
+    WHERE Preventivo.Codice = preventivo
+    INTO result;
+    RETURN result;
+  END;;
+				\end{lstlisting}
+
+
+      \subsubsection{Inserimento di una nuova prestazione}
+        Questo caso d'uso è abbastanza macchinoso. Per la prestazione inserita bisogna specificare quali componenti sono stati utilizzati e di quali forniture, quali operatori l'hanno eseguita, quindi bisogna stilare una nuova fattura. Bisogna inoltre aggiornare il magazzino, decrementando le quantità dei componenti utilizzati.
+        Stilata la fattura, al momento del pagamento della stessa, si può inserire una nuova transazione e marcare la fattura come pagata.
+
+        \begin{lstlisting}
+/** Inserimento di una nuova fattura */
+INSERT INTO Prestazione (Preventivo, TempiEsecuzione, Procedimento,
+                         DataFine, Manodopera, ServAggiuntivi)
+VALUES (...);
+
+/** Inserimento delle forniture utilizzate */
+INSERT INTO Utilizzo (Prestazione, Fornitura, Quantita)
+VALUES (<Codice della prestazione>, 
+  <Codice della fornitura>, <Quantita usata>);
+
+/** Procedura di aggiornamento delle quantità in magazzino */
+CALL update_quantita_magazzino(<Codice prestazione>);
+
+/** Associazione degli operatori che hanno eseguito la prestazione */
+INSERT INTO Occupazione (Prestazione, Operatore)
+VALUES (<Codice della prestazione>, <CF dell'operatore>);
+
+/** Calcolo del prossimo numero progressivo della fattura */
+SET @num_fattura = next_fattura_num(<Anno>);
+INSERT INTO Fattura (Numero, Anno, Imponibile, Sconto, Incentivi,
+                     DataEmissione, DataScadenza, TipoPag,
+                     StatoPag, SisPag, Prestazione)
+VALUES (@num_fattura, <Anno>, ...);
+
+/** Inserimento della transazione a pagamento avvenuto */
+INSERT INTO Transazione (Quota, Data)
+VALUES (...);
+
+/** Aggiornamento della fattura, marcata come pagata */
+UPDATE Fattura
+SET
+  StatoPag    = TRUE,
+  Transazione = <Codice della transazione>
+WHERE Fattura.Numero = @num_fattura AND Fattura.Anno = <Anno>;
+        \end{lstlisting}
+
+        Forniamo, per completezza, le implementazioni della funzione \emph{next\_fattura\_num} e della procedura \emph{update\_quantita\_magazzino}.
+
+        \begin{lstlisting}
+/** Implementazione di next_fattura_num
+ *  Restituisce il numero progressivo per la fattura successiva
+ *  da inserire.
+ *  anno: Anno in cui si intende emettere la fattura
+ */
+CREATE FUNCTION next_fattura_num(anno INTEGER)
+  RETURNS INTEGER
+  BEGIN
+    DECLARE num INTEGER DEFAULT NULL;
+    SELECT Fattura.Numero
+    INTO num
+    FROM Fattura
+    WHERE Fattura.Anno = anno
+    ORDER BY Fattura.Numero DESC
+    LIMIT 1;
+    IF num IS NULL
+    THEN
+      SET num = 1;
+    ELSE
+      SET num = num + 1;
+    END IF;
+    RETURN num;
+  END;;
+
+/** Implementazione di update_quantita_magazzino
+ *  Aggiorna le quantità delle fatture attive in magazzino
+ *  in seguito all'utilizzo di alcune di queste in una 
+ *  prestazione.
+ *  prestazione: codice della prestazione
+ */
+CREATE PROCEDURE update_quantita_magazzino(IN prestazione INTEGER)
+  BEGIN
+    DECLARE done BOOLEAN DEFAULT FALSE;
+    DECLARE fornitura_id INT;
+    DECLARE quantita INT;
+    DECLARE cur CURSOR FOR
+      SELECT
+        Utilizzo.Fornitura,
+        Utilizzo.Quantita
+      FROM Utilizzo
+      WHERE Utilizzo.Prestazione = prestazione;
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = 1;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+      ROLLBACK;
+      CALL throw_error('Errore nell''aggiornamento del magazzino');
+    END;
+    START TRANSACTION;
+    OPEN cur;
+    REPEAT
+      FETCH cur
+      INTO fornitura_id, quantita;
+      IF NOT done
+      THEN
+        UPDATE Magazzino
+        SET Magazzino.Quantita = Magazzino.Quantita - quantita
+        WHERE Magazzino.Fornitura = fornitura_id;
+      END IF;
+    UNTIL done END REPEAT;
+    CLOSE cur;
+    COMMIT;
+  END;;
+        \end{lstlisting}

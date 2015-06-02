@@ -65,7 +65,7 @@ CREATE TABLE Operatore (
 CREATE TABLE Transazione (
   Codice INTEGER AUTO_INCREMENT PRIMARY KEY,
   Quota  DECIMAL(10, 2) NOT NULL,
-  Data   DATE
+  Data   DATE           NOT NULL
 );
 
 CREATE TABLE Autovettura (
@@ -163,10 +163,10 @@ CREATE TABLE Fornitura (
 );
 
 CREATE TABLE Utilizzo (
-  Prestazione    INTEGER       NOT NULL,
-  Fornitura      INTEGER       NOT NULL,
-  PrezzoUnitario DECIMAL(8, 2) NOT NULL,
-  Quantita       INTEGER       NOT NULL,
+  Prestazione    INTEGER NOT NULL,
+  Fornitura      INTEGER NOT NULL,
+  PrezzoUnitario DECIMAL(8, 2),
+  Quantita       INTEGER NOT NULL,
   PRIMARY KEY (Prestazione, Fornitura),
   FOREIGN KEY (Prestazione) REFERENCES Prestazione (Preventivo),
   FOREIGN KEY (Fornitura) REFERENCES Fornitura (Codice)
@@ -498,6 +498,10 @@ CREATE FUNCTION calc_costo_componenti_prestazione(prestazione INTEGER)
       LEFT JOIN Fornitura ON Fornitura.Codice = Utilizzo.Fornitura
     WHERE Prestazione.Preventivo = prestazione
     INTO result;
+    IF result IS NULL
+    THEN
+      SET result = 0;
+    END IF;
     RETURN result;
   END;;
 
@@ -523,20 +527,24 @@ CREATE FUNCTION calc_costo_componenti_preventivo(preventivo INTEGER)
 CREATE FUNCTION calc_costo_totale(prestazione INTEGER)
   RETURNS DECIMAL(10, 2)
   BEGIN
-    DECLARE result DECIMAL(10, 2);
+    DECLARE result REAL DEFAULT 0;
     SELECT Prestazione.ServAggiuntivi + Prestazione.Manodopera
-      AS CostiAggiuntivi
+    INTO result
     FROM Prestazione
-    WHERE Prestazione.Preventivo = prestazione
-    INTO result;
-    SET result = result + calc_costo_componenti_prestazione(prestazione);
+    WHERE Prestazione.Preventivo = prestazione;
+    IF result IS NOT NULL
+    THEN
+      SET result = result + calc_costo_componenti_prestazione(prestazione);
+    ELSE
+      SET result = calc_costo_componenti_prestazione(prestazione);
+    END IF;
     RETURN result;
   END;;
 
 /*
  * Funzione per il calcolo dell'imponibile per una prestazione
  */
-CREATE FUNCTION calc_imponibile(prestazione INTEGER, sconto DECIMAL(4, 2))
+CREATE FUNCTION calc_imponibile_fattura(prestazione INTEGER, sconto DECIMAL(4, 2))
   RETURNS DECIMAL(10, 2)
   BEGIN
     DECLARE result DECIMAL(10, 2);
@@ -551,7 +559,7 @@ CREATE FUNCTION calc_imponibile(prestazione INTEGER, sconto DECIMAL(4, 2))
 /*
  * Funzione per il calcolo delle imposte
  */
-CREATE FUNCTION calc_imposte(imponibile DECIMAL(10, 2))
+CREATE FUNCTION calc_imposte_fattura(imponibile DECIMAL(10, 2))
   RETURNS DECIMAL(10, 2)
   BEGIN
     DECLARE imposte DECIMAL(10, 2);
@@ -559,6 +567,54 @@ CREATE FUNCTION calc_imposte(imponibile DECIMAL(10, 2))
     RETURN imposte;
   END;;
 
+/*
+ * Funzione per calcolare la somma per saldare la fattura
+ * (Tiene conto di un eventuale acconto)
+ */
+CREATE FUNCTION calc_transazione_fattura(numero_fattura INTEGER, anno INTEGER)
+  RETURNS DECIMAL(10, 2)
+  BEGIN
+    DECLARE acconto REAL DEFAULT 0;
+    DECLARE totale REAL;
+    SELECT
+      Fattura.Imponibile,
+      Transazione.Quota
+    INTO totale, acconto
+    FROM Fattura
+      JOIN Prestazione ON Prestazione.Preventivo = Fattura.Prestazione
+      JOIN Preventivo ON Preventivo.Codice = Prestazione.Preventivo
+      LEFT JOIN Transazione ON Transazione.Codice = Fattura.Transazione
+    WHERE Fattura.Numero = numero_fattura AND
+          Fattura.Anno = anno;
+    SET totale = totale + calc_imposte_fattura(totale);
+    IF acconto IS NOT NULL
+    THEN
+      SET totale = totale + acconto;
+    END IF;
+    RETURN totale;
+  END;;
+
+/*
+ * Funzione per trovare il numero della prossima fattura da inserire
+ */
+CREATE FUNCTION next_fattura_num(anno INTEGER)
+  RETURNS INTEGER
+  BEGIN
+    DECLARE num INTEGER DEFAULT NULL;
+    SELECT Fattura.Numero
+    INTO num
+    FROM Fattura
+    WHERE Fattura.Anno = anno
+    ORDER BY Fattura.Numero DESC
+    LIMIT 1;
+    IF num IS NULL
+    THEN
+      SET num = 1;
+    ELSE
+      SET num = num + 1;
+    END IF;
+    RETURN num;
+  END;;
 
 
 /*****************************************
@@ -687,6 +743,42 @@ CREATE PROCEDURE registra_ordine_magazzino(IN ordine INTEGER)
       THEN
         INSERT INTO Magazzino (Componente, Fornitura, Quantita)
         VALUES (componente_id, fornitura_id, quantita);
+      END IF;
+    UNTIL done END REPEAT;
+    CLOSE cur;
+    COMMIT;
+  END;;
+
+/*
+ * Procedura di aggiornamento delle quantità rimanenti in magazzino
+ */
+CREATE PROCEDURE update_quantita_magazzino(IN prestazione INTEGER)
+  BEGIN
+    DECLARE done BOOLEAN DEFAULT FALSE;
+    DECLARE fornitura_id INT;
+    DECLARE quantita INT;
+    DECLARE cur CURSOR FOR
+      SELECT
+        Utilizzo.Fornitura,
+        Utilizzo.Quantita
+      FROM Utilizzo
+      WHERE Utilizzo.Prestazione = prestazione;
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = 1;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+      ROLLBACK;
+      CALL throw_error('Errore nell''aggiornamento del magazzino');
+    END;
+    START TRANSACTION;
+    OPEN cur;
+    REPEAT
+      FETCH cur
+      INTO fornitura_id, quantita;
+      IF NOT done
+      THEN
+        UPDATE Magazzino
+        SET Magazzino.Quantita = Magazzino.Quantita - quantita
+        WHERE Magazzino.Fornitura = fornitura_id;
       END IF;
     UNTIL done END REPEAT;
     CLOSE cur;
@@ -1074,6 +1166,16 @@ BEFORE UPDATE ON Fattura FOR EACH ROW
 CREATE TRIGGER Utilizzo_before_insert
 BEFORE INSERT ON Utilizzo FOR EACH ROW
   BEGIN
+    DECLARE prezzo REAL;
+    IF NEW.PrezzoUnitario IS NULL
+    THEN
+      SELECT Componente.PrezzoVendita
+      INTO prezzo
+      FROM Fornitura
+        JOIN Componente ON Componente.Codice = Fornitura.Componente
+      WHERE Fornitura.Codice = NEW.Fornitura;
+      SET NEW.PrezzoUnitario = prezzo;
+    END IF;
     IF NEW.Quantita < 0
     THEN
       CALL throw_error('La Quantità di Utilizzo non può essere minore di zero');
@@ -1141,18 +1243,6 @@ BEFORE UPDATE ON Previsione FOR EACH ROW
     END IF;
   END;;
 
-/*
- * Trigger su Transazione
- */
-CREATE TRIGGER Transazione_before_update
-BEFORE UPDATE ON Transazione FOR EACH ROW
-  BEGIN
-    IF NEW.Data IS NULL
-    THEN
-      SET NEW.Data = CURRENT_DATE;
-    END IF;
-  END;;
-
 DELIMITER ;
 
 
@@ -1165,16 +1255,29 @@ DELIMITER ;
 
 /*
  * Fatture
+ * Riepilogo di una fattura
  */
-CREATE VIEW FatturaView
+CREATE VIEW RiepilogoFattura
 AS
   SELECT
     Fattura.*,
-    calc_imposte(Fattura.Imponibile)                                          AS Imposte,
-    Fattura.Imponibile + calc_imposte(Fattura.Imponibile) - Fattura.Incentivi AS Totale,
-    CONCAT(Componente.Nome)                                                   AS Componenti
+    calc_imposte_fattura(Fattura.Imponibile)                                          AS Imposte,
+    Fattura.Imponibile + calc_imposte_fattura(Fattura.Imponibile) - Fattura.Incentivi AS Totale
+  FROM Fattura;
+
+/*
+ * Fatture
+ * Dettagli di una fattura
+ */
+CREATE VIEW DettagliFattura
+AS
+  SELECT
+    Componente.Nome,
+    Utilizzo.Quantita,
+    Utilizzo.PrezzoUnitario,
+    Utilizzo.PrezzoUnitario * Utilizzo.Quantita AS PrezzoTotale
   FROM Fattura
-    LEFT JOIN Prestazione ON Prestazione.Preventivo = Fattura.Prestazione
+    JOIN Prestazione ON Prestazione.Preventivo = Fattura.Prestazione
     LEFT JOIN Utilizzo ON Prestazione.Preventivo = Utilizzo.Prestazione
     LEFT JOIN Fornitura ON Fornitura.Codice = Utilizzo.Fornitura
-    LEFT JOIN Componente ON Componente.Codice = Fornitura.Componente;
+    LEFT JOIN Componente ON Componente.Codice = Fornitura.Componente

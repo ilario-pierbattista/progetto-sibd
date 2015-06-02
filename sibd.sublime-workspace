@@ -3,6 +3,30 @@
 	{
 		"selected_items":
 		[
+			[
+				"update",
+				"update_quantita_magazzino"
+			],
+			[
+				"Imple",
+				"Implementazione"
+			],
+			[
+				"opera",
+				"operatore"
+			],
+			[
+				"registra",
+				"registra_ordine_magazzino"
+			],
+			[
+				"calc",
+				"calc_transazione_ordine"
+			],
+			[
+				"Implementa",
+				"implementazione"
+			]
 		]
 	},
 	"buffers":
@@ -11,7 +35,15 @@
 			"file": "codifica.tex",
 			"settings":
 			{
-				"buffer_size": 9056,
+				"buffer_size": 15840,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "concettuale.tex",
+			"settings":
+			{
+				"buffer_size": 44376,
 				"line_ending": "Unix"
 			}
 		}
@@ -56,7 +88,7 @@
 		"show_minimap": false,
 		"show_open_files": false,
 		"show_tabs": false,
-		"side_bar_visible": false,
+		"side_bar_visible": true,
 		"status_bar_visible": false
 	},
 	"expanded_folders":
@@ -65,17 +97,18 @@
 	],
 	"file_history":
 	[
-		"/home/ilario/Documenti/Basi di Dati/Progetto/todo.txt",
-		"/home/ilario/Documenti/Basi di Dati/Progetto/concettuale.tex",
+		"/home/ilario/Documenti/Basi di Dati/Progetto/Progetto.tex",
 		"/home/ilario/Documenti/Basi di Dati/Progetto/analisi_requisiti.tex",
 		"/home/ilario/Documenti/Basi di Dati/Progetto/codifica.tex",
-		"/home/ilario/Documenti/Basi di Dati/Progetto/Progetto.tex",
+		"/home/ilario/Documenti/Basi di Dati/Progetto/logica.tex",
+		"/home/ilario/Documenti/Basi di Dati/Progetto/concettuale.tex",
+		"/home/ilario/Documenti/Basi di Dati/Progetto/todo.txt",
 		"/home/ilario/.config/sublime-text-3/Packages/LaTeXTools/README.markdown",
 		"/home/ilario/.config/sublime-text-3/Packages/User/Preferences.sublime-settings"
 	],
 	"find":
 	{
-		"height": 37.0
+		"height": 50.0
 	},
 	"find_in_files":
 	{
@@ -89,6 +122,9 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"}\n",
+			"Transazione (Quota)",
+			"schema",
 			"\\item ",
 			"\\\\label\\{op.+\\}",
 			"\\item "
@@ -96,7 +132,7 @@
 		"highlight": true,
 		"in_selection": false,
 		"preserve_case": false,
-		"regex": true,
+		"regex": false,
 		"replace_history":
 		[
 			""
@@ -119,26 +155,57 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 9056,
+						"buffer_size": 15840,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								9056,
-								9056
+								7390,
+								7390
 							]
 						],
 						"settings":
 						{
-							"syntax": "Packages/LaTeX/LaTeX.tmLanguage"
+							"syntax": "Packages/LaTeX/LaTeX.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 3412.0,
+						"translation.y": 2790.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 0,
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "concettuale.tex",
+					"semi_transient": true,
+					"settings":
+					{
+						"buffer_size": 44376,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1963,
+								1963
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/LaTeX/LaTeX.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 270.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
 					"type": "text"
 				}
 			]
@@ -150,7 +217,7 @@
 	},
 	"input":
 	{
-		"height": 0.0
+		"height": 35.0
 	},
 	"layout":
 	{

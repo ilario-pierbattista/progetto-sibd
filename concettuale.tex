@@ -281,7 +281,7 @@
 				\label{fig:componente_fornitura_ordine_magazzino}
 			\end{figure}
 			
-			Un'ulteriore entità da aggiungere a questo gruppo è quella del magazzino. Abbiamo definito \emph{Magazzino} come una raccolta di forniture attive, cioè di forniture i quali articoli sono ancora presenti nel magazzino fisico, pronti per essere utilizzati. Legando \emph{Magazzino} con \emph{Fornitura} si modella tale associazione. La relationship \emph{Composizione} associa ad ogni istanza di \emph{Magazzino} una ed una sola istanza di \emph{Fornitura}. Da notare che il codice della fornitura e il codice del componente di riferimento, formano la chiave primaria di tale entità.
+			Un'ulteriore entità da aggiungere a questo gruppo è quella del magazzino. Abbiamo definito \emph{Magazzino} come una raccolta di forniture attive, cioè di forniture i quali articoli sono ancora presenti nel magazzino fisico, pronti per essere utilizzati. Legando \emph{Magazzino} con \emph{Fornitura} si modella tale associazione. La relationship \emph{Composizione} associa ad ogni istanza di \emph{Magazzino} una ed una sola istanza di \emph{Fornitura}.
 			Fare riferimento al diagramma in figura \ref{fig:componente_fornitura_ordine_magazzino}.
 			
 			Da notare che l'attributo "Quantità" dell'entità \emph{Magazzino} descrive il numero di articoli di uno specifico componente, acquistati in una certa fornitura, ancora disponibili in magazzino.
@@ -484,7 +484,7 @@
 				Magazzino &
 				Insieme di tutte le forniture non esaurite. &
 				Codice Componente (Numerico), Quantità (Numerico) &
-				Codice Componente (Numerico), Codice (di \emph{Fornitura})
+				Codice (di \emph{Fornitura})
 				\\ \hline
 
 				Prestazione &

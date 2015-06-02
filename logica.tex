@@ -791,7 +791,7 @@
 				Utilizzo(\underline{Prestazione}, \underline{Fornitura}, PrezzoUnitario, Quantita) \\
 				\hline
 			Magazzino &
-				Magazzino(\underline{Componente}, \underline{Fornitura}, Quantita) \\
+				Magazzino(\underline{Fornitura}, Componente,  Quantita) \\
 				\hline
 			Fattura &
 				Fattura(\underline{Numero}, \underline{Anno}, Prestazione, Imponibile, Sconto, Incentivi, DataEmissione, DataScadenza, TipoPag, StatoPag, SisPag, Transazione) \\
@@ -869,9 +869,8 @@
 			$Prestazione \rightarrow Prestazione.Preventivo$ \\
 			& $Fornitura \rightarrow Fornitura.Codice$ \\
 			\hline
-			Magazzino(\underline{Componente}, \underline{Fornitura}, Quantita) &
-			$Componente \rightarrow Componente.Codice$ \\
-			& $Fornitura \rightarrow Fornitura.Codice$ \\
+			Magazzino(\underline{Fornitura}, Componente, Quantita) &
+			$Fornitura \rightarrow Fornitura.Codice$ \\
 			\hline
 			Fattura(\underline{Numero}, \underline{Anno}, Prestazione, Imponibile, Sconto, Incentivi, DataEmissione, DataScadenza, TipoPag, StatoPag, SisPag, Transazione) &
 			$Prestazione \rightarrow Prestazione.Preventivo$ \\
