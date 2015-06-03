@@ -813,6 +813,8 @@ CREATE PROCEDURE update_quantita_magazzino(IN prestazione INTEGER)
     DECLARE done BOOLEAN DEFAULT FALSE;
     DECLARE fornitura_id INT;
     DECLARE quantita INT;
+    DECLARE quantita_presente INT;
+    DECLARE error_message VARCHAR(128) DEFAULT 'Errore nell''aggiornamento del magazzino';
     DECLARE cur CURSOR FOR
       SELECT
         Utilizzo.Fornitura,
@@ -823,7 +825,7 @@ CREATE PROCEDURE update_quantita_magazzino(IN prestazione INTEGER)
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
       ROLLBACK;
-      CALL throw_error('Errore nell''aggiornamento del magazzino');
+      CALL throw_error(error_message);
     END;
     START TRANSACTION;
     OPEN cur;
@@ -832,9 +834,72 @@ CREATE PROCEDURE update_quantita_magazzino(IN prestazione INTEGER)
       INTO fornitura_id, quantita;
       IF NOT done
       THEN
-        UPDATE Magazzino
-        SET Magazzino.Quantita = Magazzino.Quantita - quantita
+        SELECT Magazzino.Quantita
+        INTO quantita_presente
+        FROM Magazzino
         WHERE Magazzino.Fornitura = fornitura_id;
+        IF quantita_presente - quantita >= 0
+        THEN
+          UPDATE Magazzino
+          SET Magazzino.Quantita = Magazzino.Quantita - quantita
+          WHERE Magazzino.Fornitura = fornitura_id;
+        ELSE
+          SET error_message = 'La quantità di componenti disponibili non è sufficiente';
+          CALL throw_error(error_message);
+        END IF;
+      END IF;
+    UNTIL done END REPEAT;
+    CLOSE cur;
+    COMMIT;
+  END;;
+
+/*
+ * Procedura d'inserimento degli stipendi
+ */
+CREATE PROCEDURE insert_stipendi(IN data_inizio DATE, data_fine DATE, data_inserimento DATE)
+  BEGIN
+    DECLARE done BOOLEAN DEFAULT FALSE;
+    DECLARE operatore VARCHAR(16);
+    DECLARE stipendio REAL;
+    DECLARE transazione INTEGER;
+    DECLARE error_message VARCHAR(128) DEFAULT 'Errore nell''inserimento degli stipendi';
+    DECLARE cur CURSOR FOR
+      SELECT Operatore.CF
+      FROM Operatore;
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+      ROLLBACK;
+      CALL throw_error(error_message);
+    END;
+    START TRANSACTION;
+    OPEN cur;
+    REPEAT
+      FETCH cur
+      INTO operatore;
+      IF NOT done
+      THEN
+        SELECT CASE
+               WHEN Operatore.Stipendio IS NULL THEN Ore * RetribuzioneH
+               ELSE Operatore.Stipendio
+               END
+        INTO stipendio
+        FROM Operatore
+          JOIN (
+                 SELECT
+                   Turno.Operatore,
+                   SUM(ROUND(TIME_TO_SEC(TIMEDIFF(OraFine, OraInizio)) / 3600, 1)) AS Ore
+                 FROM Turno
+                 WHERE (Turno.Data BETWEEN data_inizio AND data_fine)
+                 GROUP BY Turno.Operatore
+               ) AS t ON t.Operatore = Operatore.CF
+        WHERE Operatore.CF = operatore;
+        INSERT INTO Transazione (Quota, Data)
+        VALUES (-stipendio, data_inserimento);
+        SELECT LAST_INSERT_ID()
+        INTO transazione;
+        INSERT INTO Stipendio (Operatore, Transazione)
+        VALUES (operatore, transazione);
       END IF;
     UNTIL done END REPEAT;
     CLOSE cur;
@@ -1345,20 +1410,3 @@ AS
     LEFT JOIN Transazione ON Transazione.Codice = Preventivo.Acconto
     JOIN Autovettura ON Autovettura.Targa = Preventivo.Autovettura
     JOIN Cliente ON Cliente.CF_PIVA = Autovettura.Cliente;
-
-/*
- * Fatture
- * Dettagli di una fattura
- */
-CREATE VIEW DettagliFattura
-AS
-  SELECT
-    Componente.Nome,
-    Utilizzo.Quantita,
-    Utilizzo.PrezzoUnitario,
-    Utilizzo.PrezzoUnitario * Utilizzo.Quantita AS PrezzoTotale
-  FROM Fattura
-    JOIN Prestazione ON Prestazione.Preventivo = Fattura.Prestazione
-    LEFT JOIN Utilizzo ON Prestazione.Preventivo = Utilizzo.Prestazione
-    LEFT JOIN Fornitura ON Fornitura.Codice = Utilizzo.Fornitura
-    LEFT JOIN Componente ON Componente.Codice = Fornitura.Componente

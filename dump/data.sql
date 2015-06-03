@@ -78,7 +78,7 @@ VALUES
 INSERT INTO Operatore (CF, Nome, Cognome, Citta, Via, Civico, CAP, DataNasc, ComuneNasc, ProvinciaNasc, RetribuzioneH, ModRiscossione, IBAN)
 VALUES
   ('VRDLCU90D15E783S', 'Luca', 'Verdi', 'Tolentino', 'Viale Isonzo', '87', '62150',
-   '1990-04-15', 'Macerata', 'MC', 8, 'contanti', 'IT02L1254312000023451000012');
+   '1990-04-15', 'Macerata', 'MC', 10, 'contanti', 'IT02L1254312000023451000012');
 
 /** Inserimento recapiti */
 CALL add_recapito_operatore('STFDRN60A02E783V', '0733843482', 'tel_fax');
@@ -226,6 +226,25 @@ SET Ordine.Versamento = @last_trans,
 WHERE Ordine.Codice = @last_ord;
 CALL registra_ordine_magazzino(@last_ord);
 
+INSERT INTO Ordine (DataEmissione, Fornitore) VALUES ('2015-04-08', '02365478952');
+SELECT LAST_INSERT_ID()
+INTO @last_ord;
+INSERT INTO Fornitura (Quantita, Componente, Ordine, PrezzoUnitario)
+VALUES
+  (1, 2, @last_ord, 305);
+UPDATE Ordine
+SET Imponibile = calc_imponibile_ordine(@last_ord)
+WHERE Ordine.Codice = @last_ord;
+INSERT INTO Transazione (Quota, Data)
+VALUES (calc_transazione_ordine(@last_ord, 0), '2015-04-10');
+SELECT LAST_INSERT_ID()
+INTO @last_trans;
+UPDATE Ordine
+SET Ordine.Versamento = @last_trans,
+  Ordine.DataConsegna = '2015-04-10'
+WHERE Ordine.Codice = @last_ord;
+CALL registra_ordine_magazzino(@last_ord);
+
 
 /****************************************
  * Inserimento di nuovi preventivi
@@ -293,7 +312,7 @@ VALUES (500, '2015-05-03');
 SELECT LAST_INSERT_ID()
 INTO @last_trans;
 UPDATE Preventivo
-SET Acconto       = @last_tras,
+SET Acconto       = @last_trans,
   CostoComponenti = calc_costo_componenti_preventivo(@last_prev)
 WHERE Preventivo.Codice = @last_prev;
 
@@ -341,7 +360,7 @@ VALUES (@last_prest, 2,
         '2015-04-18', 80, 0);
 INSERT INTO Utilizzo (Prestazione, Fornitura, Quantita)
 VALUES
-  (@last_prest, 10, 1),
+  (@last_prest, 10, 2),
   (@last_prest, 8, 1);
 CALL update_quantita_magazzino(@last_prest);
 INSERT INTO Occupazione (Prestazione, Operatore)
@@ -494,3 +513,10 @@ SET
   StatoPag    = TRUE,
   Transazione = @last_trans
 WHERE Fattura.Numero = @num_fattura AND Fattura.Anno = 2015;
+
+
+/**********************************
+ * Stipendi
+ **********************************
+ */
+CALL insert_stipendi('2015-04-01', '2015-05-01', '2015-05-01');

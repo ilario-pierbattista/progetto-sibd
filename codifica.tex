@@ -418,6 +418,9 @@ CREATE PROCEDURE update_quantita_magazzino(IN prestazione INTEGER)
     DECLARE done BOOLEAN DEFAULT FALSE;
     DECLARE fornitura_id INT;
     DECLARE quantita INT;
+    DECLARE quantita_presente INT;
+    DECLARE error_message VARCHAR(128) 
+      DEFAULT 'Errore nell''aggiornamento del magazzino';
     DECLARE cur CURSOR FOR
       SELECT
         Utilizzo.Fornitura,
@@ -428,7 +431,7 @@ CREATE PROCEDURE update_quantita_magazzino(IN prestazione INTEGER)
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
       ROLLBACK;
-      CALL throw_error('Errore nell''aggiornamento del magazzino');
+      CALL throw_error(error_message);
     END;
     START TRANSACTION;
     OPEN cur;
@@ -437,9 +440,20 @@ CREATE PROCEDURE update_quantita_magazzino(IN prestazione INTEGER)
       INTO fornitura_id, quantita;
       IF NOT done
       THEN
-        UPDATE Magazzino
-        SET Magazzino.Quantita = Magazzino.Quantita - quantita
+        SELECT Magazzino.Quantita
+        INTO quantita_presente
+        FROM Magazzino
         WHERE Magazzino.Fornitura = fornitura_id;
+        IF quantita_presente - quantita >= 0
+        THEN
+          UPDATE Magazzino
+          SET Magazzino.Quantita = Magazzino.Quantita - quantita
+          WHERE Magazzino.Fornitura = fornitura_id;
+        ELSE
+          SET error_message = 'La quantità di componenti'
+            ' disponibili non è sufficiente';
+          CALL throw_error(error_message);
+        END IF;
       END IF;
     UNTIL done END REPEAT;
     CLOSE cur;
@@ -646,31 +660,149 @@ SELECT
   Cliente.Civico,
   Cliente.CAP,
   Autovettura.Targa,
+  IFNULL(p.CostoComponenti, 0)
+    AS CostoComponenti,
+  Prestazione.Manodopera,
+  Prestazione.ServAggiuntivi,
   f.ImponibileLordo,
   Fattura.Sconto,
   f.ImportoSconto,
-  Fattura.Imponibile                                    AS ImponibileNetto,
+  Fattura.Imponibile 
+    AS ImponibileNetto,
   f.Imposte,
   Fattura.Incentivi,
-  Fattura.Imponibile + f.Imposte - Fattura.Incentivi    AS Totale,
-  IFNULL(Transazione.Quota, 0)                          AS RitenutaAcconto,
-  Fattura.Imponibile + f.Imposte - 
-      Fattura.Incentivi - IFNULL(Transazione.Quota, 0)  AS TotaleNetto
+  Fattura.Imponibile + f.Imposte - Fattura.Incentivi 
+    AS Totale,
+  IFNULL(Transazione.Quota, 0)
+    AS RitenutaAcconto,
+  Fattura.Imponibile + f.Imposte - Fattura.Incentivi - IFNULL(Transazione.Quota, 0) 
+    AS TotaleNetto
 FROM Fattura
-  JOIN Preventivo ON Preventivo.Codice = Fattura.Prestazione
+  JOIN Prestazione ON Prestazione.Preventivo = Fattura.Prestazione
+  JOIN Preventivo ON Preventivo.Codice = Prestazione.Preventivo
   LEFT JOIN Transazione ON Transazione.Codice = Preventivo.Acconto
   JOIN Autovettura ON Autovettura.Targa = Preventivo.Autovettura
   JOIN Cliente ON Cliente.CF_PIVA = Autovettura.Cliente
+  LEFT JOIN (SELECT
+               Utilizzo.Prestazione,
+               SUM(Utilizzo.PrezzoUnitario * Utilizzo.Quantita) 
+                AS CostoComponenti
+             FROM Utilizzo
+             GROUP BY Utilizzo.Prestazione
+            ) 
+          AS p 
+        ON p.Prestazione = Prestazione.Preventivo
   JOIN (SELECT
           Fattura.Numero,
           Fattura.Anno,
-          ROUND(Fattura.Imponibile * (100 / (100 - Fattura.Sconto)), 2)
+          ROUND(Fattura.Imponibile * (100 / (100 - Fattura.Sconto)), 2)  
             AS ImponibileLordo,
-          ROUND(Fattura.Imponibile * 0.22, 2)                                      
+          ROUND(Fattura.Imponibile * 0.22, 2)
             AS Imposte,
           ROUND(Fattura.Imponibile * (Fattura.Sconto / (100 - Fattura.Sconto)), 2) 
             AS ImportoSconto
-        FROM Fattura) AS f ON Fattura.Numero = f.Numero AND Fattura.Anno = f.Anno;
+        FROM Fattura) 
+      AS f 
+    ON Fattura.Numero = f.Numero AND Fattura.Anno = f.Anno
+WHERE Fattura.Numero = <Numero della fattura> 
+  AND Fattura.Anno = <Anno di emissione>;
+              \end{lstlisting}
+
+              \begin{figure}[H]
+                \centering
+                \includegraphics[width=14cm]{images/screenshots/show_intestazione_fattura_1.png}
+              \end{figure}
+
+              \begin{figure}[H]
+                \centering
+                \includegraphics[width=10cm]{images/screenshots/show_intestazione_fattura_2.png}
+              \end{figure}
+
+              In alternativa, si può effettuare una selezione sulla vista \emph{FatturaView}, ottenendo lo stesso risultato con un'istruzione molto più compatta.
+
+              \begin{lstlisting}
+SELECT *
+FROM FatturaView
+WHERE Anno = <Anno di emissione> 
+  AND Numero = <Numero della fattura>;
+              \end{lstlisting}
+
+              Alleghiamo uno screenshot che attesti l'equivalenza delle due istruzioni (quindi la corretta implementazione della vista, consultabile dal dump).
+
+              \begin{figure}[H]
+                \centering
+                \includegraphics[width=10cm]{images/screenshots/show_fattura_view.png}
+              \end{figure}
+
+              La seconda fase della visualizzazione dei dati per stilare una fattura prevede la divisione dei costi dei singoli componenti utilizzati.
+
+              \begin{lstlisting}
+SELECT
+  Componente.Codice as CodiceComponente,
+  Componente.Nome,
+  Utilizzo.Quantita,
+  Utilizzo.PrezzoUnitario,
+  Utilizzo.Quantita * Utilizzo.PrezzoUnitario AS PrezzoTotale
+FROM Fattura
+  JOIN Utilizzo ON Utilizzo.Prestazione = Fattura.Prestazione
+  JOIN Fornitura ON Fornitura.Codice = Utilizzo.Fornitura
+  JOIN Componente ON Componente.Codice = Fornitura.Componente
+WHERE Anno = <Anno di emissione> 
+  AND Numero = <Numero della fattura>;
+              \end{lstlisting}
+
+              \begin{figure}[H]
+                \centering
+                \includegraphics[width=10cm]{images/screenshots/show_componenti_fattura.png}
+              \end{figure}
+
+            \item[\ref{op:show_transazioni}] Consultazione delle transazioni avvenute in un certo periodo
+
+              \begin{lstlisting}
+SELECT *
+FROM Transazione
+WHERE (Transazione.Data BETWEEN <Data d'inizio>
+  AND <Data di fine>);
+              \end{lstlisting}
+
+              \begin{figure}[H]
+                \centering
+                \includegraphics[width=8cm]{images/screenshots/show_transazioni.png}
+              \end{figure}
+
+            \item[\ref{op:show_riparazioni}] Consultazione della lista delle riparazioni
+
+              \begin{lstlisting}
+SELECT Prestazione.*
+FROM Prestazione
+JOIN Preventivo ON Preventivo.Codice = Prestazione.Preventivo
+WHERE Categoria = 'riparazione';
+              \end{lstlisting}
+
+              \begin{figure}[H]
+                \centering
+                \includegraphics[width=12cm]{images/screenshots/list_riparazioni.png}
+              \end{figure}
+
+              Molto spesso può essere utile ricercare una riparazione in base al tipo di guasto riparato. Ad esempio, per ricercare i guasti riparati che coinvologono la frizione, si effettuerà una ricerca del tipo:
+
+              \begin{lstlisting}
+SELECT Prestazione.*
+FROM Prestazione
+  JOIN Preventivo ON Preventivo.Codice = Prestazione.Preventivo
+WHERE Categoria = 'riparazione'
+AND LOWER(Prestazione.Malfunzionamento) LIKE LOWER('%frizione%');
+              \end{lstlisting}
+
+              \begin{figure}[H]
+                \centering
+                \includegraphics[width=12cm]{images/screenshots/search_riparazioni.png}
+              \end{figure}
+
+            \item[\ref{op:show_preventivi}] Consultazione della lista dei preventivi
+
+              \begin{lstlisting}
+                
               \end{lstlisting}
 
           \end{description}
