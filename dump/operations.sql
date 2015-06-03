@@ -124,6 +124,9 @@ SELECT
   Cliente.Civico,
   Cliente.CAP,
   Autovettura.Targa,
+  IFNULL(p.CostoComponenti, 0)                                                      AS CostoComponenti,
+  Prestazione.Manodopera,
+  Prestazione.ServAggiuntivi,
   f.ImponibileLordo,
   Fattura.Sconto,
   f.ImportoSconto,
@@ -134,10 +137,17 @@ SELECT
   IFNULL(Transazione.Quota, 0)                                                      AS RitenutaAcconto,
   Fattura.Imponibile + f.Imposte - Fattura.Incentivi - IFNULL(Transazione.Quota, 0) AS TotaleNetto
 FROM Fattura
-  JOIN Preventivo ON Preventivo.Codice = Fattura.Prestazione
+  JOIN Prestazione ON Prestazione.Preventivo = Fattura.Prestazione
+  JOIN Preventivo ON Preventivo.Codice = Prestazione.Preventivo
   LEFT JOIN Transazione ON Transazione.Codice = Preventivo.Acconto
   JOIN Autovettura ON Autovettura.Targa = Preventivo.Autovettura
   JOIN Cliente ON Cliente.CF_PIVA = Autovettura.Cliente
+  LEFT JOIN (SELECT
+               Utilizzo.Prestazione,
+               SUM(Utilizzo.PrezzoUnitario * Utilizzo.Quantita) AS CostoComponenti
+             FROM Utilizzo
+             GROUP BY Utilizzo.Prestazione
+            ) AS p ON p.Prestazione = Prestazione.Preventivo
   JOIN (SELECT
           Fattura.Numero,
           Fattura.Anno,

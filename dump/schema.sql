@@ -497,13 +497,11 @@ CREATE FUNCTION calc_costo_componenti_prestazione(prestazione INTEGER)
   RETURNS DECIMAL(10, 2)
   BEGIN
     DECLARE result DECIMAL(10, 2);
-    SELECT SUM(Fornitura.PrezzoUnitario * Utilizzo.Quantita)
-    FROM Prestazione
-      LEFT JOIN Preventivo ON Preventivo.Codice = Prestazione.Preventivo
-      LEFT JOIN Utilizzo ON Prestazione.Preventivo = Utilizzo.Prestazione
-      LEFT JOIN Fornitura ON Fornitura.Codice = Utilizzo.Fornitura
-    WHERE Prestazione.Preventivo = prestazione
-    INTO result;
+    SELECT SUM(Utilizzo.PrezzoUnitario * Utilizzo.Quantita)
+    INTO result
+    FROM Utilizzo
+    WHERE Utilizzo.Prestazione = prestazione
+    GROUP BY Utilizzo.Prestazione;
     IF result IS NULL
     THEN
       SET result = 0;
@@ -562,6 +560,25 @@ CREATE FUNCTION calc_imponibile_fattura(prestazione INTEGER, sconto DECIMAL(4, 2
     RETURN result;
   END;;
 
+/**
+ * Funzione per il calcolo dell'imponibile lordo
+ */
+CREATE FUNCTION calc_imponibile_lordo(numero INTEGER, anno INTEGER)
+  RETURNS DECIMAL(10, 2)
+  BEGIN
+    DECLARE result DECIMAL(10, 2);
+    DECLARE imponibile_netto DECIMAL(10, 2);
+    DECLARE sconto INTEGER;
+    SELECT
+      Fattura.Imponibile,
+      Fattura.Sconto
+    INTO imponibile_netto, sconto
+    FROM Fattura
+    WHERE Fattura.Numero = numero AND Fattura.Anno = anno;
+    SET result = imponibile_netto * (100 / (100 - sconto));
+    RETURN result;
+  END;;
+
 /*
  * Funzione per il calcolo delle imposte
  */
@@ -572,6 +589,39 @@ CREATE FUNCTION calc_imposte_fattura(imponibile DECIMAL(10, 2))
     SET imposte = imponibile * IVA();
     RETURN imposte;
   END;;
+
+/*
+ * Funzione per il calcolo dell'ammontare dello sconto
+ */
+CREATE FUNCTION calc_ammontare_sconto(imponibile_netto REAL, sconto INTEGER)
+  RETURNS DECIMAL(10, 2)
+  BEGIN
+    DECLARE result DECIMAL(10, 2);
+    SET result = imponibile_netto * (sconto / (100 - sconto));
+    RETURN result;
+  END;;
+
+/*
+ * Funzione per il calcolo del totale lordo
+ */
+CREATE FUNCTION calc_totale_lordo(imponibile REAL, incentivi REAL)
+  RETURNS DECIMAL(10, 2)
+  BEGIN
+    DECLARE result DECIMAL(10, 2);
+    SET result = imponibile + calc_imposte_fattura(imponibile) - incentivi;
+    RETURN result;
+  END;;
+
+/*
+ * Funzione per il calcolo del totale netto
+ */
+CREATE FUNCTION calc_totale_netto(imponibile REAL, incentivi REAL, acconto REAL)
+  RETURNS DECIMAL(10, 2)
+  BEGIN
+    DECLARE result DECIMAL(10, 2);
+    SET result = imponibile + calc_imposte_fattura(imponibile) - incentivi - acconto;
+    RETURN result;
+  END ;;
 
 /*
  * Funzione per calcolare la somma per saldare la fattura
@@ -1266,12 +1316,32 @@ DELIMITER ;
 CREATE VIEW FatturaView
 AS
   SELECT
-    Fattura.*,
-    Cliente.*,
-    calc_imposte_fattura(Fattura.Imponibile)                                          AS Imposte,
-    Fattura.Imponibile + calc_imposte_fattura(Fattura.Imponibile) - Fattura.Incentivi AS Totale
+    Fattura.Numero,
+    Fattura.Anno,
+    Fattura.DataEmissione,
+    Fattura.SisPag,
+    Cliente.Nome,
+    Cliente.Cognome,
+    Cliente.Citta,
+    Cliente.Via,
+    Cliente.Civico,
+    Cliente.CAP,
+    Autovettura.Targa,
+    calc_costo_componenti_prestazione(Prestazione.Preventivo)                              AS CostoComponenti,
+    Prestazione.Manodopera,
+    Prestazione.ServAggiuntivi,
+    calc_imponibile_lordo(Fattura.Numero, Fattura.Anno)                                    AS ImponibileLordo,
+    Fattura.Sconto,
+    calc_ammontare_sconto(Fattura.Imponibile, Fattura.Sconto)                              AS ImportoSconto,
+    Fattura.Imponibile                                                                     AS ImponibileNetto,
+    calc_imposte_fattura(Fattura.Imponibile)                                               AS Imposte,
+    Fattura.Incentivi,
+    calc_totale_lordo(Fattura.Imponibile, Fattura.Incentivi)                               AS Totale,
+    IFNULL(Transazione.Quota, 0)                                                           AS RitenutaAcconto,
+    calc_totale_netto(Fattura.Imponibile, Fattura.Incentivi, IFNULL(Transazione.Quota, 0)) AS TotaleNetto
   FROM Fattura
-    JOIN Preventivo ON Preventivo.Codice = Fattura.Prestazione
+    JOIN Prestazione ON Prestazione.Preventivo = Fattura.Prestazione
+    JOIN Preventivo ON Preventivo.Codice = Prestazione.Preventivo
     LEFT JOIN Transazione ON Transazione.Codice = Preventivo.Acconto
     JOIN Autovettura ON Autovettura.Targa = Preventivo.Autovettura
     JOIN Cliente ON Cliente.CF_PIVA = Autovettura.Cliente;

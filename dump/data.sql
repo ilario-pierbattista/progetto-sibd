@@ -303,7 +303,7 @@ INSERT INTO Preventivo (DataEmissione, DataInizio, Categoria,
                         TempoStimato,
                         Manodopera, ServAggiuntivi, Autovettura)
 VALUES ('2015-05-01', '2015-05-10', 'revisione', 1,
-        19.20, 45, 'AB123OR');
+        19.80, 45, 'AB123OR');
 UPDATE Preventivo
 SET
   CostoComponenti = calc_costo_componenti_preventivo(@last_prev)
@@ -435,7 +435,7 @@ SET @last_prest = 4;
 INSERT INTO Prestazione (Preventivo, TempiEsecuzione,
                          DataFine, Manodopera, ServAggiuntivi)
 VALUES (@last_prest, 2,
-        '2015-05-11', 19.20, 45);
+        '2015-05-11', 19.80, 45);
 CALL update_quantita_magazzino(@last_prest);
 UPDATE Autovettura
 SET Autovettura.UltimaRevisione = '2015-05-11'
