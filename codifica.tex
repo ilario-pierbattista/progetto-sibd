@@ -6,8 +6,245 @@ Di seguito è riportata la definizione dello schema in linguaggio sql così come
 
 Il DBMS utilizzato (MySQL 5) nativamente non supporta la definizione di vincoli d'integrità personalizzabili. Per ovviare a questa limitazione, nell'implementazione completa dello schema (riportata nel dump) si è fatto un larghissimo uso di trigger che implementano la logica dei vincoli.
 
-	\subsection{Definizione dello schema e screenshot successivi all'inserimento di dati}
-		% Cliente
+	\subsection{Definizione dello schema}
+		
+    \begin{lstlisting}
+CREATE TABLE Cliente (
+  CF_PIVA        VARCHAR(16) PRIMARY KEY,
+  Nome           VARCHAR(80),
+  Cognome        VARCHAR(80),
+  RagioneSociale VARCHAR(80),
+  Citta          VARCHAR(50) NOT NULL,
+  Via            VARCHAR(50) NOT NULL,
+  Civico         VARCHAR(10) NOT NULL,
+  CAP            VARCHAR(5)  NOT NULL,
+  NDocId         VARCHAR(9)
+);
+
+CREATE TABLE Fornitore (
+  PIVA           VARCHAR(11) PRIMARY KEY,
+  RagioneSociale VARCHAR(80)                 NOT NULL,
+  TempiConsegna  INTEGER,
+  ModPagamento   ENUM('bonifico', 'assegno') NOT NULL,
+  IBAN           VARCHAR(27),
+  Citta          VARCHAR(50)                 NOT NULL,
+  Via            VARCHAR(50)                 NOT NULL,
+  Civico         VARCHAR(10)                 NOT NULL,
+  CAP            VARCHAR(5)                  NOT NULL
+);
+
+CREATE TABLE Operatore (
+  CF             VARCHAR(16) PRIMARY KEY,
+  Nome           VARCHAR(80)                             NOT NULL,
+  Cognome        VARCHAR(80)                             NOT NULL,
+  Citta          VARCHAR(50)                             NOT NULL,
+  Via            VARCHAR(50)                             NOT NULL,
+  Civico         VARCHAR(10)                             NOT NULL,
+  CAP            VARCHAR(5)                              NOT NULL,
+  DataNasc       DATE                                    NOT NULL,
+  ComuneNasc     VARCHAR(50)                             NOT NULL,
+  ProvinciaNasc  VARCHAR(2)                              NOT NULL,
+  Stipendio      DECIMAL(6, 2),
+  RetribuzioneH  DECIMAL(4, 2),
+  ModRiscossione ENUM('bonifico', 'assegno', 'contanti') NOT NULL,
+  IBAN           VARCHAR(27)
+);
+
+CREATE TABLE Transazione (
+  Codice INTEGER AUTO_INCREMENT PRIMARY KEY,
+  Quota  DECIMAL(10, 2) NOT NULL,
+  Data   DATE           NOT NULL
+);
+
+CREATE TABLE Autovettura (
+  Targa                VARCHAR(8) PRIMARY KEY,
+  Telaio               VARCHAR(17),
+  Marca                VARCHAR(50)  NOT NULL,
+  Modello              VARCHAR(100) NOT NULL,
+  Cilindrata           INTEGER,
+  AnnoImmatricolazione INTEGER      NOT NULL,
+  UltimoCollaudo       DATE,
+  UltimaRevisione      DATE,
+  Cliente              VARCHAR(16)  NOT NULL,
+  FOREIGN KEY (Cliente) REFERENCES Cliente (CF_PIVA)
+    ON UPDATE CASCADE
+);
+
+CREATE TABLE Preventivo (
+  Codice           INTEGER       AUTO_INCREMENT PRIMARY KEY,
+  DataEmissione    DATE       NOT NULL,
+  DataInizio       DATE       NOT NULL,
+  Categoria        ENUM('riparazione',
+                        'installazione_impianto_metano',
+                        'installazione_impianto_gpl',
+                        'collaudo',
+                        'revisione'
+  )                           NOT NULL,
+  Sintomi          VARCHAR(300),
+  SisAlimentazione ENUM('aspirazione', 'iniezione'),
+  TempoStimato     INTEGER,
+  CostoComponenti  DECIMAL(8, 2) DEFAULT 0,
+  Manodopera       DECIMAL(7, 2) DEFAULT 0,
+  ServAggiuntivi   DECIMAL(7, 2) DEFAULT 0,
+  Autovettura      VARCHAR(8) NOT NULL,
+  Acconto          INTEGER,
+  FOREIGN KEY (Autovettura) REFERENCES Autovettura (Targa)
+    ON UPDATE CASCADE,
+  FOREIGN KEY (Acconto) REFERENCES Transazione (Codice)
+);
+
+CREATE TABLE Componente (
+  Codice        INTEGER AUTO_INCREMENT PRIMARY KEY,
+  Nome          VARCHAR(150)  NOT NULL,
+  QuantitaMin   INTEGER DEFAULT 0,
+  Validita      INTEGER DEFAULT 0,
+  PrezzoVendita DECIMAL(6, 2) NOT NULL
+);
+
+CREATE TABLE Previsione (
+  Componente     INTEGER NOT NULL,
+  Preventivo     INTEGER NOT NULL,
+  Ubicazione     ENUM('motore', 'bagagliaio'),
+  Quantita       INTEGER NOT NULL,
+  PrezzoUnitario DECIMAL(6, 2),
+  PRIMARY KEY (Componente, Preventivo),
+  FOREIGN KEY (Componente) REFERENCES Componente (Codice),
+  FOREIGN KEY (Preventivo) REFERENCES Preventivo (Codice)
+);
+
+CREATE TABLE Prestazione (
+  Preventivo       INTEGER PRIMARY KEY,
+  TempiEsecuzione  INTEGER NOT NULL,
+  Procedimento     TEXT,
+  DataFine         DATE    NOT NULL,
+  Malfunzionamento VARCHAR(300),
+  Manodopera       DECIMAL(7, 2) DEFAULT 0,
+  ServAggiuntivi   DECIMAL(7, 2) DEFAULT 0,
+  FOREIGN KEY (Preventivo) REFERENCES Preventivo (Codice)
+);
+
+CREATE TABLE Occupazione (
+  Prestazione INTEGER     NOT NULL,
+  Operatore   VARCHAR(16) NOT NULL,
+  PRIMARY KEY (Prestazione, Operatore),
+  FOREIGN KEY (Prestazione) REFERENCES Prestazione (Preventivo),
+  FOREIGN KEY (Operatore) REFERENCES Operatore (CF)
+    ON UPDATE CASCADE
+);
+
+CREATE TABLE Ordine (
+  Codice        INTEGER       AUTO_INCREMENT PRIMARY KEY,
+  DataEmissione DATE        NOT NULL,
+  DataConsegna  DATE,
+  Imponibile    DECIMAL(9, 2) DEFAULT 0,
+  Fornitore     VARCHAR(11) NOT NULL,
+  Versamento    INTEGER,
+  FOREIGN KEY (Fornitore) REFERENCES Fornitore (PIVA)
+    ON UPDATE CASCADE,
+  FOREIGN KEY (Versamento) REFERENCES Transazione (Codice)
+);
+
+CREATE TABLE Fornitura (
+  Codice         INTEGER AUTO_INCREMENT PRIMARY KEY,
+  Quantita       INTEGER NOT NULL,
+  PrezzoUnitario DECIMAL(8, 2),
+  Componente     INTEGER NOT NULL,
+  Ordine         INTEGER NOT NULL,
+  FOREIGN KEY (Componente) REFERENCES Componente (Codice),
+  FOREIGN KEY (Ordine) REFERENCES Ordine (Codice)
+);
+
+CREATE TABLE Utilizzo (
+  Prestazione    INTEGER NOT NULL,
+  Fornitura      INTEGER NOT NULL,
+  PrezzoUnitario DECIMAL(8, 2),
+  Quantita       INTEGER NOT NULL,
+  PRIMARY KEY (Prestazione, Fornitura),
+  FOREIGN KEY (Prestazione) REFERENCES Prestazione (Preventivo),
+  FOREIGN KEY (Fornitura) REFERENCES Fornitura (Codice)
+);
+
+CREATE TABLE Magazzino (
+  Componente INTEGER NOT NULL,
+  Fornitura  INTEGER NOT NULL,
+  Quantita   INTEGER NOT NULL,
+  PRIMARY KEY (Componente, Fornitura),
+  FOREIGN KEY (Componente) REFERENCES Componente (Codice),
+  FOREIGN KEY (Fornitura) REFERENCES Fornitura (Codice)
+);
+
+CREATE TABLE Fattura (
+  Numero        INTEGER                                 NOT NULL,
+  Anno          INTEGER                                 NOT NULL,
+  Imponibile    DECIMAL(10, 2)                          NOT NULL,
+  Sconto        DECIMAL(4, 2) DEFAULT 0                 NOT NULL,
+  Incentivi     DECIMAL(8, 2) DEFAULT 0                 NOT NULL,
+  DataEmissione DATE                                    NOT NULL,
+  DataScadenza  DATE                                    NOT NULL,
+  TipoPag       ENUM('bonifico', 'assegno', 'contanti') NOT NULL,
+  StatoPag      BOOLEAN DEFAULT FALSE                   NOT NULL,
+  SisPag        ENUM('rimessa_diretta', 'rimessa_differita')
+    DEFAULT 'rimessa_diretta'                           NOT NULL,
+  Prestazione   INTEGER                                 NOT NULL,
+  Transazione   INTEGER,
+  PRIMARY KEY (Numero, Anno),
+  FOREIGN KEY (Prestazione) REFERENCES Prestazione (Preventivo),
+  FOREIGN KEY (Transazione) REFERENCES Transazione (Codice)
+);
+
+CREATE TABLE Turno (
+  Operatore VARCHAR(16) NOT NULL,
+  Data      DATE        NOT NULL,
+  OraInizio TIME        NOT NULL,
+  OraFine   TIME        NOT NULL,
+  PRIMARY KEY (Operatore, Data, OraInizio),
+  FOREIGN KEY (Operatore) REFERENCES Operatore (CF)
+    ON UPDATE CASCADE
+);
+
+CREATE TABLE Stipendio (
+  Transazione INTEGER PRIMARY KEY,
+  Operatore   VARCHAR(16) NOT NULL,
+  FOREIGN KEY (Transazione) REFERENCES Transazione (Codice),
+  FOREIGN KEY (Operatore) REFERENCES Operatore (CF)
+    ON UPDATE CASCADE
+);
+
+CREATE TABLE Recapito (
+  Codice   INTEGER AUTO_INCREMENT PRIMARY KEY,
+  Recapito VARCHAR(200)  NOT NULL,
+  Tipo     ENUM('telefono',
+                'fax',
+                'tel_fax',
+                'sito_web',
+                'email') NOT NULL,
+  UNIQUE (Recapito)
+);
+
+CREATE TABLE RubricaCliente (
+  Recapito INTEGER     NOT NULL,
+  Cliente  VARCHAR(16) NOT NULL,
+  PRIMARY KEY (Recapito, Cliente),
+  FOREIGN KEY (Cliente) REFERENCES Cliente (CF_PIVA),
+  FOREIGN KEY (Recapito) REFERENCES Recapito (Codice)
+);
+
+CREATE TABLE RubricaFornitore (
+  Recapito  INTEGER     NOT NULL,
+  Fornitore VARCHAR(11) NOT NULL,
+  PRIMARY KEY (Recapito, Fornitore),
+  FOREIGN KEY (Fornitore) REFERENCES Fornitore (PIVA),
+  FOREIGN KEY (Recapito) REFERENCES Recapito (Codice)
+);
+
+CREATE TABLE RubricaOperatore (
+  Recapito  INTEGER     NOT NULL,
+  Operatore VARCHAR(16) NOT NULL,
+  PRIMARY KEY (Recapito, Operatore),
+  FOREIGN KEY (Operatore) REFERENCES Operatore (CF),
+  FOREIGN KEY (Recapito) REFERENCES Recapito (Codice)
+);
+    \end{lstlisting}
 
 		\pagebreak
 	\subsection{Codifica delle operazioni}
@@ -756,18 +993,35 @@ WHERE Anno = <Anno di emissione>
                 \includegraphics[width=10cm]{images/screenshots/show_componenti_fattura.png}
               \end{figure}
 
-            \item[\ref{op:show_transazioni}] Consultazione delle transazioni avvenute in un certo periodo
+            \item[\ref{op:show_transazioni}] Consultazione delle transazioni avvenute in un certo periodo. La seguente istruzione, oltre a selezionare tutte le istanze interessate della tabella \emph{Transazione}, fornisce un'indicazione riguardante la natura della transazione e gli estremi per rintracciare l'istanza di \emph{Fattura}, \emph{Preventivo}, \emph{Ordine} o \emph{Operatore} ad essa associata.
 
               \begin{lstlisting}
-SELECT *
+SELECT
+  Transazione.*,
+  Preventivo.Codice                         AS Preventivo,
+  CONCAT(Fattura.Numero, '/', Fattura.Anno) AS Fattura,
+  Ordine.Codice                             AS Ordine,
+  Stipendio.Operatore                       AS Operatore,
+  CASE
+  WHEN Preventivo.Acconto IS NOT NULL THEN 'acconto'
+  WHEN Fattura.Transazione IS NOT NULL THEN 'pagamento prestazione'
+  WHEN Ordine.Versamento IS NOT NULL THEN 'versamento fornitore'
+  WHEN Stipendio.Transazione IS NOT NULL THEN 'stipendio'
+  ELSE 'categoria non riconosciuta'
+  END                                       AS Categoria
 FROM Transazione
-WHERE (Transazione.Data BETWEEN <Data d'inizio>
-  AND <Data di fine>);
+  LEFT JOIN Preventivo ON Transazione.Codice = Preventivo.Acconto
+  LEFT JOIN Fattura ON Transazione.Codice = Fattura.Transazione
+  LEFT JOIN Ordine ON Transazione.Codice = Ordine.Versamento
+  LEFT JOIN Stipendio ON Transazione.Codice = Stipendio.Transazione
+WHERE (Transazione.Data BETWEEN <Data di inizio>
+  AND <Data di fine>)
+ORDER BY Data DESC;
               \end{lstlisting}
 
               \begin{figure}[H]
                 \centering
-                \includegraphics[width=8cm]{images/screenshots/show_transazioni.png}
+                \includegraphics[width=12cm]{images/screenshots/show_transazioni.png}
               \end{figure}
 
             \item[\ref{op:show_riparazioni}] Consultazione della lista delle riparazioni
@@ -799,10 +1053,346 @@ AND LOWER(Prestazione.Malfunzionamento) LIKE LOWER('%frizione%');
                 \includegraphics[width=12cm]{images/screenshots/search_riparazioni.png}
               \end{figure}
 
-            \item[\ref{op:show_preventivi}] Consultazione della lista dei preventivi
+            \item[\ref{op:show_preventivi}] Consultazione della lista dei preventivi.
+
+            È possibile visualizzare la lista di tutti i preventivi di una certa categoria:
 
               \begin{lstlisting}
-                
+SELECT *
+FROM Preventivo
+WHERE Categoria = 'installazione_impianto_gpl';
               \end{lstlisting}
+
+              \begin{figure}[H]
+                \centering
+                \includegraphics[width=8cm]{images/screenshots/search_preventivi_1.png}
+              \end{figure}
+
+            Di seguito presentiamo l'istruzione per ricercare il preventivo di una riparazione di un'autovettura con problemi ad inserire le marce:
+
+              \begin{lstlisting}
+SELECT *
+FROM Preventivo
+WHERE Categoria = 'riparazione' AND
+      LOWER(Sintomi) LIKE LOWER('%marce%');
+              \end{lstlisting}
+
+              \begin{figure}[H]
+                \centering
+                \includegraphics[width=10cm]{images/screenshots/search_preventivi_2.png}
+              \end{figure}
+
+            Possiamo effettuare ricerche ancora più restrittive, specificando anche la marca dell'auto ed il modello:
+
+              \begin{lstlisting}
+SELECT *
+FROM Preventivo
+  JOIN Autovettura ON Autovettura.Targa = Preventivo.Autovettura
+WHERE Autovettura.Marca = 'Volkswagen'
+      AND Autovettura.Modello = 'Golf'
+      AND LOWER(Preventivo.Sintomi) LIKE '%freno%';
+              \end{lstlisting}
+
+              \begin{figure}[H]
+                \centering
+                \includegraphics[width=9cm]{images/screenshots/search_preventivi_3.png}
+              \end{figure}
+
+            Le possibili combinazioni delle chiavi di ricerca sono tante e le query che ne verrebbero fuori sarebbero molto simili a quelle appena viste. Non ci soffermiamo oltre.
+
+            \item[\ref{op:check_componente}] Controllo della disponibilità di un componente.
+
+              \begin{lstlisting}
+SELECT
+  Componente.Codice,
+  Componente.Nome,
+  SUM(IFNULL(Magazzino.Quantita, 0)) AS QuantitaPresente
+FROM Componente
+  LEFT JOIN Magazzino ON Componente.Codice = Magazzino.Componente
+WHERE Componente.Codice = <Codice del componente>
+GROUP BY Componente.Codice;
+              \end{lstlisting}
+
+              \begin{figure}[H]
+                \centering
+                \includegraphics[width=10cm]{images/screenshots/check_componente.png}
+              \end{figure}
+
+            \item[\ref{op:check_turni}] Lista dei turni di un operatore durante un arco temporale.
+
+              \begin{lstlisting}
+SELECT *
+FROM Turno
+WHERE Turno.Operatore = <Codice fiscale dell'operatore>
+      AND (Turno.Data BETWEEN <Data d'inizio>
+      AND <Data di fine>)
+ORDER BY Turno.Data ASC;
+              \end{lstlisting}
+
+              \begin{figure}[H]
+                \centering
+                \includegraphics[width=8cm]{images/screenshots/show_turni.png}
+              \end{figure}
+
+            \item[\ref{op:list_componenti}] Lista dei componenti presenti in magazzino.
+
+              \begin{lstlisting}
+SELECT
+  Componente.Codice,
+  Componente.Nome,
+  SUM(IFNULL(Magazzino.Quantita, 0)) AS QuantitaPresente
+FROM Componente
+  LEFT JOIN Magazzino ON Componente.Codice = Magazzino.Componente
+GROUP BY Componente.Codice
+HAVING QuantitaPresente > 0
+ORDER BY Componente.Nome ASC;
+              \end{lstlisting}
+
+              \begin{figure}[H]
+                \centering
+                \includegraphics[width=10cm]{images/screenshots/list_componenti.png}
+              \end{figure}
+
+            \item[\ref{op:stats_componenti}] Lista dei componenti più usati. Viene calcolata la quantità totale dei componenti utilizzati in tutte le prestazioni registrate e la quantità media d'uso per ogni prestazione.
+
+              \begin{lstlisting}
+SELECT
+  Componente.Codice,
+  Componente.Nome,
+  SUM(Utilizzo.Quantita)                      AS QuantitaUsata,
+  COUNT(Prestazione)                          AS Prestazioni,
+  SUM(Utilizzo.Quantita) / COUNT(Prestazione) AS QuantitaPrestazione
+FROM Utilizzo
+  JOIN Prestazione ON Prestazione.Preventivo = Utilizzo.Prestazione
+  JOIN Fornitura ON Fornitura.Codice = Utilizzo.Fornitura
+  JOIN Componente ON Componente.Codice = Fornitura.Componente
+GROUP BY Componente
+ORDER BY QuantitaUsata DESC
+LIMIT <Quantità di componenti che si vuole visualizzare>;
+              \end{lstlisting}
+
+              \begin{figure}[H]
+                \centering
+                \includegraphics[width=12cm]{images/screenshots/stats_componenti.png}
+              \end{figure}
+
+            \item[\ref{op:tobuy_componenti}] Lista dei componenti che si dovrebbe acquistare nuovamente. Viene calcolata anche la quantità esatta da acquistare, oltre che la quantità attualmente presente.
+
+              \begin{lstlisting}
+SELECT
+  Componente.Codice,
+  Componente.Nome,
+  Componente.QuantitaMin,
+  m.QuantitaPresente,
+  Componente.QuantitaMin - m.QuantitaPresente AS DaAcquistare
+FROM Componente
+  LEFT JOIN (SELECT
+               Magazzino.Componente,
+               SUM(IFNULL(Magazzino.Quantita, 0)) AS QuantitaPresente
+             FROM Magazzino
+             GROUP BY Magazzino.Componente
+            ) AS m ON m.Componente = Componente.Codice
+WHERE m.QuantitaPresente < Componente.QuantitaMin
+ORDER BY Componente.Nome;
+              \end{lstlisting}
+
+              \begin{figure}[H]
+                \centering
+                \includegraphics[width=12cm]{images/screenshots/tobuy_componenti.png}
+              \end{figure}
+
+            \item[\ref{op:show_recapiti_cliente}] Lista dei recapiti di un cliente.
+
+              \begin{lstlisting}
+SELECT
+  Recapito.Recapito,
+  Recapito.Tipo
+FROM RubricaCliente
+  JOIN Recapito ON Recapito.Codice = RubricaCliente.Recapito
+WHERE RubricaCliente.Cliente = <CF_PIVA del cliente>;
+              \end{lstlisting}
+
+              \begin{figure}[H]
+                \centering
+                \includegraphics[width=10cm]{images/screenshots/list_recapiti_cliente.png}
+              \end{figure}
+
+              Per due operazioni successive, considerata la forte analogia, non saranno presentati screenshot.
+
+            \item[\ref{op:show_recapiti_fornitore}] Lista dei recapiti di un fornitore.
+
+              \begin{lstlisting}
+SELECT
+  Recapito.Recapito,
+  Recapito.Tipo
+FROM RubricaFornitore
+  JOIN Recapito ON Recapito.Codice = RubricaFornitore.Recapito
+WHERE RubricaFornitore.Fornitore = <PIVA del fornitore>;
+              \end{lstlisting}
+
+            \item[\ref{op:show_recapiti_operatore}] Lista dei recapiti di un operatore.
+
+              \begin{lstlisting}
+SELECT
+  Recapito.Recapito,
+  Recapito.Tipo
+FROM RubricaOperatore
+  JOIN Recapito ON Recapito.Codice = RubricaOperatore.Recapito
+WHERE RubricaOperatore.Operatore = <CF dell'operatore>;
+              \end{lstlisting}
+
+            \item[\ref{op:list_fatture_pending}] Lista delle fatture che devono essere ancora pagate. Si calcolano anche i giorni rimanenti alla scadenza ed i giorni di ritardo nel pagamento al termine della scadenza.
+
+              \begin{lstlisting}
+SELECT
+  Fattura.*,
+  CASE
+  WHEN DATEDIFF(DataScadenza, CURRENT_DATE()) < 0 THEN 0
+  ELSE DATEDIFF(DataScadenza, CURRENT_DATE())
+  END AS GiorniRimanenti,
+  CASE
+  WHEN DATEDIFF(CURRENT_DATE(), DataScadenza) < 0 THEN 0
+  ELSE DATEDIFF(CURRENT_DATE(), DataScadenza)
+  END AS GiorniRitardo
+FROM Fattura
+WHERE Fattura.StatoPag IS FALSE;
+              \end{lstlisting}
+
+              \begin{figure}[H]
+                \centering
+                \includegraphics[width=10cm]{images/screenshots/list_fatture_pending.png}
+              \end{figure}
+
+            \item[\ref{op:list_ordini_pending}] Lista degli ordini che devono essere ancora consegnati.
+
+              \begin{lstlisting}
+SELECT
+  Ordine.*,
+  CASE
+  WHEN DATEDIFF(
+    CURRENT_DATE(), 
+    DATE_ADD(DataEmissione, INTERVAL TempiConsegna DAY)
+    ) < 0 THEN 0
+  ELSE DATEDIFF(
+    CURRENT_DATE(), 
+    DATE_ADD(DataEmissione, INTERVAL TempiConsegna DAY)
+    )
+  END AS GiorniRitardo
+FROM Ordine
+  JOIN Fornitore ON Fornitore.PIVA = Ordine.Fornitore
+WHERE DataConsegna IS NULL;
+              \end{lstlisting}
+
+              \begin{figure}[H]
+                \centering
+                \includegraphics[width=14cm]{images/screenshots/list_ordini_pending.png}
+              \end{figure}
+
+            \item[\ref{op:todo_list}] Lista dei lavori da eseguire.
+
+              \begin{lstlisting}
+SELECT
+  Preventivo.*,
+  DATEDIFF(CURRENT_DATE(), Preventivo.DataInizio) AS GiorniRitardo
+FROM Preventivo
+  LEFT JOIN Fattura ON Fattura.Prestazione = Preventivo.Codice
+WHERE DATEDIFF(CURRENT_DATE(), DataInizio) >= 0
+      AND Fattura.Prestazione IS NULL;
+              \end{lstlisting}
+
+              \begin{figure}[H]
+                \centering
+                \includegraphics[width=12cm]{images/screenshots/todo_list.png}
+              \end{figure}
+
+            \item[\ref{op:calc_stipendio_operatore}] Calcolo dello stipendio degli operatori. Lo stipendio è mensile, tuttavia è necessario specificare manualmente gli estremi temporali di riferimento.
+            È da notare che gli operatori con stipendio fisso (attributo \emph{Stipendio} di \emph{Operatore} diverso da null), riceveranno sempre lo stesso stipendio, mentre gli operatori che vengono retribuiti ad ore di lavoro (attributo \emph{RetribuzioneH} di \emph{Operatore}) riceveranno un compenso calcolato in base alla somma dei turni effettuati nell'arco temporale di riferimento.
+
+              \begin{lstlisting}
+SELECT
+  Operatore.CF,
+  Operatore.Nome,
+  Operatore.Cognome,
+  CASE
+  WHEN Operatore.Stipendio IS NULL THEN Ore * RetribuzioneH
+  ELSE Operatore.Stipendio
+  END AS StipendioMensile
+FROM Operatore
+  JOIN (
+         SELECT
+           Turno.Operatore,
+           SUM(ROUND(TIME_TO_SEC(TIMEDIFF(OraFine, OraInizio)) / 3600, 1)) AS Ore
+         FROM Turno
+         WHERE (Turno.Data BETWEEN '2015-04-01' AND '2015-05-01')
+         GROUP BY Operatore
+       ) AS t ON t.Operatore = Operatore.CF;
+              \end{lstlisting}
+
+              \begin{figure}[H]
+                \centering
+                \includegraphics[width=12cm]{images/screenshots/calc_stipendio_operatore.png}
+              \end{figure}
+
+            \item[\ref{op:stats_prevetivi_prestazioni}] Scostamento tra i costi preventivati e quelli effettivi. Il costo delle prestazioni è stato messo a confronto con i costi preventivati, sia nella sua totalità, sia scorporandolo nelle voci di cui è composto. Inoltre è stato calcolato l'errore nella previsione di ogni voce, definito come la differenza tra l'effettivo e il preventivato (il segno stabilisce solamente la direzione dell'errore).
+
+              \begin{lstlisting}
+SELECT
+  Preventivo.Codice,
+  Preventivo.CostoComponenti                       AS ComponentiPrevisti,
+  SUM(Utilizzo.PrezzoUnitario * Utilizzo.Quantita) AS ComponentiEffettivi,
+  SUM(Utilizzo.PrezzoUnitario * Utilizzo.Quantita) -
+  Preventivo.CostoComponenti
+                                                   AS ErroreComponenti,
+  Preventivo.Manodopera                            AS ManodoperaPrevista,
+  Prestazione.Manodopera                           AS ManodoperaEffettiva,
+  Prestazione.Manodopera - Preventivo.Manodopera   AS ErroreManodopera,
+  Preventivo.ServAggiuntivi                        AS CostiAggiuntiviPrevisti,
+  Prestazione.ServAggiuntivi                       AS CostiAggiuntiviEffettivi,
+  Prestazione.ServAggiuntivi - Preventivo.ServAggiuntivi
+                                                   AS ErroreCostiAggiunti,
+  Preventivo.CostoComponenti + Preventivo.Manodopera +
+  Preventivo.ServAggiuntivi
+                                                   AS TotalePrevisto,
+  SUM(Utilizzo.PrezzoUnitario * Utilizzo.Quantita) +
+  Prestazione.Manodopera + Prestazione.ServAggiuntivi
+                                                   AS TotaleEffettivo,
+  SUM(Utilizzo.PrezzoUnitario * Utilizzo.Quantita) +
+  Prestazione.Manodopera + Prestazione.ServAggiuntivi -
+  (Preventivo.CostoComponenti + Preventivo.Manodopera +
+   Preventivo.ServAggiuntivi)
+                                                   AS ErroreTotale
+FROM Preventivo
+  JOIN Prestazione ON Preventivo.Codice = Prestazione.Preventivo
+  JOIN Utilizzo ON Prestazione.Preventivo = Utilizzo.Prestazione
+GROUP BY Prestazione;
+              \end{lstlisting}
+
+              \begin{figure}[H]
+                \centering
+                \includegraphics[width=12cm]{images/screenshots/scostamento_1.png}
+              \end{figure}
+
+              \begin{figure}[H]
+                \centering
+                \includegraphics[width=8cm]{images/screenshots/scostamento_2.png}
+              \end{figure}
+
+            \item[\ref{op:stats_costi}] Variazione dei costi di un componente.
+
+              \begin{lstlisting}
+SELECT
+  Fornitura.Componente,
+  Fornitura.PrezzoUnitario AS PrezzoAcquisto,
+  Ordine.DataEmissione
+FROM Fornitura
+  JOIN Ordine ON Ordine.Codice = Fornitura.Ordine
+WHERE Componente = 2
+ORDER BY DataEmissione DESC;
+              \end{lstlisting}
+
+              \begin{figure}[H]
+                \centering
+                \includegraphics[width=8cm]{images/screenshots/stats_costi.png}
+              \end{figure}
 
           \end{description}

@@ -122,6 +122,11 @@
       <foreign-key name="Magazzino_ibfk_1" columns="Componente" ref-table="Componente" ref-schema="" ref-catalog="Officina" ref-columns="Codice" update-rule="3" delete-rule="3" deferrability="2"/>
       <foreign-key name="Magazzino_ibfk_2" columns="Fornitura" ref-table="Fornitura" ref-schema="" ref-catalog="Officina" ref-columns="Codice" update-rule="3" delete-rule="3" deferrability="2"/>
     </table>
+    <table name="MagazzinoView" schema="" catalog="Officina" type="VIEW">
+      <column name="Codice" sqlType="INT" precision="10" scale="0" nullable="false" jdbcType="4" def="MA=="/>
+      <column name="Nome" sqlType="VARCHAR" precision="150" scale="0" nullable="false" jdbcType="12"/>
+      <column name="QuantitaPresente" sqlType="DECIMAL" precision="32" scale="0" nullable="true" jdbcType="3"/>
+    </table>
     <table name="Occupazione" schema="" catalog="Officina" type="TABLE">
       <column name="Prestazione" sqlType="INT" precision="10" scale="0" nullable="false" jdbcType="4"/>
       <column name="Operatore" sqlType="VARCHAR" precision="16" scale="0" nullable="false" jdbcType="12"/>

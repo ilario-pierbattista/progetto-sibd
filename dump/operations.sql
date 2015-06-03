@@ -167,17 +167,17 @@ WHERE Anno = 2015 AND Numero = 3;
  */
 SELECT
   Transazione.*,
-  Preventivo.Codice as Preventivo,
-  CONCAT(Fattura.Numero, '/', Fattura.Anno) as Fattura,
-  Ordine.Codice as Ordine,
-  Stipendio.Operatore as Operatore,
+  Preventivo.Codice                         AS Preventivo,
+  CONCAT(Fattura.Numero, '/', Fattura.Anno) AS Fattura,
+  Ordine.Codice                             AS Ordine,
+  Stipendio.Operatore                       AS Operatore,
   CASE
-    WHEN Preventivo.Acconto is not NULL THEN 'acconto'
-    WHEN Fattura.Transazione is NOT null THEN 'pagamento prestazione'
-    WHEN Ordine.Versamento is NOT null THEN 'versamento fornitore'
-    WHEN Stipendio.Transazione is not null THEN 'stipendio'
-    ELSE 'categoria non riconosciuta'
-  END AS Categoria
+  WHEN Preventivo.Acconto IS NOT NULL THEN 'acconto'
+  WHEN Fattura.Transazione IS NOT NULL THEN 'pagamento prestazione'
+  WHEN Ordine.Versamento IS NOT NULL THEN 'versamento fornitore'
+  WHEN Stipendio.Transazione IS NOT NULL THEN 'stipendio'
+  ELSE 'categoria non riconosciuta'
+  END                                       AS Categoria
 FROM Transazione
   LEFT JOIN Preventivo ON Transazione.Codice = Preventivo.Acconto
   LEFT JOIN Fattura ON Transazione.Codice = Fattura.Transazione
@@ -213,7 +213,7 @@ WHERE Categoria = 'installazione_impianto_gpl';
 SELECT *
 FROM Preventivo
 WHERE Categoria = 'riparazione' AND
-      LOWER(Sintomi) LIKE LOWER('%freno%');
+      LOWER(Sintomi) LIKE LOWER('%marce%');
 /* Ricerca per modello d'auto e sintomi */
 SELECT *
 FROM Preventivo
@@ -231,7 +231,7 @@ SELECT
   SUM(IFNULL(Magazzino.Quantita, 0)) AS QuantitaPresente
 FROM Componente
   LEFT JOIN Magazzino ON Componente.Codice = Magazzino.Componente
-WHERE Componente.Codice = 9
+WHERE Componente.Codice = 8
 GROUP BY Componente.Codice;
 
 /**
@@ -240,7 +240,8 @@ GROUP BY Componente.Codice;
 SELECT *
 FROM Turno
 WHERE Turno.Operatore = 'VRDLCU90D15E783S'
-      AND (Turno.Data BETWEEN '2015-04-10' AND '2015-04-14');
+      AND (Turno.Data BETWEEN '2015-04-10' AND '2015-04-14')
+ORDER BY Turno.Data ASC;
 
 /**
  * OP33: Lista componenti presenti
@@ -252,6 +253,7 @@ SELECT
 FROM Componente
   LEFT JOIN Magazzino ON Componente.Codice = Magazzino.Componente
 GROUP BY Componente.Codice
+HAVING QuantitaPresente > 0
 ORDER BY Componente.Nome ASC;
 
 /**
@@ -268,7 +270,8 @@ FROM Utilizzo
   JOIN Fornitura ON Fornitura.Codice = Utilizzo.Fornitura
   JOIN Componente ON Componente.Codice = Fornitura.Componente
 GROUP BY Componente
-ORDER BY QuantitaUsata DESC;
+ORDER BY QuantitaUsata DESC
+LIMIT 5;
 
 /**
  * OP35: Lista dei componenti che si dovrebbero acquistare nuovamente
@@ -387,14 +390,27 @@ SELECT
   Preventivo.Codice,
   Preventivo.CostoComponenti                       AS ComponentiPrevisti,
   SUM(Utilizzo.PrezzoUnitario * Utilizzo.Quantita) AS ComponentiEffettivi,
+  SUM(Utilizzo.PrezzoUnitario * Utilizzo.Quantita) -
+  Preventivo.CostoComponenti
+                                                   AS ErroreComponenti,
   Preventivo.Manodopera                            AS ManodoperaPrevista,
   Prestazione.Manodopera                           AS ManodoperaEffettiva,
+  Prestazione.Manodopera - Preventivo.Manodopera   AS ErroreManodopera,
   Preventivo.ServAggiuntivi                        AS CostiAggiuntiviPrevisti,
   Prestazione.ServAggiuntivi                       AS CostiAggiuntiviEffettivi,
-  Preventivo.CostoComponenti + Preventivo.Manodopera + Preventivo.ServAggiuntivi
+  Prestazione.ServAggiuntivi - Preventivo.ServAggiuntivi
+                                                   AS ErroreCostiAggiunti,
+  Preventivo.CostoComponenti + Preventivo.Manodopera +
+  Preventivo.ServAggiuntivi
                                                    AS TotalePrevisto,
-  SUM(Utilizzo.PrezzoUnitario * Utilizzo.Quantita) + Prestazione.Manodopera + Prestazione.ServAggiuntivi
-                                                   AS TotaleEffettivo
+  SUM(Utilizzo.PrezzoUnitario * Utilizzo.Quantita) +
+  Prestazione.Manodopera + Prestazione.ServAggiuntivi
+                                                   AS TotaleEffettivo,
+  SUM(Utilizzo.PrezzoUnitario * Utilizzo.Quantita) +
+  Prestazione.Manodopera + Prestazione.ServAggiuntivi -
+  (Preventivo.CostoComponenti + Preventivo.Manodopera +
+   Preventivo.ServAggiuntivi)
+                                                   AS ErroreTotale
 FROM Preventivo
   JOIN Prestazione ON Preventivo.Codice = Prestazione.Preventivo
   JOIN Utilizzo ON Prestazione.Preventivo = Utilizzo.Prestazione

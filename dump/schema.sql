@@ -1,11 +1,12 @@
 /**
  * Tabella dei contenuti
- * 0) Creazione dello schema
- * 1) Tabelle
- * 2) Funzioni
- * 3) Procedure
- * 4) Trigger
- * 5) Viste
+ * 0) Creazione dello schema......12
+ * 1) Tabelle.....................16
+ * 2) Funzioni...................262
+ * 3) Procedure..................677
+ * 4) Trigger....................910
+ * 5) Viste.....................1371
+ * 6) Inserimento dati..........1432
  */
 
 DROP SCHEMA IF EXISTS Officina;
@@ -1410,3 +1411,30 @@ AS
     LEFT JOIN Transazione ON Transazione.Codice = Preventivo.Acconto
     JOIN Autovettura ON Autovettura.Targa = Preventivo.Autovettura
     JOIN Cliente ON Cliente.CF_PIVA = Autovettura.Cliente;
+
+/**
+ * Magazzino
+ * Componenti presenti in magazzino
+ */
+CREATE VIEW MagazzinoView
+AS
+  SELECT
+    Componente.Codice,
+    Componente.Nome,
+    SUM(IFNULL(Magazzino.Quantita, 0)) AS QuantitaPresente
+  FROM Componente
+    LEFT JOIN Magazzino ON Componente.Codice = Magazzino.Componente
+  GROUP BY Componente.Codice
+  HAVING QuantitaPresente > 0
+  ORDER BY Componente.Nome ASC;
+
+
+/***************************************************************
+ ***************************************************************
+ ****
+ ****     INSERIMENTO DATI
+ ****
+ ****
+ ***************************************************************
+ ***************************************************************
+ */

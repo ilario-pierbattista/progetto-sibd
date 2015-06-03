@@ -226,7 +226,7 @@ SET Ordine.Versamento = @last_trans,
 WHERE Ordine.Codice = @last_ord;
 CALL registra_ordine_magazzino(@last_ord);
 
-INSERT INTO Ordine (DataEmissione, Fornitore) VALUES ('2015-04-08', '02365478952');
+INSERT INTO Ordine (DataEmissione, Fornitore) VALUES ('2015-04-09', '02365478952');
 SELECT LAST_INSERT_ID()
 INTO @last_ord;
 INSERT INTO Fornitura (Quantita, Componente, Ordine, PrezzoUnitario)
@@ -236,7 +236,7 @@ UPDATE Ordine
 SET Imponibile = calc_imponibile_ordine(@last_ord)
 WHERE Ordine.Codice = @last_ord;
 INSERT INTO Transazione (Quota, Data)
-VALUES (calc_transazione_ordine(@last_ord, 0), '2015-04-10');
+VALUES (calc_transazione_ordine(@last_ord, 0), '2015-04-11');
 SELECT LAST_INSERT_ID()
 INTO @last_trans;
 UPDATE Ordine
@@ -520,3 +520,104 @@ WHERE Fattura.Numero = @num_fattura AND Fattura.Anno = 2015;
  **********************************
  */
 CALL insert_stipendi('2015-04-01', '2015-05-01', '2015-05-01');
+
+
+/*********************************
+ * INSERIMENTI EXTRA
+ *********************************
+ */
+
+/************************************
+ * Preventivo che non verrà eseguito
+ */
+INSERT INTO Preventivo (DataEmissione, DataInizio, Categoria, Sintomi,
+                        SisAlimentazione, TempoStimato,
+                        Manodopera, ServAggiuntivi, Autovettura)
+VALUES ('2015-04-20', '2015-04-30', 'installazione_impianto_metano',
+        NULL, 'iniezione', 3, 400, 100, 'RT435CM');
+SELECT LAST_INSERT_ID()
+INTO @last_prev;
+INSERT INTO Previsione (Componente, Preventivo, Ubicazione, Quantita)
+VALUES
+  (1, @last_prev, 'bagagliaio', 1),
+  (4, @last_prev, 'motore', 1),
+  (6, @last_prev, 'motore', 1),
+  (8, @last_prev, 'motore', 1);
+INSERT INTO Transazione (Quota, Data)
+VALUES (300, '2015-04-09');
+SELECT LAST_INSERT_ID()
+INTO @last_transazione;
+UPDATE Preventivo
+SET Acconto       = @last_transazione,
+  CostoComponenti = calc_costo_componenti_preventivo(@last_prev)
+WHERE Preventivo.Codice = @last_prev;
+
+
+/*************************************
+ * Fattura che non verrà saldata
+ */
+INSERT INTO Preventivo (DataEmissione, DataInizio, Categoria,
+                        SisAlimentazione, TempoStimato,
+                        Manodopera, ServAggiuntivi, Autovettura)
+VALUES ('2015-05-03', '2015-05-20', 'installazione_impianto_gpl',
+        'aspirazione', 2, 400, 150, 'BX692TE');
+SELECT LAST_INSERT_ID()
+INTO @last_prev;
+INSERT INTO Previsione (Componente, Preventivo, Quantita, Ubicazione)
+VALUES
+  (3, @last_prev, 1, 'bagagliaio'),
+  (5, @last_prev, 1, 'motore'),
+  (10, @last_prev, 1, 'motore'),
+  (8, @last_prev, 1, 'motore');
+INSERT INTO Transazione (Quota, Data)
+VALUES (350, '2015-05-03');
+SELECT LAST_INSERT_ID()
+INTO @last_trans;
+UPDATE Preventivo
+SET Acconto       = @last_trans,
+  CostoComponenti = calc_costo_componenti_preventivo(@last_prev)
+WHERE Preventivo.Codice = @last_prev;
+INSERT INTO Prestazione (Preventivo, TempiEsecuzione, Procedimento,
+                         DataFine, Manodopera, ServAggiuntivi)
+VALUES (@last_prev, 2,
+        'Installazione di un impianto a gpl',
+        '2015-05-22', 400, 140);
+INSERT INTO Utilizzo (Prestazione, Fornitura, Quantita)
+VALUES
+  (@last_prev, 3, 1),
+  (@last_prev, 5, 1),
+  (@last_prev, 10, 1),
+  (@last_prev, 7, 1);
+CALL update_quantita_magazzino(@last_prev);
+INSERT INTO Occupazione (Prestazione, Operatore)
+VALUES
+  (@last_prev, 'STFDRN60A02E783V');
+SET @num_fattura = next_fattura_num(2015);
+INSERT INTO Fattura (Numero, Anno, Imponibile, Sconto, Incentivi,
+                     DataEmissione, DataScadenza, TipoPag,
+                     StatoPag, SisPag, Prestazione)
+VALUES (@num_fattura, 2015, calc_imponibile_fattura(@last_prev, 0), 0, 200,
+        '2015-05-22', '2015-05-30', 'bonifico',
+        FALSE, 'rimessa_differita', @last_prev);
+
+
+/***********************************************
+ * Ordine che non verrà consegnato
+ */
+INSERT INTO Ordine (DataEmissione, Fornitore) VALUES ('2015-05-30', '05987418630');
+SELECT LAST_INSERT_ID()
+INTO @last_ord;
+INSERT INTO Fornitura (Quantita, Componente, Ordine, PrezzoUnitario)
+VALUES
+  (1, 9, @last_ord, 100),
+  (7, 12, @last_ord, 6);
+UPDATE Ordine
+SET Imponibile = calc_imponibile_ordine(@last_ord)
+WHERE Ordine.Codice = @last_ord;
+INSERT INTO Transazione (Quota, Data)
+VALUES (calc_transazione_ordine(@last_ord, 0), '2015-05-30');
+SELECT LAST_INSERT_ID()
+INTO @last_trans;
+UPDATE Ordine
+SET Ordine.Versamento = @last_trans
+WHERE Ordine.Codice = @last_ord;
