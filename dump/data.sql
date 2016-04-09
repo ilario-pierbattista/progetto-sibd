@@ -5,8 +5,8 @@
 /* Cliente non dotato di partita iva */
 INSERT INTO Cliente (CF_PIVA, Nome, Cognome, Citta, Via, Civico, CAP, NDocId)
 VALUES
-  ('PRBLRI93R05I324O', 'Ilario', 'Pierbattista', 'Monte Urano', 'Via Picena', '14', '63813', 'AO5254936'),
-  ('STFLSN93A08E783E', 'Alessandro', 'Staffolani', 'Pollenza', 'Via Cardarelli', '31', '62010', 'MC5160237'),
+  ('PRBLRI00A00B000C', 'Ilario', 'Pierbattista', 'Ancona', 'Via Di Qui', '99', '62000', 'AB0000000'),
+  ('STFLSN00A00B000C', 'Alessandro', 'Staffolani', 'Ancona', 'Via Di Là', '31', '62010', 'AB0000001'),
   ('RSSMRA78L13L366E', 'Mario', 'Rossi', 'Treia', 'Via Roma', '56', '62010', 'LM3698120');
 
 /* Cliente dotato di partita iva */
